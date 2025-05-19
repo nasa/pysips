@@ -21,7 +21,7 @@ class Metropolis(VectorMCMC):
         super().__init__(
             model=None,
             data=None,
-            priors=prior,
+            priors=[prior],
             log_like_func=lambda *x: likelihood,
             log_like_args=None,
         )
