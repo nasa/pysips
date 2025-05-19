@@ -1,0 +1,40 @@
+[project]
+name = "bayesr"
+keywords = ["symbolic regression"]
+description = "A package for Bayesian symbolic regression."
+authors = [
+    {name = "Geoffrey Bomarito", email = "geoffrey.f.bomarito@nasa.gov" },
+    {name = "Patrick Leser", email = "patrick.e.leser@nasa.gov" },
+]
+requires-python = ">=3.12"
+readme = "README.md"
+license = {file = "LICENSE.txt"}
+dynamic = ["version"]
+dependencies = [
+    "bingo",
+    "smcpy",
+]
+classifiers = [
+    "License :: OSI Approved :: Apache Software License",
+    "Development Status :: 3 - Alpha",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+]
+
+[project.urls]
+Documentation = "https://nasa.github.io/bingo/"
+Repository = "https://github.com/nasa/bingo"
+
+[project.optional-dependencies]
+TESTS = [
+    "pytest",
+    "pytest-mock",
+    "pytest-cov",
+    "coverage",
+]
+
+[tool.cibuildwheel]
+skip = "pp*"
+
+[tool.setuptools_scm]
+local_scheme = "no-local-version"
