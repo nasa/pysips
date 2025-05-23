@@ -1,7 +1,7 @@
 [project]
-name = "bayesr"
+name = "pysips"
 keywords = ["symbolic regression"]
-description = "A package for Bayesian symbolic regression."
+description = "A python package for symbolic inference via posterior sampling."
 authors = [
     {name = "Geoffrey Bomarito", email = "geoffrey.f.bomarito@nasa.gov" },
     {name = "Patrick Leser", email = "patrick.e.leser@nasa.gov" },

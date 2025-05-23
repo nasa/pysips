@@ -1,4 +1,7 @@
-from bingo.symbolic_regression import ExplicitTrainingData, ExplicitRegression
+from bingo.symbolic_regression.explicit_regression import (
+    ExplicitTrainingData,
+    ExplicitRegression,
+)
 from bingo.local_optimizers.scipy_optimizer import ScipyOptimizer
 
 

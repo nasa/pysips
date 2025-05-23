@@ -2,7 +2,7 @@ import pytest
 from bingo.symbolic_regression import ComponentGenerator, AGraphGenerator
 
 
-from bayesr.prior import Prior
+from pysips.prior import Prior
 
 
 def get_generator(

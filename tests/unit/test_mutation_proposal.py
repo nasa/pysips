@@ -1,6 +1,6 @@
 import pytest
 
-from bayesr.mutation_proposal import MutationProposal
+from pysips.mutation_proposal import MutationProposal
 
 
 IMPORTMODULE = MutationProposal.__module__

@@ -1,8 +1,7 @@
 import numpy as np
 
 from multiprocessing import Pool
-from smcpy import VectorMCMC, ImproperUniform
-from tqdm import tqdm
+from smcpy import VectorMCMC
 
 
 class Metropolis(VectorMCMC):

@@ -1,7 +1,9 @@
 import inspect
 import numpy as np
 import pytest
-from bayesr.sampler import Metropolis  # Adjust import as needed
+from pysips.sampler import Metropolis  # Adjust import as needed
+
+IMPORTMODULE = Metropolis.__module__
 
 
 def dummy_likelihood(x):
@@ -51,7 +53,7 @@ class TestMetropolis:
         dummy_pool.__exit__.return_value = None
         dummy_pool.map.side_effect = lambda func, iterable: list(map(func, iterable))
 
-        mocker.patch("bayesr.metropolis.Pool", return_value=dummy_pool)
+        mocker.patch(f"{IMPORTMODULE}.Pool", return_value=dummy_pool)
 
         graphs = np.array(
             [[DummyGraph(1)], [DummyGraph(2)], [DummyGraph(3)]], dtype=object

@@ -3,11 +3,11 @@ from pathlib import Path
 import numpy as np
 import h5py
 
-from bayesr.laplace_nmll import LaplaceNmll
-from bayesr.mutation_proposal import MutationProposal
-from bayesr.crossover_proposal import CrossoverProposal
-from bayesr.random_choice_proposal import RandomChoiceProposal
-from bayesr.sampler import sample
+from pysips.laplace_nmll import LaplaceNmll
+from pysips.mutation_proposal import MutationProposal
+from pysips.crossover_proposal import CrossoverProposal
+from pysips.random_choice_proposal import RandomChoiceProposal
+from pysips.sampler import sample
 
 from bingo.symbolic_regression import ComponentGenerator, AGraphGenerator
 

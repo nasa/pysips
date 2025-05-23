@@ -1,13 +1,16 @@
 import numpy as np
 import pytest
 
-from bayesr.sampler import sample, run_smc
+from pysips.sampler import sample, run_smc
+
+IMPORTMODULE = sample.__module__
 
 
 class TestSampleFunction:
     def test_default_kwargs(self, mocker):
         mock_run_smc = mocker.patch(
-            "bayesr.sampler.run_smc", return_value=("mock_models", "mock_likelihoods")
+            f"{IMPORTMODULE}.run_smc",
+            return_value=("mock_models", "mock_likelihoods"),
         )
 
         likelihood = lambda x: x
@@ -35,7 +38,7 @@ class TestSampleFunction:
 
     def test_custom_kwargs(self, mocker):
         mock_run_smc = mocker.patch(
-            "bayesr.sampler.run_smc", return_value=("mock_models", "mock_likelihoods")
+            f"{IMPORTMODULE}.run_smc", return_value=("mock_models", "mock_likelihoods")
         )
 
         likelihood = lambda x: x
@@ -61,27 +64,27 @@ class TestRunSMC:
     def test_functionality(self, mocker, multiproc):
         mock_rng_instance = mocker.Mock(name="rngInstance")
         mock_rng = mocker.patch(
-            "bayesr.sampler.np.random.default_rng", return_value=mock_rng_instance
+            f"{IMPORTMODULE}.np.random.default_rng", return_value=mock_rng_instance
         )
 
         mock_prior_instance = mocker.Mock(name="PriorInstance")
         mock_prior = mocker.patch(
-            "bayesr.sampler.Prior", return_value=mock_prior_instance
+            f"{IMPORTMODULE}.Prior", return_value=mock_prior_instance
         )
 
         mock_mcmc_instance = mocker.Mock(name="MetropolisInstance")
         mock_metropolis = mocker.patch(
-            "bayesr.sampler.Metropolis", return_value=mock_mcmc_instance
+            f"{IMPORTMODULE}.Metropolis", return_value=mock_mcmc_instance
         )
 
         mock_kernel_instance = mocker.Mock(name="VectorMCMCKernelInstance")
         mock_vector_kernel = mocker.patch(
-            "bayesr.sampler.VectorMCMCKernel", return_value=mock_kernel_instance
+            f"{IMPORTMODULE}.VectorMCMCKernel", return_value=mock_kernel_instance
         )
 
         mock_sampler_instance = mocker.Mock(name="AdaptiveSamplerInstance")
         mock_adaptive_sampler = mocker.patch(
-            "bayesr.sampler.AdaptiveSampler", return_value=mock_sampler_instance
+            f"{IMPORTMODULE}.AdaptiveSampler", return_value=mock_sampler_instance
         )
 
         dummy_params = np.array([[1], [2], [3]])

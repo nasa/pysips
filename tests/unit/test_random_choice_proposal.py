@@ -1,7 +1,7 @@
 import pytest
 import numpy as np
 
-from bayesr.random_choice_proposal import RandomChoiceProposal
+from pysips.random_choice_proposal import RandomChoiceProposal
 
 
 class TestRandomChoiceProposal:

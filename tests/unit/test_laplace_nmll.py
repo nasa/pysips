@@ -1,7 +1,7 @@
 import pytest
 import numpy as np
 
-from bayesr.laplace_nmll import LaplaceNmll
+from pysips.laplace_nmll import LaplaceNmll
 
 IMPORTMODULE = LaplaceNmll.__module__
 

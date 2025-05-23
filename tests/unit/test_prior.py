@@ -2,7 +2,7 @@ import pytest
 import numpy as np
 
 # Import the class to test
-from bayesr.prior import Prior, MAX_REPEATS
+from pysips.prior import Prior, MAX_REPEATS
 
 
 IMPORTMODULE = Prior.__module__

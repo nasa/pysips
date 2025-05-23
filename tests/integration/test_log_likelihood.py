@@ -1,7 +1,7 @@
 import numpy as np
 
-from bayesr.laplace_nmll import LaplaceNmll
-from bayesr.metropolis import Metropolis
+from pysips.laplace_nmll import LaplaceNmll
+from pysips.metropolis import Metropolis
 from bingo.symbolic_regression.agraph.agraph import AGraph
 
 

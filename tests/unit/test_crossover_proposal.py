@@ -1,6 +1,6 @@
 import pytest
 
-from bayesr.crossover_proposal import CrossoverProposal
+from pysips.crossover_proposal import CrossoverProposal
 
 IMPORTMODULE = CrossoverProposal.__module__
 
