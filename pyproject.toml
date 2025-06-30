@@ -11,8 +11,10 @@ readme = "README.md"
 license = {file = "LICENSE.txt"}
 dynamic = ["version"]
 dependencies = [
-    "bingo",
+    "numpy",
+    "bingo-nasa",
     "smcpy>=0.1.6",
+    "scikit-learn"
 ]
 classifiers = [
     "Development Status :: 3 - Alpha",
