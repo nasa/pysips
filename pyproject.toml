@@ -26,14 +26,6 @@ classifiers = [
 Documentation = "https://nasa.github.io/pysips/"
 Repository = "https://github.com/nasa/pysips"
 
-[project.optional-dependencies]
-TESTS = [
-    "pytest",
-    "pytest-mock",
-    "pytest-cov",
-    "coverage",
-]
-
 [tool.cibuildwheel]
 skip = "pp*"
 
