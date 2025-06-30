@@ -12,18 +12,17 @@ license = {file = "LICENSE.txt"}
 dynamic = ["version"]
 dependencies = [
     "bingo",
-    "smcpy",
+    "smcpy>=0.1.6",
 ]
 classifiers = [
-    "License :: OSI Approved :: Apache Software License",
     "Development Status :: 3 - Alpha",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
 ]
 
 [project.urls]
-Documentation = "https://nasa.github.io/bingo/"
-Repository = "https://github.com/nasa/bingo"
+Documentation = "https://nasa.github.io/pysips/"
+Repository = "https://github.com/nasa/pysips"
 
 [project.optional-dependencies]
 TESTS = [
@@ -38,3 +37,6 @@ skip = "pp*"
 
 [tool.setuptools_scm]
 local_scheme = "no-local-version"
+
+[tool.setuptools.packages.find]
+    exclude = ['demos']
