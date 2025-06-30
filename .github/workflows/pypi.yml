@@ -13,7 +13,7 @@ jobs:
         with:
           submodules: recursive
       - name: Set up Python 3.x
-        uses: actions/setup-python@v3
+        uses: actions/setup-python@v5
         with:
           python-version: "3.x"
       - name: Build using pip
@@ -26,7 +26,7 @@ jobs:
             pytest tests/
 
 
-  source-build:
+  build:
     needs: pip_build_test
     name: Build source distribution 📦
     runs-on: ubuntu-latest
@@ -36,7 +36,7 @@ jobs:
       with:
         fetch-depth: 0
     - name: Set up Python 3.x
-      uses: actions/setup-python@v3
+      uses: actions/setup-python@v5
       with:
         python-version: "3.x"
     - name: Install dependencies
@@ -48,40 +48,11 @@ jobs:
         python -m build
     - name: see whats in the dist
       run: ls dist
-    - name: Remove wheel (was built for testing purposes)
-      run: |
-        cd dist
-        rm *.whl
-        cd ..
-
-    - name: Upload sdist
+    - name: Upload dist
       uses: actions/upload-artifact@v4
       with:
-        name: python-package-source
-        path: dist/*.tar.gz
-
-  build:
-    needs: pip_build_test
-    name: Build binary distributions 📦
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-
-    - uses: pypa/cibuildwheel@v2.21
-
-    - name: Verify clean directory
-      run: git diff --exit-code
-      shell: bash
-
-    - name: Upload wheels
-      uses: actions/upload-artifact@v4
-      with:
-        name: python-package-wheels
-        path: wheelhouse/*.whl
-
+        name: python-package-dist
+        path: dist/*
 
 #   publish-to-pypi:
 #     name: >-
@@ -168,7 +139,6 @@ jobs:
     if: github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/main'  # publish to testPyPI on main and develop branches
     needs:
       - build
-      - source-build
     runs-on: ubuntu-latest
 
     environment:
@@ -179,15 +149,10 @@ jobs:
       id-token: write  # IMPORTANT: mandatory for trusted publishing
 
     steps:
-    - name: Download all the wheels
+    - name: Download dist
       uses: actions/download-artifact@v4
       with:
-        name: python-package-wheels
-        path: dist/
-    - name: Download source
-      uses: actions/download-artifact@v4
-      with:
-        name: python-package-source
+        name: python-package-dist
         path: dist/
     - name: Publish distribution 📦 to TestPyPI
       uses: pypa/gh-action-pypi-publish@release/v1
