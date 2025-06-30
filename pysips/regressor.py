@@ -277,7 +277,7 @@ class PysipsRegressor(BaseEstimator, RegressorMixin):
             )
 
         # Use the best model for prediction
-        return self.best_model_.evaluate_equation_at(X)
+        return self.best_model_.evaluate_equation_at(X).flatten()
 
     def score(self, X, y):
         """

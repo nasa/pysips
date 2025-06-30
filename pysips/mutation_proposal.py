@@ -71,7 +71,6 @@ class MutationProposal:
         self._repeat_mutation_prob = repeat_mutation_probability
 
     def _do_mutation(self, model):
-        print("do mutation")
         new_model = self._mutation(model)
         while self._rng.random() < self._repeat_mutation_prob:
             new_model = self._mutation(new_model)
@@ -80,7 +79,6 @@ class MutationProposal:
     def __call__(self, model):
         new_model = self._do_mutation(model)
         while new_model == model:
-            print("repeating")
             new_model = self._do_mutation(model)
         return new_model
 

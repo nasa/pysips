@@ -1,7 +1,7 @@
 import warnings
 import numpy as np
 
-from smcpy import ImproperUniform
+from smcpy.priors import ImproperUniform
 
 MAX_REPEATS = 100
 
