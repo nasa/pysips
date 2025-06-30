@@ -23,8 +23,6 @@ PySIPS implements a Sequential Monte Carlo (SMC) framework for Bayesian symbolic
 
 ## Installation
 
-(Coming Soon!)
-
 ```bash
 pip install pysips
 ```
