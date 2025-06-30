@@ -1,3 +1,29 @@
+"""
+Custom Prior Distribution for Unique Random Value Generation.
+
+This module provides a specialized prior distribution class that extends the
+ImproperUniform prior from smcpy to generate unique random values using a
+custom generator function. It is designed to prevent duplicate values in
+sampling scenarios where uniqueness is required.
+
+Constants
+---------
+MAX_REPEATS : int
+    Maximum number of consecutive attempts allowed before warning about
+    potential generator issues (default: 100).
+
+Example
+-------
+>>> def my_generator():
+...     return np.random.randint(0, 1000)
+>>>
+>>> prior = Prior(my_generator)
+>>> samples = prior.rvs(10)  # Generate 10 unique samples
+>>> print(samples.shape)
+(10, 1)
+
+"""
+
 import warnings
 import numpy as np
 
@@ -29,6 +55,7 @@ class Prior(ImproperUniform):
         super().__init__()
         self._generator = generator
 
+    # pylint: disable=W0613
     def rvs(self, N, random_state=None):
         """
         Generate N unique random values using the generator.

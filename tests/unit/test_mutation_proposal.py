@@ -35,7 +35,7 @@ class TestMutationProposal:
         )
 
         mutation_proposal = MutationProposal(
-            X_dim=X_dim,
+            x_dim=X_dim,
             operators=operators,
             terminal_probability=0.2,
             constant_probability=0.5,
@@ -81,7 +81,7 @@ class TestMutationProposal:
         mocker.patch(f"{IMPORTMODULE}.ComponentGenerator")
         mocker.patch(f"{IMPORTMODULE}.AGraphMutation", return_value=mock_mutation)
 
-        mutation_proposal = MutationProposal(X_dim=X_dim, operators=operators)
+        mutation_proposal = MutationProposal(x_dim=X_dim, operators=operators)
         mutation_proposal._rng = mock_rng
 
         result = mutation_proposal._do_mutation(mock_model)
@@ -111,7 +111,7 @@ class TestMutationProposal:
         mocker.patch(f"{IMPORTMODULE}.AGraphMutation", return_value=mock_mutation)
 
         mutation_proposal = MutationProposal(
-            X_dim=X_dim, operators=operators, repeat_mutation_probability=0.5
+            x_dim=X_dim, operators=operators, repeat_mutation_probability=0.5
         )
         mutation_proposal._rng = mock_rng
 
@@ -138,7 +138,7 @@ class TestMutationProposal:
         mock_model.__eq__.return_value = False
 
         mutation_proposal = MutationProposal(
-            X_dim=X_dim, operators=operators, repeat_mutation_probability=0.0
+            x_dim=X_dim, operators=operators, repeat_mutation_probability=0.0
         )
         result = mutation_proposal(mock_model)
 
@@ -162,7 +162,7 @@ class TestMutationProposal:
         mock_model.__eq__.side_effect = lambda other: other is equivalent_model
 
         mutation_proposal = MutationProposal(
-            X_dim=X_dim, operators=operators, repeat_mutation_probability=0.0
+            x_dim=X_dim, operators=operators, repeat_mutation_probability=0.0
         )
         result = mutation_proposal(mock_model)
 
@@ -176,7 +176,7 @@ class TestMutationProposal:
         mocker.patch(f"{IMPORTMODULE}.ComponentGenerator")
         mocker.patch(f"{IMPORTMODULE}.AGraphMutation")
 
-        mutation_proposal = MutationProposal(X_dim=X_dim, operators=operators)
+        mutation_proposal = MutationProposal(x_dim=X_dim, operators=operators)
 
         # This should not raise any errors
         mutation_proposal.update(some_param=10)
@@ -192,5 +192,5 @@ class TestMutationProposal:
         mocker.patch(f"{IMPORTMODULE}.AGraphMutation"),
         mock_rng = mocker.patch("numpy.random.default_rng")
 
-        _ = MutationProposal(X_dim=X_dim, operators=operators, seed=seed)
+        _ = MutationProposal(x_dim=X_dim, operators=operators, seed=seed)
         mock_rng.assert_called_once_with(seed)
