@@ -3,3 +3,6 @@
 *.cache/
 *.ipynb_checkpoints/
 .pytest_cache/
+.pypirc
+dist/*
+*.egg-info/
