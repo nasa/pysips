@@ -45,7 +45,7 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_
 
 # Initialize and fit the regressor
 regressor = PysipsRegressor(
-    operators=['+', '-', '*', '^2'],
+    operators=['+', '-', '*'],
     max_complexity=12,
     num_particles=100,
     num_mcmc_samples=10,
