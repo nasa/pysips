@@ -38,13 +38,21 @@ object-based parameters that may not support standard covariance computation.
 
 # pylint: disable=R0913,R0917
 import numpy as np
-from smcpy import VectorMCMCKernel, AdaptiveSampler
+from smcpy import VectorMCMCKernel, AdaptiveSampler, FixedTimeSampler
 
 from .metropolis import Metropolis
 from .prior import Prior
 
 
-def sample(likelihood, proposal, generator, multiprocess=False, kwargs=None, seed=None):
+def sample(
+    likelihood,
+    proposal,
+    generator,
+    max_time=None,
+    multiprocess=False,
+    kwargs=None,
+    seed=None,
+):
     """
     Perform Sequential Monte Carlo sampling with default parameters.
 
@@ -63,6 +71,8 @@ def sample(likelihood, proposal, generator, multiprocess=False, kwargs=None, see
     generator : callable
         Function that generates initial parameter values when called with no
         arguments. Should return hashable values for uniqueness tracking.
+    max_time : float, optional
+        Maximum compute time limit for the sampling, in seconds (default no time limit).
     multiprocess : bool, optional
         Whether to use multiprocessing for likelihood evaluations (default: False).
     kwargs : dict, optional
@@ -104,10 +114,12 @@ def sample(likelihood, proposal, generator, multiprocess=False, kwargs=None, see
     smc_kwargs = {"num_particles": 5000, "num_mcmc_samples": 10}
     if kwargs is not None:
         smc_kwargs.update(kwargs)
-    return run_smc(likelihood, proposal, generator, multiprocess, smc_kwargs, rng)
+    return run_smc(
+        likelihood, proposal, generator, max_time, multiprocess, smc_kwargs, rng
+    )
 
 
-def run_smc(likelihood, proposal, generator, multiprocess, kwargs, rng):
+def run_smc(likelihood, proposal, generator, max_time, multiprocess, kwargs, rng):
     """
     Execute Sequential Monte Carlo sampling with full parameter control.
 
@@ -123,6 +135,9 @@ def run_smc(likelihood, proposal, generator, multiprocess, kwargs, rng):
         Function that proposes new parameter values in MCMC steps.
     generator : callable
         Function that generates unique initial parameter values.
+    max_time : float, None
+        Maximum compute time limit for the sampling, in seconds. None value indicates
+        no time limit
     multiprocess : bool
         Whether to enable multiprocessing for likelihood evaluations.
     kwargs : dict
@@ -147,7 +162,11 @@ def run_smc(likelihood, proposal, generator, multiprocess, kwargs, rng):
         multiprocess=multiprocess,
     )
     kernel = VectorMCMCKernel(mcmc, param_order=["f"], rng=rng)
-    smc = AdaptiveSampler(kernel)
+
+    if max_time is None:
+        smc = AdaptiveSampler(kernel)
+    else:
+        smc = FixedTimeSampler(kernel, max_time)
 
     # pylint: disable=W0212
     smc._mutator._compute_cov = False  # hack to bypass covariance calc on obj
@@ -155,5 +174,6 @@ def run_smc(likelihood, proposal, generator, multiprocess, kwargs, rng):
 
     models = steps[-1].params[:, 0].tolist()
     likelihoods = [likelihood(c) for c in models]  # fit final pop of equ
+    phis = smc.phi_sequence
 
-    return models, likelihoods
+    return models, likelihoods, phis
