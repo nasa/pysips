@@ -49,6 +49,7 @@ regressor = PysipsRegressor(
     max_complexity=12,
     num_particles=100,
     num_mcmc_samples=10,
+    max_time=60,
     random_state=42
 )
 
