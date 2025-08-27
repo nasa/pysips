@@ -54,6 +54,7 @@ Sampling Parameters:
     - num_mcmc_samples: MCMC steps per SMC iteration
     - target_ess: Target effective sample size
     - crossover_pool_size: Size of crossover gene pool
+    - max_time: Maximum runtime for sampling process
 
 Usage Example
 -------------
@@ -198,6 +199,10 @@ class PysipsRegressor(BaseEstimator, RegressorMixin):
 
     random_state : int or None, default=None
         Random seed for reproducibility.
+
+    max_time : float or None, default=None
+        Maximum time in seconds to run the sampling process. If None,
+        the sampling will run until completion without time constraints.
     """
 
     def __init__(
@@ -223,6 +228,7 @@ class PysipsRegressor(BaseEstimator, RegressorMixin):
         opt_restarts=1,
         model_selection="mode",
         random_state=None,
+        max_time=None,
     ):
 
         self.operators = operators if operators is not None else DEFAULT_OPERATORS
@@ -252,11 +258,13 @@ class PysipsRegressor(BaseEstimator, RegressorMixin):
         self.opt_restarts = opt_restarts
         self.model_selection = model_selection
         self.random_state = random_state
+        self.max_time = max_time
 
         # attributes set after fitting
         self.n_features_in_ = None
         self.models_ = None
         self.likelihoods_ = None
+        self.phis_ = None
         self.best_model_ = None
         self.best_likelihood_ = None
 
@@ -342,10 +350,11 @@ class PysipsRegressor(BaseEstimator, RegressorMixin):
         likelihood = LaplaceNmll(X, y)
 
         # Run sampling
-        models, likelihoods = sample(
+        models, likelihoods, phis = sample(
             likelihood,
             proposal,
             generator,
+            max_time=self.max_time,
             seed=self.random_state,
             kwargs={
                 "num_particles": self.num_particles,
@@ -357,6 +366,7 @@ class PysipsRegressor(BaseEstimator, RegressorMixin):
         # Save the models and their likelihoods
         self.models_ = models
         self.likelihoods_ = likelihoods
+        self.phis_ = phis
 
         # Select the best model
         if self.model_selection == "max_nml":
