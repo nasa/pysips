@@ -28,10 +28,11 @@ class TestSampleFunction:
         assert args[0] == likelihood
         assert args[1] == proposal
         assert args[2] == generator
-        assert args[3] is False
+        assert args[3] is None
+        assert args[4] is False
 
-        kwargs_passed = args[4]
-        rng_passed = args[5]
+        kwargs_passed = args[5]
+        rng_passed = args[6]
 
         assert kwargs_passed == {"num_particles": 5000, "num_mcmc_samples": 10}
         assert isinstance(rng_passed, np.random.Generator)
@@ -55,8 +56,9 @@ class TestSampleFunction:
         assert args[0] == likelihood
         assert args[1] == proposal
         assert args[2] == generator
-        assert args[3] is False
-        assert args[4] == custom_kwargs
+        assert args[3] is None
+        assert args[4] is False
+        assert args[5] == custom_kwargs
 
 
 class TestRunSMC:
@@ -90,6 +92,7 @@ class TestRunSMC:
         dummy_params = np.array([[1], [2], [3]])
         dummy_step = mocker.Mock(params=dummy_params)
         mock_sampler_instance.sample.return_value = ([dummy_step], None)
+        mock_sampler_instance.phi_sequence = [0, 0.5, 1]
 
         likelihood = mocker.Mock(side_effect=lambda x: x * 10)
 
@@ -97,7 +100,7 @@ class TestRunSMC:
         generator = "generator"
         kwargs = {"num_particles": 3, "num_mcmc_samples": 4}
 
-        models, likelihoods = sample(
+        models, likelihoods, phis = sample(
             likelihood,
             proposal,
             generator,
@@ -131,3 +134,6 @@ class TestRunSMC:
         expected_likelihoods = [m * 10 for m in expected_models]
         assert likelihoods == expected_likelihoods
         assert likelihood.call_count == len(expected_models)
+
+        expected_phis = [0, 0.5, 1]
+        assert phis == expected_phis
