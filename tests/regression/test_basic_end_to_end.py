@@ -118,7 +118,7 @@ def test_basic_end_to_end():
     likelihood = LaplaceNmll(X, y)
     generator = get_generator(**config)
     proposal = get_proposal(**config)
-    models, likelihoods = sample(
+    models, likelihoods, phis = sample(
         likelihood,
         proposal,
         generator,
