@@ -44,7 +44,7 @@ def mock_external_components(mocker: MockerFixture):
     mock_model = MagicMock()
     mock_model.__str__.return_value = "2*X_0"
     mock_likelihoods = np.array([0.9])
-    mock_sample.return_value = ([mock_model], mock_likelihoods)
+    mock_sample.return_value = ([mock_model], mock_likelihoods, [0.5])
 
     return {
         "component_gen": mock_component_gen,
