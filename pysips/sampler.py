@@ -237,15 +237,7 @@ def run_smc(
     - If max_equation_evals is specified (and max_time is not), MaxStepSampler is used
     - If neither is specified, AdaptiveSampler is used
     """
-    prior = Prior(generator)
-
-    mcmc = Metropolis(
-        likelihood=likelihood,
-        proposal=proposal,
-        prior=prior,
-        multiprocess=multiprocess,
-    )
-    kernel = VectorMCMCKernel(mcmc, param_order=["f"], rng=rng)
+    kernel = _create_mcmc_kernel(likelihood, proposal, generator, multiprocess, rng)
 
     # Execute sampling with or without checkpointing
     if checkpoint_file is None:
@@ -258,6 +250,17 @@ def run_smc(
     likelihoods = [likelihood(c) for c in models]  # fit final pop of equ
 
     return models, likelihoods, phis
+
+
+def _create_mcmc_kernel(likelihood, proposal, generator, multiprocess, rng):
+    prior = Prior(generator)
+    mcmc = Metropolis(
+        likelihood=likelihood,
+        proposal=proposal,
+        prior=prior,
+        multiprocess=multiprocess,
+    )
+    return VectorMCMCKernel(mcmc, param_order=["f"], rng=rng)
 
 
 def _smc_call(max_time, max_equation_evals, kwargs, kernel):
