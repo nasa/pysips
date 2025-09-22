@@ -221,6 +221,7 @@ class TestSampleLimits:
             multiprocess=False,
             kwargs={"num_particles": 10, "num_mcmc_samples": 5},
             rng=mocker.Mock(),
+            checkpoint_file=None,
         )
 
         # Verify FixedTimeSampler was used
@@ -251,6 +252,7 @@ class TestSampleLimits:
                 "num_mcmc_samples": num_mcmc_samples,
             },
             rng=mocker.Mock(),
+            checkpoint_file=None,
         )
 
         sampler_mocks["max_step_sampler"].assert_called_once_with(
@@ -270,6 +272,7 @@ class TestSampleLimits:
             multiprocess=False,
             kwargs={"num_particles": 10, "num_mcmc_samples": 5},
             rng=mocker.Mock(),
+            checkpoint_file=None,
         )
 
         sampler_mocks["adaptive_sampler"].assert_called_once_with(
@@ -294,6 +297,7 @@ class TestSampleLimits:
             multiprocess=False,
             kwargs={"num_particles": 10, "num_mcmc_samples": 5},
             rng=mocker.Mock(),
+            checkpoint_file=None,
         )
 
         sampler_mocks["fixed_time_sampler"].assert_called_once_with(
@@ -332,6 +336,7 @@ class TestSampleLimits:
                 "num_mcmc_samples": num_mcmc_samples,
             },
             rng=mocker.Mock(),
+            checkpoint_file=None,
         )
 
         sampler_mocks["max_step_sampler"].assert_called_once_with(

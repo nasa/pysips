@@ -149,7 +149,7 @@ def sample(
     - Progress is automatically saved during the sampling process
     - The checkpoint file uses pickle format for serialization
     - Interrupted runs can be restarted from the last checkpoint
-    
+
     When max_equation_evals and max_time are specified:
     - max_time takes precedence over max_equation_evals
     """
@@ -168,9 +168,6 @@ def sample(
         smc_kwargs,
         rng,
         checkpoint_file,
-        multiprocess,
-        smc_kwargs,
-        rng,
     )
 
 
