@@ -483,8 +483,7 @@ class PysipsRegressor(BaseEstimator, RegressorMixin):
             # catch error cause by NaN or inf values in prediction e.g. log(0)
             if "Input contains NaN" in str(e) or "Input contains infinity" in str(e):
                 return -np.inf
-            else:
-                raise
+            raise
         return score
 
     def get_expression(self):
