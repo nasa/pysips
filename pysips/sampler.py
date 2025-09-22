@@ -38,7 +38,7 @@ object-based parameters that may not support standard covariance computation.
 
 # pylint: disable=R0913,R0917
 import numpy as np
-from smcpy import VectorMCMCKernel, AdaptiveSampler, FixedTimeSampler
+from smcpy import VectorMCMCKernel, AdaptiveSampler, FixedTimeSampler, MaxStepSampler
 
 from .metropolis import Metropolis
 from .prior import Prior
@@ -49,6 +49,7 @@ def sample(
     proposal,
     generator,
     max_time=None,
+    max_equation_evals=None,
     multiprocess=False,
     kwargs=None,
     seed=None,
@@ -73,6 +74,8 @@ def sample(
         arguments. Should return hashable values for uniqueness tracking.
     max_time : float, optional
         Maximum compute time limit for the sampling, in seconds (default no time limit).
+    max_equation_evals : int, optional
+        Maximum number of equation evaluations allowed during sampling (default: no limit).
     multiprocess : bool, optional
         Whether to use multiprocessing for likelihood evaluations (default: False).
     kwargs : dict, optional
@@ -101,6 +104,12 @@ def sample(
     >>>
     >>> models, likes = sample(likelihood_func, proposal_func, generator_func)
     >>> print(f"Sampled {len(models)} models")
+    >>>
+    >>> # Sampling with max equation evaluations limit
+    >>> models, likes, phis = sample(likelihood_func, proposal_func, generator_func,
+    ...                              max_equation_evals=10000)
+    >>> print(f"Sampling completed with evaluation limit")
+
 
     Notes
     -----
@@ -108,6 +117,9 @@ def sample(
     configuration uses 5000 particles and 10 MCMC samples per SMC step, which
     provides a reasonable balance between accuracy and computational cost for
     many applications.
+
+    When max_equation_evals and max_time are specified:
+    - max_time takes precedence over max_equation_evals
     """
     rng = np.random.default_rng(seed)
 
@@ -115,11 +127,27 @@ def sample(
     if kwargs is not None:
         smc_kwargs.update(kwargs)
     return run_smc(
-        likelihood, proposal, generator, max_time, multiprocess, smc_kwargs, rng
+        likelihood,
+        proposal,
+        generator,
+        max_time,
+        max_equation_evals,
+        multiprocess,
+        smc_kwargs,
+        rng,
     )
 
 
-def run_smc(likelihood, proposal, generator, max_time, multiprocess, kwargs, rng):
+def run_smc(
+    likelihood,
+    proposal,
+    generator,
+    max_time,
+    max_equation_evals,
+    multiprocess,
+    kwargs,
+    rng,
+):
     """
     Execute Sequential Monte Carlo sampling with full parameter control.
 
@@ -137,7 +165,10 @@ def run_smc(likelihood, proposal, generator, max_time, multiprocess, kwargs, rng
         Function that generates unique initial parameter values.
     max_time : float, None
         Maximum compute time limit for the sampling, in seconds. None value indicates
-        no time limit
+        no time limit.
+    max_equation_evals : int, None
+        Maximum number of equation evaluations allowed during sampling.
+        None value indicates no evaluation limit.
     multiprocess : bool
         Whether to enable multiprocessing for likelihood evaluations.
     kwargs : dict
@@ -152,6 +183,16 @@ def run_smc(likelihood, proposal, generator, max_time, multiprocess, kwargs, rng
     likelihoods : list
         Likelihood values for each model in the final population, computed
         fresh to ensure consistency.
+    phis : list
+        Phi values (tempering parameters) from the SMC sequence.
+
+    Notes
+    -----
+    Sampling strategy selection logic:
+    - If max_time is specified FixedTimeSampler is used
+    - If max_equation_evals is specified (and max_time is not), MaxStepSampler is used
+    - If neither is specified, AdaptiveSampler is used
+
     """
     prior = Prior(generator)
 
@@ -163,17 +204,29 @@ def run_smc(likelihood, proposal, generator, max_time, multiprocess, kwargs, rng
     )
     kernel = VectorMCMCKernel(mcmc, param_order=["f"], rng=rng)
 
-    if max_time is None:
-        smc = AdaptiveSampler(kernel)
-    else:
+    steps, phis = _smc_call(max_time, max_equation_evals, kwargs, kernel)
+
+    models = steps[-1].params[:, 0].tolist()
+    likelihoods = [likelihood(c) for c in models]  # fit final pop of equ
+
+    return models, likelihoods, phis
+
+
+def _smc_call(max_time, max_equation_evals, kwargs, kernel):
+    # Choose sampler based on specified constraints
+    if max_time is not None:
         smc = FixedTimeSampler(kernel, max_time)
+    elif max_equation_evals is not None:
+        max_steps = max_equation_evals // (
+            kwargs["num_particles"] * kwargs["num_mcmc_samples"]
+        )
+        smc = MaxStepSampler(kernel, max_steps=max_steps)
+    else:
+        smc = AdaptiveSampler(kernel)
 
     # pylint: disable=W0212
     smc._mutator._compute_cov = False  # hack to bypass covariance calc on obj
     steps, _ = smc.sample(**kwargs)
-
-    models = steps[-1].params[:, 0].tolist()
-    likelihoods = [likelihood(c) for c in models]  # fit final pop of equ
     phis = smc.phi_sequence
 
-    return models, likelihoods, phis
+    return steps, phis
