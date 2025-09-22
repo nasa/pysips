@@ -56,6 +56,11 @@ Sampling Parameters:
     - crossover_pool_size: Size of crossover gene pool
     - max_time: Maximum runtime for sampling process
 
+Checkpointing:
+    - checkpoint_file: File path for saving/loading sampling progress
+      If the checkpoint file exists, fitting will attempt to resume from
+      the saved state and continue updating the checkpoint as it proceeds
+
 Usage Example
 -------------
 >>> from pysips import PysipsRegressor
@@ -71,6 +76,7 @@ Usage Example
 ...     max_complexity=20,
 ...     num_particles=100,
 ...     model_selection='mode',
+...     checkpoint_file='my_run.checkpoint',
 ...     random_state=42
 ... )
 >>> regressor.fit(X, y)
@@ -106,6 +112,11 @@ For best results, consider:
 - Tuning mutation/crossover probabilities for your domain
 - Using sufficient particles for good posterior approximation
 - Setting appropriate number of MCMC samples for mixing
+
+Checkpointing allows for:
+- Resuming interrupted long-running fits
+- Incremental progress saving during extended sampling runs
+- Recovery from system failures or resource limitations
 """
 
 from collections import Counter
@@ -134,6 +145,12 @@ DEFALT_PARAMETER_INITIALIZATION_BOUNDS = [-5, 5]
 class PysipsRegressor(BaseEstimator, RegressorMixin):
     """
     A scikit-learn compatible wrapper for PySIPS symbolic regression.
+
+    This regressor uses Sequential Monte Carlo (SMC) sampling to explore
+    the space of symbolic expressions and find mathematical models that
+    best explain the observed data. The approach provides principled
+    uncertainty quantification and supports checkpointing for long-running
+    fits.
 
     Parameters
     ----------
@@ -200,6 +217,12 @@ class PysipsRegressor(BaseEstimator, RegressorMixin):
         model and "max_nml" for the model with maximum normalized marginal
         likelihood.
 
+    checkpoint_file : str or None, default=None
+        File path for saving and loading sampling progress. If the checkpoint
+        file exists, fitting will attempt to resume from the saved state and
+        continue updating the checkpoint as sampling proceeds. If None, no
+        checkpointing is performed.
+
     random_state : int or None, default=None
         Random seed for reproducibility.
 
@@ -236,6 +259,7 @@ class PysipsRegressor(BaseEstimator, RegressorMixin):
         param_init_bounds=None,
         opt_restarts=1,
         model_selection="mode",
+        checkpoint_file=None,
         random_state=None,
         max_time=None,
         max_equation_evals=None,
@@ -273,6 +297,7 @@ class PysipsRegressor(BaseEstimator, RegressorMixin):
         )
         self.opt_restarts = opt_restarts
         self.model_selection = model_selection
+        self.checkpoint_file = checkpoint_file
         self.random_state = random_state
         self.max_time = max_time
         self.max_equation_evals = max_equation_evals
@@ -374,6 +399,7 @@ class PysipsRegressor(BaseEstimator, RegressorMixin):
             max_time=self.max_time,
             max_equation_evals=self.max_equation_evals,
             seed=self.random_state,
+            checkpoint_file=self.checkpoint_file,
             kwargs={
                 "num_particles": self.num_particles,
                 "num_mcmc_samples": self.num_mcmc_samples,
