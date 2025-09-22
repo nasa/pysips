@@ -50,7 +50,7 @@ last saved state if the checkpoint file exists when sampling begins.
 
 # pylint: disable=R0913,R0917
 import numpy as np
-from smcpy import VectorMCMCKernel, AdaptiveSampler, FixedTimeSampler
+from smcpy import VectorMCMCKernel, AdaptiveSampler, FixedTimeSampler, MaxStepSampler
 from smcpy.utils.storage import PickleStorage
 
 from .metropolis import Metropolis
@@ -62,6 +62,7 @@ def sample(
     proposal,
     generator,
     max_time=None,
+    max_equation_evals=None,
     multiprocess=False,
     kwargs=None,
     seed=None,
@@ -87,6 +88,8 @@ def sample(
         arguments. Should return hashable values for uniqueness tracking.
     max_time : float, optional
         Maximum compute time limit for the sampling, in seconds (default no time limit).
+    max_equation_evals : int, optional
+        Maximum number of equation evaluations allowed during sampling (default: no limit).
     multiprocess : bool, optional
         Whether to use multiprocessing for likelihood evaluations (default: False).
     kwargs : dict, optional
@@ -128,6 +131,11 @@ def sample(
     >>> models, likes, phis = sample(likelihood_func, proposal_func, generator_func,
     ...                              checkpoint_file="progress.pkl")
     >>> print(f"Checkpointed sampling completed")
+    >>>
+    >>> # Sampling with max equation evaluations limit
+    >>> models, likes, phis = sample(likelihood_func, proposal_func, generator_func,
+    ...                              max_equation_evals=10000)
+    >>> print(f"Sampling completed with evaluation limit")
 
     Notes
     -----
@@ -141,6 +149,9 @@ def sample(
     - Progress is automatically saved during the sampling process
     - The checkpoint file uses pickle format for serialization
     - Interrupted runs can be restarted from the last checkpoint
+    
+    When max_equation_evals and max_time are specified:
+    - max_time takes precedence over max_equation_evals
     """
     rng = np.random.default_rng(seed)
 
@@ -152,10 +163,14 @@ def sample(
         proposal,
         generator,
         max_time,
+        max_equation_evals,
         multiprocess,
         smc_kwargs,
         rng,
         checkpoint_file,
+        multiprocess,
+        smc_kwargs,
+        rng,
     )
 
 
@@ -164,6 +179,7 @@ def run_smc(
     proposal,
     generator,
     max_time,
+    max_equation_evals,
     multiprocess,
     kwargs,
     rng,
@@ -186,7 +202,10 @@ def run_smc(
         Function that generates unique initial parameter values.
     max_time : float, None
         Maximum compute time limit for the sampling, in seconds. None value indicates
-        no time limit
+        no time limit.
+    max_equation_evals : int, None
+        Maximum number of equation evaluations allowed during sampling.
+        None value indicates no evaluation limit.
     multiprocess : bool
         Whether to enable multiprocessing for likelihood evaluations.
     kwargs : dict
@@ -215,6 +234,11 @@ def run_smc(
     - Saves progress incrementally during sampling
     - Uses append mode ('a') by default for safe restarts
     - Handles serialization of the complete sampler state
+
+    Sampling strategy selection logic:
+    - If max_time is specified FixedTimeSampler is used
+    - If max_equation_evals is specified (and max_time is not), MaxStepSampler is used
+    - If neither is specified, AdaptiveSampler is used
     """
     prior = Prior(generator)
 
@@ -228,10 +252,10 @@ def run_smc(
 
     # Execute sampling with or without checkpointing
     if checkpoint_file is None:
-        steps, phis = _smc_call(max_time, kwargs, kernel)
+        steps, phis = _smc_call(max_time, max_equation_evals, kwargs, kernel)
     else:
         with PickleStorage(checkpoint_file):
-            steps, phis = _smc_call(max_time, kwargs, kernel)
+            steps, phis = _smc_call(max_time, max_equation_evals, kwargs, kernel)
 
     models = steps[-1].params[:, 0].tolist()
     likelihoods = [likelihood(c) for c in models]  # fit final pop of equ
@@ -239,11 +263,17 @@ def run_smc(
     return models, likelihoods, phis
 
 
-def _smc_call(max_time, kwargs, kernel):
-    if max_time is None:
-        smc = AdaptiveSampler(kernel)
-    else:
+def _smc_call(max_time, max_equation_evals, kwargs, kernel):
+    # Choose sampler based on specified constraints
+    if max_time is not None:
         smc = FixedTimeSampler(kernel, max_time)
+    elif max_equation_evals is not None:
+        max_steps = max_equation_evals // (
+            kwargs["num_particles"] * kwargs["num_mcmc_samples"]
+        )
+        smc = MaxStepSampler(kernel, max_steps=max_steps)
+    else:
+        smc = AdaptiveSampler(kernel)
 
     # pylint: disable=W0212
     smc._mutator._compute_cov = False  # hack to bypass covariance calc on obj

@@ -132,6 +132,9 @@ from .crossover_proposal import CrossoverProposal
 from .random_choice_proposal import RandomChoiceProposal
 from .sampler import sample
 
+MAX_FLOAT = np.finfo(np.float64).max
+MIN_FLOAT = np.finfo(np.float64).min
+
 USE_PYTHON = True
 USE_SIMPLIFICATION = True
 DEFAULT_OPERATORS = ["+", "*"]
@@ -226,6 +229,12 @@ class PysipsRegressor(BaseEstimator, RegressorMixin):
     max_time : float or None, default=None
         Maximum time in seconds to run the sampling process. If None,
         the sampling will run until completion without time constraints.
+        Cannot be used together with max_equation_evals.
+
+    max_equation_evals : float or None, default=None
+        Maximum number of evaluations during the sampling process. If None,
+        the sampling will run until completion without time constraints.
+        Cannot be used together with max_time.
     """
 
     def __init__(
@@ -253,7 +262,14 @@ class PysipsRegressor(BaseEstimator, RegressorMixin):
         checkpoint_file=None,
         random_state=None,
         max_time=None,
+        max_equation_evals=None,
     ):
+        # Validate that max_time and max_equation_evals are not both specified
+        if max_time is not None and max_equation_evals is not None:
+            raise ValueError(
+                "max_time and max_equation_evals cannot both be specified. "
+                "Please choose one constraint method."
+            )
 
         self.operators = operators if operators is not None else DEFAULT_OPERATORS
         self.max_complexity = max_complexity
@@ -284,6 +300,7 @@ class PysipsRegressor(BaseEstimator, RegressorMixin):
         self.checkpoint_file = checkpoint_file
         self.random_state = random_state
         self.max_time = max_time
+        self.max_equation_evals = max_equation_evals
 
         # attributes set after fitting
         self.n_features_in_ = None
@@ -380,6 +397,7 @@ class PysipsRegressor(BaseEstimator, RegressorMixin):
             proposal,
             generator,
             max_time=self.max_time,
+            max_equation_evals=self.max_equation_evals,
             seed=self.random_state,
             checkpoint_file=self.checkpoint_file,
             kwargs={
@@ -437,7 +455,8 @@ class PysipsRegressor(BaseEstimator, RegressorMixin):
             )
 
         # Use the best model for prediction
-        return self.best_model_.evaluate_equation_at(X).flatten()
+        prediction = self.best_model_.evaluate_equation_at(X).flatten()
+        return prediction
 
     def score(self, X, y, sample_weight=None):
         """
@@ -458,7 +477,15 @@ class PysipsRegressor(BaseEstimator, RegressorMixin):
             R^2 of self.predict(X) with respect to y.
         """
         # Use default implementation from scikit-learn
-        return super().score(X, y, sample_weight=sample_weight)
+        try:
+            score = super().score(X, y, sample_weight=sample_weight)
+        except ValueError as e:
+            # catch error cause by NaN or inf values in prediction e.g. log(0)
+            if "Input contains NaN" in str(e) or "Input contains infinity" in str(e):
+                return -np.inf
+            else:
+                raise
+        return score
 
     def get_expression(self):
         """

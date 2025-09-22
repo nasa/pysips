@@ -20,7 +20,7 @@ dynamic = ["version"]
 dependencies = [
     "numpy",
     "bingo-nasa",
-    "smcpy>=0.1.10",
+    "smcpy>=0.1.11",
     "scikit-learn"
 ]
 classifiers = [
