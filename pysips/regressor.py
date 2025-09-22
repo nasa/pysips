@@ -455,7 +455,7 @@ class PysipsRegressor(BaseEstimator, RegressorMixin):
             score = super().score(X, y, sample_weight=sample_weight)
         except ValueError as e:
             # catch error cause by NaN or inf values in prediction e.g. log(0)
-            if "Input contains NaN" in str(e) or "Input contains infinity":
+            if "Input contains NaN" in str(e) or "Input contains infinity" in str(e):
                 return -np.inf
             else:
                 raise

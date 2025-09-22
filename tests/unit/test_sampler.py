@@ -6,6 +6,46 @@ from pysips.sampler import sample, run_smc
 IMPORTMODULE = sample.__module__
 
 
+@pytest.fixture
+def sampler_mocks(mocker):
+    """Fixture that sets up common mocks for the samplers tests."""
+    # Mock all the dependencies
+    mocker.patch(f"{IMPORTMODULE}.Prior")
+    mocker.patch(f"{IMPORTMODULE}.Metropolis")
+    mock_kernel = mocker.patch(f"{IMPORTMODULE}.VectorMCMCKernel")
+
+    # Mock the samplers
+    mock_fixed_time_sampler = mocker.patch(f"{IMPORTMODULE}.FixedTimeSampler")
+    mock_max_step_sampler = mocker.patch(f"{IMPORTMODULE}.MaxStepSampler")
+    mock_adaptive_sampler = mocker.patch(f"{IMPORTMODULE}.AdaptiveSampler")
+
+    # Configure mock samplers with common behavior
+    for sampler_mock in [
+        mock_fixed_time_sampler,
+        mock_max_step_sampler,
+        mock_adaptive_sampler,
+    ]:
+        mock_instance = mocker.Mock()
+        mock_instance.sample.return_value = (
+            [mocker.Mock(params=np.array([[1]]))],
+            None,
+        )
+        mock_instance.phi_sequence = [1.0]
+        mock_instance._mutator = mocker.Mock()
+        sampler_mock.return_value = mock_instance
+
+    # Mock likelihood
+    mock_likelihood = mocker.Mock(return_value=1.0)
+
+    return {
+        "kernel": mock_kernel,
+        "fixed_time_sampler": mock_fixed_time_sampler,
+        "max_step_sampler": mock_max_step_sampler,
+        "adaptive_sampler": mock_adaptive_sampler,
+        "likelihood": mock_likelihood,
+    }
+
+
 class TestSampleFunction:
     def test_default_kwargs(self, mocker):
         mock_run_smc = mocker.patch(
@@ -29,10 +69,11 @@ class TestSampleFunction:
         assert args[1] == proposal
         assert args[2] == generator
         assert args[3] is None
-        assert args[4] is False
+        assert args[4] is None
+        assert args[5] is False
 
-        kwargs_passed = args[5]
-        rng_passed = args[6]
+        kwargs_passed = args[6]
+        rng_passed = args[7]
 
         assert kwargs_passed == {"num_particles": 5000, "num_mcmc_samples": 10}
         assert isinstance(rng_passed, np.random.Generator)
@@ -57,8 +98,9 @@ class TestSampleFunction:
         assert args[1] == proposal
         assert args[2] == generator
         assert args[3] is None
-        assert args[4] is False
-        assert args[5] == custom_kwargs
+        assert args[4] is None
+        assert args[5] is False
+        assert args[6] == custom_kwargs
 
 
 class TestRunSMC:
@@ -137,3 +179,161 @@ class TestRunSMC:
 
         expected_phis = [0, 0.5, 1]
         assert phis == expected_phis
+
+
+class TestSampleLimits:
+    def test_both_sample_limits_passed_through(self, mocker):
+        """Test that both max_time and max_equation_evals are passed through."""
+        mock_run_smc = mocker.patch(
+            f"{IMPORTMODULE}.run_smc",
+            return_value=("mock_models", "mock_likelihoods", "mock_phis"),
+        )
+
+        likelihood = lambda x: x
+        proposal = object()
+        generator = object()
+        max_time = 30.0
+        max_equation_evals = 5000
+
+        sample(
+            likelihood,
+            proposal,
+            generator,
+            max_time=max_time,
+            max_equation_evals=max_equation_evals,
+        )
+
+        mock_run_smc.assert_called_once()
+        args, _ = mock_run_smc.call_args
+        assert args[3] == max_time
+        assert args[4] == max_equation_evals
+
+    def test_fixed_time_sampler_when_max_time_specified(self, mocker, sampler_mocks):
+        """Test that FixedTimeSampler is used when max_time is specified."""
+        max_time = 60.0
+
+        run_smc(
+            likelihood=sampler_mocks["likelihood"],
+            proposal="proposal",
+            generator="generator",
+            max_time=max_time,
+            max_equation_evals=None,
+            multiprocess=False,
+            kwargs={"num_particles": 10, "num_mcmc_samples": 5},
+            rng=mocker.Mock(),
+        )
+
+        # Verify FixedTimeSampler was used
+        sampler_mocks["fixed_time_sampler"].assert_called_once_with(
+            sampler_mocks["kernel"].return_value, max_time
+        )
+        sampler_mocks["max_step_sampler"].assert_not_called()
+        sampler_mocks["adaptive_sampler"].assert_not_called()
+
+    def test_max_step_sampler_when_max_equation_evals_specified(
+        self, mocker, sampler_mocks
+    ):
+        """Test that MaxStepSampler is used when max_equation_evals is specified (and max_time is None)."""
+        max_equation_evals = 10000
+        num_particles = 100
+        num_mcmc_samples = 10
+        expected_max_steps = 10
+
+        run_smc(
+            likelihood=sampler_mocks["likelihood"],
+            proposal="proposal",
+            generator="generator",
+            max_time=None,
+            max_equation_evals=max_equation_evals,
+            multiprocess=False,
+            kwargs={
+                "num_particles": num_particles,
+                "num_mcmc_samples": num_mcmc_samples,
+            },
+            rng=mocker.Mock(),
+        )
+
+        sampler_mocks["max_step_sampler"].assert_called_once_with(
+            sampler_mocks["kernel"].return_value, max_steps=expected_max_steps
+        )
+        sampler_mocks["fixed_time_sampler"].assert_not_called()
+        sampler_mocks["adaptive_sampler"].assert_not_called()
+
+    def test_adaptive_sampler_when_no_limits_specified(self, mocker, sampler_mocks):
+        """Test that AdaptiveSampler is used when neither max_time nor max_equation_evals is specified."""
+        run_smc(
+            likelihood=sampler_mocks["likelihood"],
+            proposal="proposal",
+            generator="generator",
+            max_time=None,
+            max_equation_evals=None,
+            multiprocess=False,
+            kwargs={"num_particles": 10, "num_mcmc_samples": 5},
+            rng=mocker.Mock(),
+        )
+
+        sampler_mocks["adaptive_sampler"].assert_called_once_with(
+            sampler_mocks["kernel"].return_value
+        )
+        sampler_mocks["fixed_time_sampler"].assert_not_called()
+        sampler_mocks["max_step_sampler"].assert_not_called()
+
+    def test_max_time_takes_precedence_over_max_equation_evals(
+        self, mocker, sampler_mocks
+    ):
+        """Test that max_time takes precedence when both max_time and max_equation_evals are specified."""
+        max_time = 30.0
+        max_equation_evals = 5000
+
+        run_smc(
+            likelihood=sampler_mocks["likelihood"],
+            proposal="proposal",
+            generator="generator",
+            max_time=max_time,
+            max_equation_evals=max_equation_evals,
+            multiprocess=False,
+            kwargs={"num_particles": 10, "num_mcmc_samples": 5},
+            rng=mocker.Mock(),
+        )
+
+        sampler_mocks["fixed_time_sampler"].assert_called_once_with(
+            sampler_mocks["kernel"].return_value, max_time
+        )
+        sampler_mocks["max_step_sampler"].assert_not_called()
+        sampler_mocks["adaptive_sampler"].assert_not_called()
+
+    @pytest.mark.parametrize(
+        "max_equation_evals,num_particles,num_mcmc_samples,expected_max_steps",
+        [
+            (10000, 100, 10, 10),
+            (5000, 50, 5, 20),
+            (1000, 25, 4, 10),
+        ],
+    )
+    def test_max_steps_calculation_correct(
+        self,
+        mocker,
+        sampler_mocks,
+        max_equation_evals,
+        num_particles,
+        num_mcmc_samples,
+        expected_max_steps,
+    ):
+        """Test that max_steps is calculated correctly for MaxStepSampler."""
+        run_smc(
+            likelihood=sampler_mocks["likelihood"],
+            proposal="proposal",
+            generator="generator",
+            max_time=None,
+            max_equation_evals=max_equation_evals,
+            multiprocess=False,
+            kwargs={
+                "num_particles": num_particles,
+                "num_mcmc_samples": num_mcmc_samples,
+            },
+            rng=mocker.Mock(),
+        )
+
+        sampler_mocks["max_step_sampler"].assert_called_once_with(
+            sampler_mocks["kernel"].return_value, max_steps=expected_max_steps
+        )
