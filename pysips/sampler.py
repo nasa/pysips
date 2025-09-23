@@ -35,7 +35,7 @@ Example
 Notes
 -----
 This module uses the following workflow:
-1. Creates a custom Prior that generates unique values
+1. Creates a custom Prior that generates unique models
 2. Sets up a Metropolis-Hastings MCMC kernel
 3. Optionally enables checkpointing for progress persistence
 4. Runs adaptive SMC sampling
