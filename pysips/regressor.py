@@ -231,7 +231,7 @@ class PysipsRegressor(BaseEstimator, RegressorMixin):
         the sampling will run until completion without time constraints.
         Cannot be used together with max_equation_evals.
 
-    max_equation_evals : float or None, default=None
+    max_equation_evals : int or None, default=None
         Maximum number of evaluations during the sampling process. If None,
         the sampling will run until completion without time constraints.
         Cannot be used together with max_time.
