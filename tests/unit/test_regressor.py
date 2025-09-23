@@ -2,6 +2,7 @@ import pytest
 import numpy as np
 from unittest.mock import MagicMock
 from pytest_mock import MockerFixture
+from sklearn.base import RegressorMixin
 
 from pysips.regressor import PysipsRegressor
 
@@ -44,7 +45,7 @@ def mock_external_components(mocker: MockerFixture):
     mock_model = MagicMock()
     mock_model.__str__.return_value = "2*X_0"
     mock_likelihoods = np.array([0.9])
-    mock_sample.return_value = ([mock_model], mock_likelihoods)
+    mock_sample.return_value = ([mock_model], mock_likelihoods, [0.5])
 
     return {
         "component_gen": mock_component_gen,
@@ -225,3 +226,57 @@ def test_get_models_not_fitted(mocker: MockerFixture):
 
     with pytest.raises(Exception):  # Should raise the exception from check_is_fitted
         regressor.get_models()
+
+
+@pytest.mark.parametrize("invalid_value", [np.nan, np.inf, -np.inf])
+def test_score_handles_invalid_predictions(
+    sample_data, mocker: MockerFixture, invalid_value
+):
+    """Test that score method handles NaN and infinity values in predictions."""
+    X, y = sample_data
+
+    mocker.patch(f"{IMPORTMODULE}.check_is_fitted")
+    mocker.patch(f"{IMPORTMODULE}.check_array", return_value=X)
+
+    mock_model = MagicMock()
+    predictions = np.array([2.0, 4.0, 6.0, 8.0, 10.0])
+    predictions[0] = invalid_value  # Set first prediction to the invalid value
+    mock_model.evaluate_equation_at.return_value = predictions
+
+    regressor = PysipsRegressor()
+    regressor.best_model_ = mock_model
+    regressor.models_ = [mock_model]
+    regressor.likelihoods_ = np.array([1.0])
+    regressor.n_features_in_ = X.shape[1]
+
+    score = regressor.score(X, y)
+    assert score == -np.inf
+
+
+def test_score_reraises_other_value_errors(sample_data, mocker: MockerFixture):
+    """Test that score method re-raises ValueError exceptions that are not NaN/inf related."""
+    X, y = sample_data
+
+    regressor = PysipsRegressor()
+    regressor.best_model_ = MagicMock()
+
+    mocker.patch.object(
+        RegressorMixin, "score", side_effect=ValueError("Some other error")
+    )
+    with pytest.raises(ValueError, match="Some other error"):
+        regressor.score(X, y)
+
+
+def test_score_normal_case_passes_through(sample_data, mocker: MockerFixture):
+    """Test that score method passes through normal results when no errors occur."""
+    X, y = sample_data
+
+    mock_super_score = mocker.patch(
+        "sklearn.base.RegressorMixin.score", return_value=0.85
+    )
+    regressor = PysipsRegressor()
+    regressor.best_model_ = MagicMock()
+
+    score = regressor.score(X, y)
+    assert score == 0.85
+    mock_super_score.assert_called_once_with(X, y, sample_weight=None)

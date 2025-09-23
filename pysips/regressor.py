@@ -54,6 +54,12 @@ Sampling Parameters:
     - num_mcmc_samples: MCMC steps per SMC iteration
     - target_ess: Target effective sample size
     - crossover_pool_size: Size of crossover gene pool
+    - max_time: Maximum runtime for sampling process
+
+Checkpointing:
+    - checkpoint_file: File path for saving/loading sampling progress
+      If the checkpoint file exists, fitting will attempt to resume from
+      the saved state and continue updating the checkpoint as it proceeds
 
 Usage Example
 -------------
@@ -70,6 +76,7 @@ Usage Example
 ...     max_complexity=20,
 ...     num_particles=100,
 ...     model_selection='mode',
+...     checkpoint_file='my_run.checkpoint',
 ...     random_state=42
 ... )
 >>> regressor.fit(X, y)
@@ -105,6 +112,11 @@ For best results, consider:
 - Tuning mutation/crossover probabilities for your domain
 - Using sufficient particles for good posterior approximation
 - Setting appropriate number of MCMC samples for mixing
+
+Checkpointing allows for:
+- Resuming interrupted long-running fits
+- Incremental progress saving during extended sampling runs
+- Recovery from system failures or resource limitations
 """
 
 from collections import Counter
@@ -120,6 +132,9 @@ from .crossover_proposal import CrossoverProposal
 from .random_choice_proposal import RandomChoiceProposal
 from .sampler import sample
 
+MAX_FLOAT = np.finfo(np.float64).max
+MIN_FLOAT = np.finfo(np.float64).min
+
 USE_PYTHON = True
 USE_SIMPLIFICATION = True
 DEFAULT_OPERATORS = ["+", "*"]
@@ -130,6 +145,12 @@ DEFALT_PARAMETER_INITIALIZATION_BOUNDS = [-5, 5]
 class PysipsRegressor(BaseEstimator, RegressorMixin):
     """
     A scikit-learn compatible wrapper for PySIPS symbolic regression.
+
+    This regressor uses Sequential Monte Carlo (SMC) sampling to explore
+    the space of symbolic expressions and find mathematical models that
+    best explain the observed data. The approach provides principled
+    uncertainty quantification and supports checkpointing for long-running
+    fits.
 
     Parameters
     ----------
@@ -196,8 +217,24 @@ class PysipsRegressor(BaseEstimator, RegressorMixin):
         model and "max_nml" for the model with maximum normalized marginal
         likelihood.
 
+    checkpoint_file : str or None, default=None
+        File path for saving and loading sampling progress. If the checkpoint
+        file exists, fitting will attempt to resume from the saved state and
+        continue updating the checkpoint as sampling proceeds. If None, no
+        checkpointing is performed.
+
     random_state : int or None, default=None
         Random seed for reproducibility.
+
+    max_time : float or None, default=None
+        Maximum time in seconds to run the sampling process. If None,
+        the sampling will run until completion without time constraints.
+        Cannot be used together with max_equation_evals.
+
+    max_equation_evals : int or None, default=None
+        Maximum number of evaluations during the sampling process. If None,
+        the sampling will run until completion without time constraints.
+        Cannot be used together with max_time.
     """
 
     def __init__(
@@ -222,8 +259,17 @@ class PysipsRegressor(BaseEstimator, RegressorMixin):
         param_init_bounds=None,
         opt_restarts=1,
         model_selection="mode",
+        checkpoint_file=None,
         random_state=None,
+        max_time=None,
+        max_equation_evals=None,
     ):
+        # Validate that max_time and max_equation_evals are not both specified
+        if max_time is not None and max_equation_evals is not None:
+            raise ValueError(
+                "max_time and max_equation_evals cannot both be specified. "
+                "Please choose one constraint method."
+            )
 
         self.operators = operators if operators is not None else DEFAULT_OPERATORS
         self.max_complexity = max_complexity
@@ -251,12 +297,16 @@ class PysipsRegressor(BaseEstimator, RegressorMixin):
         )
         self.opt_restarts = opt_restarts
         self.model_selection = model_selection
+        self.checkpoint_file = checkpoint_file
         self.random_state = random_state
+        self.max_time = max_time
+        self.max_equation_evals = max_equation_evals
 
         # attributes set after fitting
         self.n_features_in_ = None
         self.models_ = None
         self.likelihoods_ = None
+        self.phis_ = None
         self.best_model_ = None
         self.best_likelihood_ = None
 
@@ -342,11 +392,14 @@ class PysipsRegressor(BaseEstimator, RegressorMixin):
         likelihood = LaplaceNmll(X, y)
 
         # Run sampling
-        models, likelihoods = sample(
+        models, likelihoods, phis = sample(
             likelihood,
             proposal,
             generator,
+            max_time=self.max_time,
+            max_equation_evals=self.max_equation_evals,
             seed=self.random_state,
+            checkpoint_file=self.checkpoint_file,
             kwargs={
                 "num_particles": self.num_particles,
                 "num_mcmc_samples": self.num_mcmc_samples,
@@ -357,6 +410,7 @@ class PysipsRegressor(BaseEstimator, RegressorMixin):
         # Save the models and their likelihoods
         self.models_ = models
         self.likelihoods_ = likelihoods
+        self.phis_ = phis
 
         # Select the best model
         if self.model_selection == "max_nml":
@@ -401,7 +455,8 @@ class PysipsRegressor(BaseEstimator, RegressorMixin):
             )
 
         # Use the best model for prediction
-        return self.best_model_.evaluate_equation_at(X).flatten()
+        prediction = self.best_model_.evaluate_equation_at(X).flatten()
+        return prediction
 
     def score(self, X, y, sample_weight=None):
         """
@@ -422,7 +477,14 @@ class PysipsRegressor(BaseEstimator, RegressorMixin):
             R^2 of self.predict(X) with respect to y.
         """
         # Use default implementation from scikit-learn
-        return super().score(X, y, sample_weight=sample_weight)
+        try:
+            score = super().score(X, y, sample_weight=sample_weight)
+        except ValueError as e:
+            # catch error cause by NaN or inf values in prediction e.g. log(0)
+            if "Input contains NaN" in str(e) or "Input contains infinity" in str(e):
+                return -np.inf
+            raise
+        return score
 
     def get_expression(self):
         """
