@@ -55,6 +55,7 @@ Sampling Parameters:
     - target_ess: Target effective sample size
     - crossover_pool_size: Size of crossover gene pool
     - max_time: Maximum runtime for sampling process
+    - multiprocess: Whether to use multiprocessing for likelihood evaluations
 
 Checkpointing:
     - checkpoint_file: File path for saving/loading sampling progress
@@ -117,6 +118,9 @@ Checkpointing allows for:
 - Resuming interrupted long-running fits
 - Incremental progress saving during extended sampling runs
 - Recovery from system failures or resource limitations
+
+Multiprocessing can significantly speed up likelihood evaluations for complex
+expressions, but may have overhead for simple expressions or small datasets.
 """
 
 from collections import Counter
@@ -223,6 +227,11 @@ class PysipsRegressor(BaseEstimator, RegressorMixin):
         continue updating the checkpoint as sampling proceeds. If None, no
         checkpointing is performed.
 
+    multiprocess : bool, default=False
+        Whether to use multiprocessing for likelihood evaluations. When True,
+        equation evaluations will be parallelized across multiple CPU cores,
+        which can speed up computation.
+
     random_state : int or None, default=None
         Random seed for reproducibility.
 
@@ -260,6 +269,7 @@ class PysipsRegressor(BaseEstimator, RegressorMixin):
         opt_restarts=1,
         model_selection="mode",
         checkpoint_file=None,
+        multiprocess=False,
         random_state=None,
         max_time=None,
         max_equation_evals=None,
@@ -298,6 +308,7 @@ class PysipsRegressor(BaseEstimator, RegressorMixin):
         self.opt_restarts = opt_restarts
         self.model_selection = model_selection
         self.checkpoint_file = checkpoint_file
+        self.multiprocess = multiprocess
         self.random_state = random_state
         self.max_time = max_time
         self.max_equation_evals = max_equation_evals
@@ -400,6 +411,7 @@ class PysipsRegressor(BaseEstimator, RegressorMixin):
             max_equation_evals=self.max_equation_evals,
             seed=self.random_state,
             checkpoint_file=self.checkpoint_file,
+            multiprocess=self.multiprocess,
             kwargs={
                 "num_particles": self.num_particles,
                 "num_mcmc_samples": self.num_mcmc_samples,
