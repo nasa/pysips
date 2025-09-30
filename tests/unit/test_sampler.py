@@ -74,9 +74,13 @@ class TestSampleFunction:
 
         kwargs_passed = args[6]
         rng_passed = args[7]
+        checkpoint_file_passed = args[8]
+        show_progress_bar_passed = args[9]
 
         assert kwargs_passed == {"num_particles": 5000, "num_mcmc_samples": 10}
         assert isinstance(rng_passed, np.random.Generator)
+        assert checkpoint_file_passed is None
+        assert show_progress_bar_passed is True
 
     def test_custom_kwargs(self, mocker):
         mock_run_smc = mocker.patch(
@@ -101,6 +105,9 @@ class TestSampleFunction:
         assert args[4] is None
         assert args[5] is False
         assert args[6] == custom_kwargs
+        # args[7] is rng
+        assert args[8] is None  # checkpoint_file
+        assert args[9] is True  # show_progress_bar (default)
 
 
 class TestRunSMC:
@@ -222,11 +229,12 @@ class TestSampleLimits:
             kwargs={"num_particles": 10, "num_mcmc_samples": 5},
             rng=mocker.Mock(),
             checkpoint_file=None,
+            show_progress_bar=True,
         )
 
         # Verify FixedTimeSampler was used
         sampler_mocks["fixed_time_sampler"].assert_called_once_with(
-            sampler_mocks["kernel"].return_value, max_time
+            sampler_mocks["kernel"].return_value, max_time, show_progress_bar=True
         )
         sampler_mocks["max_step_sampler"].assert_not_called()
         sampler_mocks["adaptive_sampler"].assert_not_called()

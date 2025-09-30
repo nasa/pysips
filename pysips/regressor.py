@@ -235,6 +235,11 @@ class PysipsRegressor(BaseEstimator, RegressorMixin):
         Maximum number of evaluations during the sampling process. If None,
         the sampling will run until completion without time constraints.
         Cannot be used together with max_time.
+
+    show_progress_bar : bool, default=True
+        Whether to display a progress bar during fitting. When False, the
+        progress bar will be hidden, which is useful for hyperparameter
+        tuning or when running multiple fits in parallel.
     """
 
     def __init__(
@@ -263,6 +268,7 @@ class PysipsRegressor(BaseEstimator, RegressorMixin):
         random_state=None,
         max_time=None,
         max_equation_evals=None,
+        show_progress_bar=True,
     ):
         # Validate that max_time and max_equation_evals are not both specified
         if max_time is not None and max_equation_evals is not None:
@@ -301,6 +307,7 @@ class PysipsRegressor(BaseEstimator, RegressorMixin):
         self.random_state = random_state
         self.max_time = max_time
         self.max_equation_evals = max_equation_evals
+        self.show_progress_bar = show_progress_bar
 
         # attributes set after fitting
         self.n_features_in_ = None
@@ -400,6 +407,7 @@ class PysipsRegressor(BaseEstimator, RegressorMixin):
             max_equation_evals=self.max_equation_evals,
             seed=self.random_state,
             checkpoint_file=self.checkpoint_file,
+            show_progress_bar=self.show_progress_bar,
             kwargs={
                 "num_particles": self.num_particles,
                 "num_mcmc_samples": self.num_mcmc_samples,
