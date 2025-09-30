@@ -90,6 +90,15 @@ Usage Example
 >>>
 >>> # Get all sampled models
 >>> models, likelihoods = regressor.get_models()
+>>>
+>>> # For hyperparameter tuning, disable progress bar
+>>> regressor_quiet = PysipsRegressor(
+...     operators=['+', '*'],
+...     num_particles=50,
+...     show_progress_bar=False,  # No progress output
+...     random_state=42
+... )
+>>> regressor_quiet.fit(X, y)  # Silent fitting
 
 Applications
 ------------

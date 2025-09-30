@@ -171,7 +171,7 @@ class TestRunSMC:
             mock_mcmc_instance, param_order=["f"], rng=mock_rng_instance
         )
 
-        mock_adaptive_sampler.assert_called_once_with(mock_kernel_instance)
+        mock_adaptive_sampler.assert_called_once_with(mock_kernel_instance, show_progress_bar=True)
 
         mock_sampler_instance.sample.assert_called_once_with(**kwargs)
 
@@ -261,10 +261,11 @@ class TestSampleLimits:
             },
             rng=mocker.Mock(),
             checkpoint_file=None,
+            show_progress_bar=True,
         )
 
         sampler_mocks["max_step_sampler"].assert_called_once_with(
-            sampler_mocks["kernel"].return_value, max_steps=expected_max_steps
+            sampler_mocks["kernel"].return_value, max_steps=expected_max_steps, show_progress_bar=True
         )
         sampler_mocks["fixed_time_sampler"].assert_not_called()
         sampler_mocks["adaptive_sampler"].assert_not_called()
@@ -281,10 +282,11 @@ class TestSampleLimits:
             kwargs={"num_particles": 10, "num_mcmc_samples": 5},
             rng=mocker.Mock(),
             checkpoint_file=None,
+            show_progress_bar=True,
         )
 
         sampler_mocks["adaptive_sampler"].assert_called_once_with(
-            sampler_mocks["kernel"].return_value
+            sampler_mocks["kernel"].return_value, show_progress_bar=True
         )
         sampler_mocks["fixed_time_sampler"].assert_not_called()
         sampler_mocks["max_step_sampler"].assert_not_called()
@@ -306,10 +308,11 @@ class TestSampleLimits:
             kwargs={"num_particles": 10, "num_mcmc_samples": 5},
             rng=mocker.Mock(),
             checkpoint_file=None,
+            show_progress_bar=True,
         )
 
         sampler_mocks["fixed_time_sampler"].assert_called_once_with(
-            sampler_mocks["kernel"].return_value, max_time
+            sampler_mocks["kernel"].return_value, max_time, show_progress_bar=True
         )
         sampler_mocks["max_step_sampler"].assert_not_called()
         sampler_mocks["adaptive_sampler"].assert_not_called()
@@ -345,8 +348,9 @@ class TestSampleLimits:
             },
             rng=mocker.Mock(),
             checkpoint_file=None,
+            show_progress_bar=True,
         )
 
         sampler_mocks["max_step_sampler"].assert_called_once_with(
-            sampler_mocks["kernel"].return_value, max_steps=expected_max_steps
+            sampler_mocks["kernel"].return_value, max_steps=expected_max_steps, show_progress_bar=True
         )
