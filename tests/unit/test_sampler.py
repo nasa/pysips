@@ -382,82 +382,58 @@ class TestSampleLimits:
             sampler_mocks["kernel"].return_value, max_steps=expected_max_steps, show_progress_bar=True
         )
 
-    def test_show_progress_bar_false_passed_to_samplers(self, mocker, sampler_mocks):
+    @pytest.mark.parametrize(
+        "max_time,max_equation_evals,expected_sampler",
+        [
+            # AdaptiveSampler case
+            (None, None, "adaptive_sampler"),
+            # FixedTimeSampler case  
+            (30.0, None, "fixed_time_sampler"),
+            # MaxStepSampler case
+            (None, 1000, "max_step_sampler"),
+        ],
+    )
+    def test_show_progress_bar_false_passed_to_samplers(
+        self, mocker, sampler_mocks, max_time, max_equation_evals, expected_sampler
+    ):
         """Test that show_progress_bar=False gets passed to the samplers correctly."""
-        # Test with AdaptiveSampler (default case)
-        run_smc(
-            likelihood=sampler_mocks["likelihood"],
-            proposal="proposal",
-            generator="generator",
-            max_time=None,
-            max_equation_evals=None,
-            multiprocess=False,
-            kwargs={"num_particles": 10, "num_mcmc_samples": 5},
-            rng=mocker.Mock(),
-            checkpoint_file=None,
-            show_progress_bar=False,
-        )
+        # For MaxStepSampler case, we need specific particle/mcmc values to get expected_max_steps=10
+        if max_equation_evals is not None:
+            num_particles = 25
+            num_mcmc_samples = 4
+            expected_max_steps = 10
+        else:
+            num_particles = 10
+            num_mcmc_samples = 5
 
-        sampler_mocks["adaptive_sampler"].assert_called_once_with(
-            sampler_mocks["kernel"].return_value, show_progress_bar=False
-        )
-        sampler_mocks["fixed_time_sampler"].assert_not_called()
-        sampler_mocks["max_step_sampler"].assert_not_called()
-
-        # Reset mocks for next test
-        sampler_mocks["adaptive_sampler"].reset_mock()
-        sampler_mocks["fixed_time_sampler"].reset_mock()
-        sampler_mocks["max_step_sampler"].reset_mock()
-
-        # Test with FixedTimeSampler  
-        max_time = 30.0
         run_smc(
             likelihood=sampler_mocks["likelihood"],
             proposal="proposal",
             generator="generator",
             max_time=max_time,
-            max_equation_evals=None,
-            multiprocess=False,
-            kwargs={"num_particles": 10, "num_mcmc_samples": 5},
-            rng=mocker.Mock(),
-            checkpoint_file=None,
-            show_progress_bar=False,
-        )
-
-        sampler_mocks["fixed_time_sampler"].assert_called_once_with(
-            sampler_mocks["kernel"].return_value, max_time, show_progress_bar=False
-        )
-        sampler_mocks["adaptive_sampler"].assert_not_called()
-        sampler_mocks["max_step_sampler"].assert_not_called()
-
-        # Reset mocks for next test
-        sampler_mocks["adaptive_sampler"].reset_mock()
-        sampler_mocks["fixed_time_sampler"].reset_mock()
-        sampler_mocks["max_step_sampler"].reset_mock()
-
-        # Test with MaxStepSampler
-        max_equation_evals = 1000
-        num_particles = 25
-        num_mcmc_samples = 4
-        expected_max_steps = 10
-        run_smc(
-            likelihood=sampler_mocks["likelihood"],
-            proposal="proposal",
-            generator="generator",
-            max_time=None,
             max_equation_evals=max_equation_evals,
             multiprocess=False,
-            kwargs={
-                "num_particles": num_particles,
-                "num_mcmc_samples": num_mcmc_samples,
-            },
+            kwargs={"num_particles": num_particles, "num_mcmc_samples": num_mcmc_samples},
             rng=mocker.Mock(),
             checkpoint_file=None,
             show_progress_bar=False,
         )
 
-        sampler_mocks["max_step_sampler"].assert_called_once_with(
-            sampler_mocks["kernel"].return_value, max_steps=expected_max_steps, show_progress_bar=False
-        )
-        sampler_mocks["adaptive_sampler"].assert_not_called()
-        sampler_mocks["fixed_time_sampler"].assert_not_called()
+        # Check the expected sampler was called correctly
+        if expected_sampler == "adaptive_sampler":
+            sampler_mocks[expected_sampler].assert_called_once_with(
+                sampler_mocks["kernel"].return_value, show_progress_bar=False
+            )
+        elif expected_sampler == "fixed_time_sampler":
+            sampler_mocks[expected_sampler].assert_called_once_with(
+                sampler_mocks["kernel"].return_value, max_time, show_progress_bar=False
+            )
+        elif expected_sampler == "max_step_sampler":
+            sampler_mocks[expected_sampler].assert_called_once_with(
+                sampler_mocks["kernel"].return_value, max_steps=expected_max_steps, show_progress_bar=False
+            )
+
+        # Verify other samplers were not called
+        for sampler_name in ["adaptive_sampler", "fixed_time_sampler", "max_step_sampler"]:
+            if sampler_name != expected_sampler:
+                sampler_mocks[sampler_name].assert_not_called()
