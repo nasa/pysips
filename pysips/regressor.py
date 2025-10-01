@@ -263,6 +263,7 @@ class PysipsRegressor(BaseEstimator, RegressorMixin):
         random_state=None,
         max_time=None,
         max_equation_evals=None,
+        xvals=None
     ):
         # Validate that max_time and max_equation_evals are not both specified
         if max_time is not None and max_equation_evals is not None:
@@ -309,6 +310,7 @@ class PysipsRegressor(BaseEstimator, RegressorMixin):
         self.phis_ = None
         self.best_model_ = None
         self.best_likelihood_ = None
+        self.xvals = xvals
 
     def _get_generator(self, x_dim):
         """Create expression generator."""
@@ -405,6 +407,7 @@ class PysipsRegressor(BaseEstimator, RegressorMixin):
                 "num_mcmc_samples": self.num_mcmc_samples,
                 "target_ess": self.target_ess,
             },
+            xvals=self.xvals
         )
 
         # Save the models and their likelihoods

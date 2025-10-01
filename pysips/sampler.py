@@ -67,6 +67,7 @@ def sample(
     kwargs=None,
     seed=None,
     checkpoint_file=None,
+    xvals=None
 ):
     """
     Perform Sequential Monte Carlo sampling with default parameters.
@@ -131,11 +132,6 @@ def sample(
     >>> models, likes, phis = sample(likelihood_func, proposal_func, generator_func,
     ...                              checkpoint_file="progress.pkl")
     >>> print(f"Checkpointed sampling completed")
-    >>>
-    >>> # Sampling with max equation evaluations limit
-    >>> models, likes, phis = sample(likelihood_func, proposal_func, generator_func,
-    ...                              max_equation_evals=10000)
-    >>> print(f"Sampling completed with evaluation limit")
 
     Notes
     -----
@@ -168,6 +164,7 @@ def sample(
         smc_kwargs,
         rng,
         checkpoint_file,
+        xvals
     )
 
 
@@ -181,6 +178,7 @@ def run_smc(
     kwargs,
     rng,
     checkpoint_file,
+    xvals
 ):
     """
     Execute Sequential Monte Carlo sampling with full parameter control.
@@ -231,17 +229,12 @@ def run_smc(
     - Saves progress incrementally during sampling
     - Uses append mode ('a') by default for safe restarts
     - Handles serialization of the complete sampler state
-
-    Sampling strategy selection logic:
-    - If max_time is specified FixedTimeSampler is used
-    - If max_equation_evals is specified (and max_time is not), MaxStepSampler is used
-    - If neither is specified, AdaptiveSampler is used
     """
-    kernel = _create_mcmc_kernel(likelihood, proposal, generator, multiprocess, rng)
+    kernel = _create_mcmc_kernel(likelihood, proposal, generator, multiprocess, rng, xvals)
 
     # Execute sampling with or without checkpointing
     if checkpoint_file is None:
-        steps, phis = _smc_call(max_time, max_equation_evals, kwargs, kernel)
+        steps, phis = _smc_call(max_time, kwargs, kernel)
     else:
         with PickleStorage(checkpoint_file):
             steps, phis = _smc_call(max_time, max_equation_evals, kwargs, kernel)
@@ -252,19 +245,19 @@ def run_smc(
     return models, likelihoods, phis
 
 
-def _create_mcmc_kernel(likelihood, proposal, generator, multiprocess, rng):
+def _create_mcmc_kernel(likelihood, proposal, generator, multiprocess, rng, xvals):
     prior = Prior(generator)
     mcmc = Metropolis(
         likelihood=likelihood,
         proposal=proposal,
         prior=prior,
         multiprocess=multiprocess,
+        xvals=xvals
     )
     return VectorMCMCKernel(mcmc, param_order=["f"], rng=rng)
 
 
 def _smc_call(max_time, max_equation_evals, kwargs, kernel):
-    # Choose sampler based on specified constraints
     if max_time is not None:
         smc = FixedTimeSampler(kernel, max_time)
     elif max_equation_evals is not None:

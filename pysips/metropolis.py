@@ -74,7 +74,7 @@ class Metropolis(VectorMCMC):
         symmetric.
     """
 
-    def __init__(self, likelihood, proposal, prior, multiprocess=False):
+    def __init__(self, likelihood, proposal, prior, multiprocess=False, xvals=None):
         super().__init__(
             model=None,
             data=None,
@@ -83,10 +83,11 @@ class Metropolis(VectorMCMC):
             log_like_args=None,
         )
         self._equ_proposal = proposal
-        self.proposal = lambda x, z: np.array(
-            [[self._equ_proposal(xi)] for xi in x.flatten()]
+        self.proposal = lambda x, cov: np.array(
+            [[self._equ_proposal(xi, cov)] for xi in x.flatten()]
         )
         self._is_multiprocess = multiprocess
+        self.xvals = xvals
 
     def smc_metropolis(self, inputs, num_samples, cov=None):
         """
@@ -98,12 +99,21 @@ class Metropolis(VectorMCMC):
             number of samples in the chain; includes burnin
         """
         log_priors, log_like = self._initialize_probabilities(inputs)
-
+        eval_equations = np.array([agraph[0].evaluate_equation_at(self.xvals).flatten() for agraph in inputs])
+        cov = np.cov(eval_equations, rowvar=False)
         for _ in range(num_samples):
-
-            inputs, log_like, _, _ = self._perform_mcmc_step(
-                inputs, None, log_like, log_priors
+            inputs, log_like, _, rejected = self._perform_mcmc_step(
+                inputs, cov, log_like, log_priors
             )
+
+            num_particles = len(inputs)
+            num_accepted = num_particles - np.sum(rejected)
+
+            if num_accepted < inputs.shape[0] * 0.3:
+                cov = cov * 1 / 5
+            if num_accepted > inputs.shape[0] * 0.7:
+                cov = cov * 2
+
 
         self._equ_proposal.update(gene_pool=inputs.flatten())
 
