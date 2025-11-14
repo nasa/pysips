@@ -67,6 +67,7 @@ def sample(
     kwargs=None,
     seed=None,
     checkpoint_file=None,
+    show_progress_bar=True,
 ):
     """
     Perform Sequential Monte Carlo sampling with default parameters.
@@ -102,6 +103,10 @@ def sample(
         file exists, sampling will attempt to resume from the saved state and
         continue updating the checkpoint as it proceeds. If None, no
         checkpointing is performed (default: None).
+    show_progress_bar : bool, optional
+        Whether to display a progress bar during sampling. When False, the
+        progress bar will be hidden, which is useful for hyperparameter
+        tuning or when running multiple fits in parallel (default: True).
 
     Returns
     -------
@@ -168,6 +173,7 @@ def sample(
         smc_kwargs,
         rng,
         checkpoint_file,
+        show_progress_bar,
     )
 
 
@@ -181,6 +187,7 @@ def run_smc(
     kwargs,
     rng,
     checkpoint_file,
+    show_progress_bar,
 ):
     """
     Execute Sequential Monte Carlo sampling with full parameter control.
@@ -213,6 +220,9 @@ def run_smc(
         File path for checkpointing. If None, no checkpointing is performed.
         If provided, sampling progress will be saved to this file and can be
         resumed if the file exists from a previous run.
+    show_progress_bar : bool
+        Whether to display a progress bar during sampling. When False, progress
+        updates are suppressed.
 
     Returns
     -------
@@ -241,10 +251,10 @@ def run_smc(
 
     # Execute sampling with or without checkpointing
     if checkpoint_file is None:
-        steps, phis = _smc_call(max_time, max_equation_evals, kwargs, kernel)
+        steps, phis = _smc_call(max_time, max_equation_evals, kwargs, kernel, show_progress_bar)
     else:
         with PickleStorage(checkpoint_file):
-            steps, phis = _smc_call(max_time, max_equation_evals, kwargs, kernel)
+            steps, phis = _smc_call(max_time, max_equation_evals, kwargs, kernel, show_progress_bar)
 
     models = steps[-1].params[:, 0].tolist()
     likelihoods = [likelihood(c) for c in models]  # fit final pop of equ
@@ -263,17 +273,17 @@ def _create_mcmc_kernel(likelihood, proposal, generator, multiprocess, rng):
     return VectorMCMCKernel(mcmc, param_order=["f"], rng=rng)
 
 
-def _smc_call(max_time, max_equation_evals, kwargs, kernel):
+def _smc_call(max_time, max_equation_evals, kwargs, kernel, show_progress_bar):
     # Choose sampler based on specified constraints
     if max_time is not None:
-        smc = FixedTimeSampler(kernel, max_time)
+        smc = FixedTimeSampler(kernel, max_time, show_progress_bar=show_progress_bar)
     elif max_equation_evals is not None:
         max_steps = max_equation_evals // (
             kwargs["num_particles"] * kwargs["num_mcmc_samples"]
         )
-        smc = MaxStepSampler(kernel, max_steps=max_steps)
+        smc = MaxStepSampler(kernel, max_steps=max_steps, show_progress_bar=show_progress_bar)
     else:
-        smc = AdaptiveSampler(kernel)
+        smc = AdaptiveSampler(kernel, show_progress_bar=show_progress_bar)
 
     # pylint: disable=W0212
     smc._mutator._compute_cov = False  # hack to bypass covariance calc on obj

@@ -74,9 +74,13 @@ class TestSampleFunction:
 
         kwargs_passed = args[6]
         rng_passed = args[7]
+        checkpoint_file_passed = args[8]
+        show_progress_bar_passed = args[9]
 
         assert kwargs_passed == {"num_particles": 5000, "num_mcmc_samples": 10}
         assert isinstance(rng_passed, np.random.Generator)
+        assert checkpoint_file_passed is None
+        assert show_progress_bar_passed is True
 
     def test_custom_kwargs(self, mocker):
         mock_run_smc = mocker.patch(
@@ -101,6 +105,36 @@ class TestSampleFunction:
         assert args[4] is None
         assert args[5] is False
         assert args[6] == custom_kwargs
+        # args[7] is rng
+        assert args[8] is None  # checkpoint_file
+        assert args[9] is True  # show_progress_bar (default)
+
+    def test_show_progress_bar_false(self, mocker):
+        """Test that show_progress_bar=False gets passed through correctly."""
+        mock_run_smc = mocker.patch(
+            f"{IMPORTMODULE}.run_smc", return_value=("mock_models", "mock_likelihoods")
+        )
+
+        likelihood = lambda x: x
+        proposal = object()
+        generator = object()
+
+        result = sample(likelihood, proposal, generator, show_progress_bar=False, seed=42)
+
+        assert result == ("mock_models", "mock_likelihoods")
+        mock_run_smc.assert_called_once()
+
+        args, _ = mock_run_smc.call_args
+        assert args[0] == likelihood
+        assert args[1] == proposal
+        assert args[2] == generator
+        assert args[3] is None
+        assert args[4] is None
+        assert args[5] is False
+        # args[6] is kwargs
+        # args[7] is rng
+        assert args[8] is None  # checkpoint_file
+        assert args[9] is False  # show_progress_bar (explicitly set to False)
 
 
 class TestRunSMC:
@@ -164,7 +198,7 @@ class TestRunSMC:
             mock_mcmc_instance, param_order=["f"], rng=mock_rng_instance
         )
 
-        mock_adaptive_sampler.assert_called_once_with(mock_kernel_instance)
+        mock_adaptive_sampler.assert_called_once_with(mock_kernel_instance, show_progress_bar=True)
 
         mock_sampler_instance.sample.assert_called_once_with(**kwargs)
 
@@ -222,11 +256,12 @@ class TestSampleLimits:
             kwargs={"num_particles": 10, "num_mcmc_samples": 5},
             rng=mocker.Mock(),
             checkpoint_file=None,
+            show_progress_bar=True,
         )
 
         # Verify FixedTimeSampler was used
         sampler_mocks["fixed_time_sampler"].assert_called_once_with(
-            sampler_mocks["kernel"].return_value, max_time
+            sampler_mocks["kernel"].return_value, max_time, show_progress_bar=True
         )
         sampler_mocks["max_step_sampler"].assert_not_called()
         sampler_mocks["adaptive_sampler"].assert_not_called()
@@ -253,10 +288,11 @@ class TestSampleLimits:
             },
             rng=mocker.Mock(),
             checkpoint_file=None,
+            show_progress_bar=True,
         )
 
         sampler_mocks["max_step_sampler"].assert_called_once_with(
-            sampler_mocks["kernel"].return_value, max_steps=expected_max_steps
+            sampler_mocks["kernel"].return_value, max_steps=expected_max_steps, show_progress_bar=True
         )
         sampler_mocks["fixed_time_sampler"].assert_not_called()
         sampler_mocks["adaptive_sampler"].assert_not_called()
@@ -273,10 +309,11 @@ class TestSampleLimits:
             kwargs={"num_particles": 10, "num_mcmc_samples": 5},
             rng=mocker.Mock(),
             checkpoint_file=None,
+            show_progress_bar=True,
         )
 
         sampler_mocks["adaptive_sampler"].assert_called_once_with(
-            sampler_mocks["kernel"].return_value
+            sampler_mocks["kernel"].return_value, show_progress_bar=True
         )
         sampler_mocks["fixed_time_sampler"].assert_not_called()
         sampler_mocks["max_step_sampler"].assert_not_called()
@@ -298,10 +335,11 @@ class TestSampleLimits:
             kwargs={"num_particles": 10, "num_mcmc_samples": 5},
             rng=mocker.Mock(),
             checkpoint_file=None,
+            show_progress_bar=True,
         )
 
         sampler_mocks["fixed_time_sampler"].assert_called_once_with(
-            sampler_mocks["kernel"].return_value, max_time
+            sampler_mocks["kernel"].return_value, max_time, show_progress_bar=True
         )
         sampler_mocks["max_step_sampler"].assert_not_called()
         sampler_mocks["adaptive_sampler"].assert_not_called()
@@ -337,8 +375,65 @@ class TestSampleLimits:
             },
             rng=mocker.Mock(),
             checkpoint_file=None,
+            show_progress_bar=True,
         )
 
         sampler_mocks["max_step_sampler"].assert_called_once_with(
-            sampler_mocks["kernel"].return_value, max_steps=expected_max_steps
+            sampler_mocks["kernel"].return_value, max_steps=expected_max_steps, show_progress_bar=True
         )
+
+    @pytest.mark.parametrize(
+        "max_time,max_equation_evals,expected_sampler",
+        [
+            # AdaptiveSampler case
+            (None, None, "adaptive_sampler"),
+            # FixedTimeSampler case  
+            (30.0, None, "fixed_time_sampler"),
+            # MaxStepSampler case
+            (None, 1000, "max_step_sampler"),
+        ],
+    )
+    def test_show_progress_bar_false_passed_to_samplers(
+        self, mocker, sampler_mocks, max_time, max_equation_evals, expected_sampler
+    ):
+        """Test that show_progress_bar=False gets passed to the samplers correctly."""
+        # For MaxStepSampler case, we need specific particle/mcmc values to get expected_max_steps=10
+        if max_equation_evals is not None:
+            num_particles = 25
+            num_mcmc_samples = 4
+            expected_max_steps = 10
+        else:
+            num_particles = 10
+            num_mcmc_samples = 5
+
+        run_smc(
+            likelihood=sampler_mocks["likelihood"],
+            proposal="proposal",
+            generator="generator",
+            max_time=max_time,
+            max_equation_evals=max_equation_evals,
+            multiprocess=False,
+            kwargs={"num_particles": num_particles, "num_mcmc_samples": num_mcmc_samples},
+            rng=mocker.Mock(),
+            checkpoint_file=None,
+            show_progress_bar=False,
+        )
+
+        # Check the expected sampler was called correctly
+        if expected_sampler == "adaptive_sampler":
+            sampler_mocks[expected_sampler].assert_called_once_with(
+                sampler_mocks["kernel"].return_value, show_progress_bar=False
+            )
+        elif expected_sampler == "fixed_time_sampler":
+            sampler_mocks[expected_sampler].assert_called_once_with(
+                sampler_mocks["kernel"].return_value, max_time, show_progress_bar=False
+            )
+        elif expected_sampler == "max_step_sampler":
+            sampler_mocks[expected_sampler].assert_called_once_with(
+                sampler_mocks["kernel"].return_value, max_steps=expected_max_steps, show_progress_bar=False
+            )
+
+        # Verify other samplers were not called
+        for sampler_name in ["adaptive_sampler", "fixed_time_sampler", "max_step_sampler"]:
+            if sampler_name != expected_sampler:
+                sampler_mocks[sampler_name].assert_not_called()
