@@ -1,0 +1,356 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pysips.random_choice_proposal &mdash; PySIPS 0.1.dev1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=6aee1ebc"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            PySIPS
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart.html">Quickstart Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../quickstart.html#installation">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../quickstart.html#basic-usage">Basic Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../quickstart.html#expected-output">Expected Output</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../quickstart.html#understanding-the-parameters">Understanding the Parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../quickstart.html#accessing-results">Accessing Results</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../quickstart.html#next-steps">Next Steps</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../quickstart.html#common-issues">Common Issues</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial.html">PySIPS Tutorial</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorial.html#Table-of-Contents">Table of Contents</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorial.html#1.-Basic-Symbolic-Regression">1. Basic Symbolic Regression</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorial.html#2.-Multivariate-Regression">2. Multivariate Regression</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorial.html#3.-Customizing-Available-Operators">3. Customizing Available Operators</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../tutorial.html#Available-operators:">Available operators:</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorial.html#4.-Model-Selection-Strategies">4. Model Selection Strategies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorial.html#5.-Checkpointing-for-Long-Runs">5. Checkpointing for Long Runs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorial.html#6.-Hyperparameter-Tuning">6. Hyperparameter Tuning</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorial.html#7.-Analyzing-the-Posterior-Distribution">7. Analyzing the Posterior Distribution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorial.html#Advanced-Topics">Advanced Topics</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../tutorial.html#Mutation-and-Crossover-Control">Mutation and Crossover Control</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../tutorial.html#Expression-Complexity-Control">Expression Complexity Control</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../tutorial.html#SMC-Sampling-Control">SMC Sampling Control</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorial.html#Best-Practices">Best Practices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorial.html#Troubleshooting">Troubleshooting</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../tutorial.html#Issue:-Fitting-is-too-slow">Issue: Fitting is too slow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../tutorial.html#Issue:-Poor-model-quality">Issue: Poor model quality</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../tutorial.html#Issue:-Overfitting">Issue: Overfitting</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../tutorial.html#Issue:-Checkpoint-file-corrupted">Issue: Checkpoint file corrupted</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorial.html#Further-Resources">Further Resources</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api/modules.html">PySIPS API Documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../api/pysips.html">API Reference</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../api/pysips.html#main-components">Main Components</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../api/pysips.html#pysipsregressor">PysipsRegressor</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/pysips.html#core-modules">Core Modules</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../api/pysips.html#module-pysips.sampler">Sampler</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/pysips.html#module-pysips.prior">Prior</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/pysips.html#module-pysips.metropolis">Metropolis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/pysips.html#module-pysips.laplace_nmll">Laplace NMLL</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/pysips.html#proposal-mechanisms">Proposal Mechanisms</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../api/pysips.html#module-pysips.mutation_proposal">Mutation Proposal</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/pysips.html#module-pysips.crossover_proposal">Crossover Proposal</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/pysips.html#module-pysips.random_choice_proposal">Random Choice Proposal</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/modules.html#quick-links">Quick Links</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">PySIPS</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">pysips.random_choice_proposal</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for pysips.random_choice_proposal</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Composite Proposal Generator with Probabilistic Selection.</span>
+
+<span class="sd">This module provides a meta-proposal mechanism that probabilistically selects</span>
+<span class="sd">and applies one or more proposal operators from a collection of available</span>
+<span class="sd">proposals. It supports both exclusive selection (choosing exactly one proposal)</span>
+<span class="sd">and non-exclusive selection (choosing multiple proposals to apply sequentially).</span>
+
+<span class="sd">This approach allows for flexible proposal strategies in MCMC sampling or</span>
+<span class="sd">evolutionary algorithms by combining different types of modifications (e.g.,</span>
+<span class="sd">mutation, crossover, local optimization) with configurable probabilities.</span>
+
+<span class="sd">Selection Modes</span>
+<span class="sd">---------------</span>
+<span class="sd">Exclusive Mode (default)</span>
+<span class="sd">    Selects exactly one proposal based on the provided probabilities using</span>
+<span class="sd">    weighted random selection. The probabilities are automatically normalized</span>
+<span class="sd">    to sum to the cumulative total.</span>
+
+<span class="sd">Non-Exclusive Mode</span>
+<span class="sd">    Each proposal is independently selected based on its probability. If no</span>
+<span class="sd">    proposals are selected in a round, the process repeats until at least one</span>
+<span class="sd">    is chosen. Selected proposals are applied sequentially in random order.</span>
+
+<span class="sd">Usage Examples</span>
+<span class="sd">--------------</span>
+<span class="sd">Exclusive selection (choose one proposal type):</span>
+<span class="sd">&gt;&gt;&gt; from mutation import MutationProposal</span>
+<span class="sd">&gt;&gt;&gt; from crossover import CrossoverProposal</span>
+<span class="sd">&gt;&gt;&gt;</span>
+<span class="sd">&gt;&gt;&gt; mutation = MutationProposal(X_dim=3, operators=[&quot;+&quot;, &quot;*&quot;])</span>
+<span class="sd">&gt;&gt;&gt; crossover = CrossoverProposal(gene_pool)</span>
+<span class="sd">&gt;&gt;&gt;</span>
+<span class="sd">&gt;&gt;&gt; # 70% mutation, 30% crossover</span>
+<span class="sd">&gt;&gt;&gt; proposal = RandomChoiceProposal(</span>
+<span class="sd">...     [mutation, crossover],</span>
+<span class="sd">...     [0.7, 0.3],</span>
+<span class="sd">...     exclusive=True</span>
+<span class="sd">... )</span>
+
+<span class="sd">Non-exclusive selection (can apply multiple proposals):</span>
+<span class="sd">&gt;&gt;&gt; # Each proposal has independent 40% chance of being applied</span>
+<span class="sd">&gt;&gt;&gt; proposal = RandomChoiceProposal(</span>
+<span class="sd">...     [mutation, crossover, local_optimizer],</span>
+<span class="sd">...     [0.4, 0.4, 0.2],</span>
+<span class="sd">...     exclusive=False</span>
+<span class="sd">... )</span>
+
+<span class="sd">Integration Notes</span>
+<span class="sd">-----------------</span>
+<span class="sd">The update() method automatically propagates parameter updates to all</span>
+<span class="sd">constituent proposals, making this class compatible with adaptive sampling</span>
+<span class="sd">frameworks that modify proposal parameters during execution.</span>
+
+<span class="sd">All constituent proposals must implement:</span>
+<span class="sd">- __call__(model) method for applying the proposal</span>
+<span class="sd">- update(*args, **kwargs) method for parameter updates (optional)</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">bisect</span><span class="w"> </span><span class="kn">import</span> <span class="n">bisect_left</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+
+<div class="viewcode-block" id="RandomChoiceProposal">
+<a class="viewcode-back" href="../../api/pysips.html#pysips.random_choice_proposal.RandomChoiceProposal">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">RandomChoiceProposal</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Randomly choose a proposal to use</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    proposals : list of proposals</span>
+<span class="sd">        options for the proposal</span>
+<span class="sd">    probabilities : list of float</span>
+<span class="sd">        probabilties of choosing each proposal</span>
+<span class="sd">    exclusive : bool, optional</span>
+<span class="sd">        whether the proposals are mutually exclusive or if they can all be</span>
+<span class="sd">        performed at once, by default True</span>
+<span class="sd">    seed : int, optional</span>
+<span class="sd">        random seed used to control repeatability</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="RandomChoiceProposal.__init__">
+<a class="viewcode-back" href="../../api/pysips.html#pysips.random_choice_proposal.RandomChoiceProposal.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">proposals</span><span class="p">,</span> <span class="n">probabilities</span><span class="p">,</span> <span class="n">exclusive</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_proposals</span> <span class="o">=</span> <span class="n">proposals</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_probabilities</span> <span class="o">=</span> <span class="n">probabilities</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cum_probabilities</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">probabilities</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_exclusive</span> <span class="o">=</span> <span class="n">exclusive</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_select_proposals</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">active_proposals</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exclusive</span><span class="p">:</span>
+            <span class="n">rand</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rng</span><span class="o">.</span><span class="n">random</span><span class="p">()</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cum_probabilities</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">active_proposals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_proposals</span><span class="p">[</span><span class="n">bisect_left</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_cum_probabilities</span><span class="p">,</span> <span class="n">rand</span><span class="p">)]</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="n">active_proposals</span>
+
+        <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">active_proposals</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">prop</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_proposals</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_probabilities</span><span class="p">):</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rng</span><span class="o">.</span><span class="n">random</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">p</span><span class="p">:</span>
+                    <span class="n">active_proposals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">prop</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rng</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">active_proposals</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">active_proposals</span>
+
+<div class="viewcode-block" id="RandomChoiceProposal.__call__">
+<a class="viewcode-back" href="../../api/pysips.html#pysips.random_choice_proposal.RandomChoiceProposal.__call__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Apply randomly selected proposal(s) to generate a new model.</span>
+
+<span class="sd">        This method implements the core functionality of the composite proposal</span>
+<span class="sd">        generator. It selects one or more proposals based on the configured</span>
+<span class="sd">        probabilities and selection mode, then applies them sequentially to</span>
+<span class="sd">        transform the input model.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        model : object</span>
+<span class="sd">            The input model to be transformed. This should be compatible with</span>
+<span class="sd">            all constituent proposal operators (typically an AGraph for symbolic</span>
+<span class="sd">            regression or similar structured representation).</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        object</span>
+<span class="sd">            A new model resulting from applying the selected proposal(s).</span>
+<span class="sd">            The type matches the input model type.</span>
+
+<span class="sd">        Process Overview</span>
+<span class="sd">        ----------------</span>
+<span class="sd">        1. **Selection Phase**: Randomly selects active proposals based on:</span>
+<span class="sd">        - Exclusive mode: Exactly one proposal via weighted selection</span>
+<span class="sd">        - Non-exclusive mode: Zero or more proposals via independent trials</span>
+
+<span class="sd">        2. **Application Phase**: Applies selected proposals sequentially:</span>
+<span class="sd">        - First proposal transforms the original model</span>
+<span class="sd">        - Subsequent proposals transform the result of previous applications</span>
+<span class="sd">        - Order is randomized in non-exclusive mode to avoid bias</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        - In non-exclusive mode, if no proposals are initially selected, the</span>
+<span class="sd">        selection process repeats until at least one proposal is chosen</span>
+<span class="sd">        - Sequential application means later proposals operate on the results</span>
+<span class="sd">        of earlier ones, potentially creating compound transformations</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">active_proposals</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_select_proposals</span><span class="p">()</span>
+        <span class="n">new_model</span> <span class="o">=</span> <span class="n">active_proposals</span><span class="p">[</span><span class="mi">0</span><span class="p">](</span><span class="n">model</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">active_proposals</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+            <span class="n">new_model</span> <span class="o">=</span> <span class="n">prop</span><span class="p">(</span><span class="n">new_model</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">new_model</span></div>
+
+
+<div class="viewcode-block" id="RandomChoiceProposal.update">
+<a class="viewcode-back" href="../../api/pysips.html#pysips.random_choice_proposal.RandomChoiceProposal.update">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Propagate parameter updates to all constituent proposals.</span>
+
+<span class="sd">        This method forwards update calls to all constituent proposal operators,</span>
+<span class="sd">        enabling the composite proposal to participate in adaptive sampling</span>
+<span class="sd">        schemes where proposal parameters are modified during the sampling process.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        *args : tuple</span>
+<span class="sd">            Positional arguments to be passed to each constituent proposal&#39;s</span>
+<span class="sd">            update method. Common examples include new gene pools, population</span>
+<span class="sd">            statistics, or adaptation parameters.</span>
+<span class="sd">        **kwargs : dict</span>
+<span class="sd">            Keyword arguments to be passed to each constituent proposal&#39;s</span>
+<span class="sd">            update method. May include parameters like learning rates,</span>
+<span class="sd">            temperature schedules, or other adaptive parameters.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        None</span>
+<span class="sd">            This method modifies the constituent proposals in-place and does</span>
+<span class="sd">            not return any values.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_proposals</span><span class="p">:</span>
+            <span class="n">p</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, United States Government as represented by the Administrator of the National Aeronautics and Space Administration.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

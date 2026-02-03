@@ -1,0 +1,280 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pysips.laplace_nmll &mdash; PySIPS 0.1.dev1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=6aee1ebc"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            PySIPS
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart.html">Quickstart Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../quickstart.html#installation">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../quickstart.html#basic-usage">Basic Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../quickstart.html#expected-output">Expected Output</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../quickstart.html#understanding-the-parameters">Understanding the Parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../quickstart.html#accessing-results">Accessing Results</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../quickstart.html#next-steps">Next Steps</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../quickstart.html#common-issues">Common Issues</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial.html">PySIPS Tutorial</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorial.html#Table-of-Contents">Table of Contents</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorial.html#1.-Basic-Symbolic-Regression">1. Basic Symbolic Regression</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorial.html#2.-Multivariate-Regression">2. Multivariate Regression</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorial.html#3.-Customizing-Available-Operators">3. Customizing Available Operators</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../tutorial.html#Available-operators:">Available operators:</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorial.html#4.-Model-Selection-Strategies">4. Model Selection Strategies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorial.html#5.-Checkpointing-for-Long-Runs">5. Checkpointing for Long Runs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorial.html#6.-Hyperparameter-Tuning">6. Hyperparameter Tuning</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorial.html#7.-Analyzing-the-Posterior-Distribution">7. Analyzing the Posterior Distribution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorial.html#Advanced-Topics">Advanced Topics</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../tutorial.html#Mutation-and-Crossover-Control">Mutation and Crossover Control</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../tutorial.html#Expression-Complexity-Control">Expression Complexity Control</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../tutorial.html#SMC-Sampling-Control">SMC Sampling Control</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorial.html#Best-Practices">Best Practices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorial.html#Troubleshooting">Troubleshooting</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../tutorial.html#Issue:-Fitting-is-too-slow">Issue: Fitting is too slow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../tutorial.html#Issue:-Poor-model-quality">Issue: Poor model quality</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../tutorial.html#Issue:-Overfitting">Issue: Overfitting</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../tutorial.html#Issue:-Checkpoint-file-corrupted">Issue: Checkpoint file corrupted</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorial.html#Further-Resources">Further Resources</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api/modules.html">PySIPS API Documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../api/pysips.html">API Reference</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../api/pysips.html#main-components">Main Components</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../api/pysips.html#pysipsregressor">PysipsRegressor</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/pysips.html#core-modules">Core Modules</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../api/pysips.html#module-pysips.sampler">Sampler</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/pysips.html#module-pysips.prior">Prior</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/pysips.html#module-pysips.metropolis">Metropolis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/pysips.html#module-pysips.laplace_nmll">Laplace NMLL</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/pysips.html#proposal-mechanisms">Proposal Mechanisms</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../api/pysips.html#module-pysips.mutation_proposal">Mutation Proposal</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/pysips.html#module-pysips.crossover_proposal">Crossover Proposal</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/pysips.html#module-pysips.random_choice_proposal">Random Choice Proposal</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/modules.html#quick-links">Quick Links</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">PySIPS</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">pysips.laplace_nmll</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for pysips.laplace_nmll</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Laplace Approximation for Normalized Marginal Log-Likelihood Estimation.</span>
+
+<span class="sd">This module provides functionality for computing the Normalized Marginal Log-Likelihood</span>
+<span class="sd">(NMLL) using the Laplace approximation method. It integrates with the bingo symbolic</span>
+<span class="sd">regression library to evaluate the likelihood of symbolic mathematical models given</span>
+<span class="sd">observed data.</span>
+
+<span class="sd">The Laplace approximation is a method for approximating integrals that appear in</span>
+<span class="sd">Bayesian model selection, particularly useful for comparing different symbolic</span>
+<span class="sd">regression models. It approximates the marginal likelihood by making a Gaussian</span>
+<span class="sd">approximation around the maximum a posteriori (MAP) estimate of the parameters.</span>
+
+<span class="sd">Key Features</span>
+<span class="sd">------------</span>
+<span class="sd">- Integration with bingo&#39;s symbolic regression framework</span>
+<span class="sd">- Multiple optimization restarts to avoid local minima</span>
+<span class="sd">- Configurable scipy-based optimization backend</span>
+<span class="sd">- Automatic parameter bound initialization for robust optimization</span>
+
+<span class="sd">Usage Example</span>
+<span class="sd">-------------</span>
+<span class="sd">&gt;&gt;&gt; import numpy as np</span>
+<span class="sd">&gt;&gt;&gt; from bingo.symbolic_regression import AGraph</span>
+<span class="sd">&gt;&gt;&gt;</span>
+<span class="sd">&gt;&gt;&gt; # Generate sample data</span>
+<span class="sd">&gt;&gt;&gt; X = np.random.randn(100, 2)</span>
+<span class="sd">&gt;&gt;&gt; y = X[:, 0]**2 + X[:, 1] + np.random.normal(0, 0.1, 100)</span>
+<span class="sd">&gt;&gt;&gt;</span>
+<span class="sd">&gt;&gt;&gt; # Create NMLL evaluator</span>
+<span class="sd">&gt;&gt;&gt; nmll_evaluator = LaplaceNmll(X, y, opt_restarts=3)</span>
+<span class="sd">&gt;&gt;&gt;</span>
+<span class="sd">&gt;&gt;&gt; # Evaluate a symbolic model (assuming you have an AGraph model)</span>
+<span class="sd">&gt;&gt;&gt; # nmll_score = nmll_evaluator(model)</span>
+
+<span class="sd">Notes</span>
+<span class="sd">-----</span>
+<span class="sd">The multiple restart strategy helps ensure robust optimization by avoiding</span>
+<span class="sd">local minima in the parameter space, which is especially important for</span>
+<span class="sd">complex symbolic expressions.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">bingo.symbolic_regression.explicit_regression</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">ExplicitTrainingData</span><span class="p">,</span>
+    <span class="n">ExplicitRegression</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">bingo.local_optimizers.scipy_optimizer</span><span class="w"> </span><span class="kn">import</span> <span class="n">ScipyOptimizer</span>
+
+
+<span class="c1"># pylint: disable=R0903</span>
+<div class="viewcode-block" id="LaplaceNmll">
+<a class="viewcode-back" href="../../api/pysips.html#pysips.laplace_nmll.LaplaceNmll">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">LaplaceNmll</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Normalized Marginal Likelihood using Laplace approximation</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    X : 2d Numpy Array</span>
+<span class="sd">        Array of shape [num_datapoints, num_features] representing the input features</span>
+<span class="sd">    y : 1d Numpy Array</span>
+<span class="sd">        Array of labels of shape [num_datapoints]</span>
+<span class="sd">    opt_restarts : int, optional</span>
+<span class="sd">        number of times to perform gradient based optimization, each with different</span>
+<span class="sd">        random initialization, by default 1</span>
+<span class="sd">    **optimizer_kwargs :</span>
+<span class="sd">        any keyword arguments to be passed to bingo&#39;s scipy optimizer</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="LaplaceNmll.__init__">
+<a class="viewcode-back" href="../../api/pysips.html#pysips.laplace_nmll.LaplaceNmll.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">opt_restarts</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="o">**</span><span class="n">optimizer_kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_neg_nmll</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_init_neg_nmll</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_deterministic_optimizer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_init_deterministic_optimizer</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_neg_nmll</span><span class="p">,</span> <span class="o">**</span><span class="n">optimizer_kwargs</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_opt_restarts</span> <span class="o">=</span> <span class="n">opt_restarts</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_init_neg_nmll</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+        <span class="n">training_data</span> <span class="o">=</span> <span class="n">ExplicitTrainingData</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ExplicitRegression</span><span class="p">(</span>
+            <span class="n">training_data</span><span class="o">=</span><span class="n">training_data</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="s2">&quot;negative nmll laplace&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_init_deterministic_optimizer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">objective</span><span class="p">,</span> <span class="o">**</span><span class="n">optimizer_kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="s2">&quot;param_init_bounds&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">optimizer_kwargs</span><span class="p">:</span>
+            <span class="n">optimizer_kwargs</span><span class="p">[</span><span class="s2">&quot;param_init_bounds&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">ScipyOptimizer</span><span class="p">(</span><span class="n">objective</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;lm&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">optimizer_kwargs</span><span class="p">)</span>
+
+<div class="viewcode-block" id="LaplaceNmll.__call__">
+<a class="viewcode-back" href="../../api/pysips.html#pysips.laplace_nmll.LaplaceNmll.__call__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;calaculates NMLL using the Laplace approximation</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        model : AGraph</span>
+<span class="sd">            a bingo equation using the AGraph representation</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_deterministic_optimizer</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="n">nmll</span> <span class="o">=</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">_neg_nmll</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="n">consts</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">get_local_optimization_params</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_opt_restarts</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_deterministic_optimizer</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+            <span class="n">trial_nmll</span> <span class="o">=</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">_neg_nmll</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">trial_nmll</span> <span class="o">&gt;</span> <span class="n">nmll</span><span class="p">:</span>
+                <span class="n">nmll</span> <span class="o">=</span> <span class="n">trial_nmll</span>
+                <span class="n">consts</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">get_local_optimization_params</span><span class="p">()</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">set_local_optimization_params</span><span class="p">(</span><span class="n">consts</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">nmll</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, United States Government as represented by the Administrator of the National Aeronautics and Space Administration.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

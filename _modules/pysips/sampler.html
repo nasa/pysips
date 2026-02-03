@@ -1,0 +1,465 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pysips.sampler &mdash; PySIPS 0.1.dev1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=6aee1ebc"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            PySIPS
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart.html">Quickstart Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../quickstart.html#installation">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../quickstart.html#basic-usage">Basic Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../quickstart.html#expected-output">Expected Output</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../quickstart.html#understanding-the-parameters">Understanding the Parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../quickstart.html#accessing-results">Accessing Results</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../quickstart.html#next-steps">Next Steps</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../quickstart.html#common-issues">Common Issues</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial.html">PySIPS Tutorial</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorial.html#Table-of-Contents">Table of Contents</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorial.html#1.-Basic-Symbolic-Regression">1. Basic Symbolic Regression</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorial.html#2.-Multivariate-Regression">2. Multivariate Regression</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorial.html#3.-Customizing-Available-Operators">3. Customizing Available Operators</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../tutorial.html#Available-operators:">Available operators:</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorial.html#4.-Model-Selection-Strategies">4. Model Selection Strategies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorial.html#5.-Checkpointing-for-Long-Runs">5. Checkpointing for Long Runs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorial.html#6.-Hyperparameter-Tuning">6. Hyperparameter Tuning</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorial.html#7.-Analyzing-the-Posterior-Distribution">7. Analyzing the Posterior Distribution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorial.html#Advanced-Topics">Advanced Topics</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../tutorial.html#Mutation-and-Crossover-Control">Mutation and Crossover Control</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../tutorial.html#Expression-Complexity-Control">Expression Complexity Control</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../tutorial.html#SMC-Sampling-Control">SMC Sampling Control</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorial.html#Best-Practices">Best Practices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorial.html#Troubleshooting">Troubleshooting</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../tutorial.html#Issue:-Fitting-is-too-slow">Issue: Fitting is too slow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../tutorial.html#Issue:-Poor-model-quality">Issue: Poor model quality</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../tutorial.html#Issue:-Overfitting">Issue: Overfitting</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../tutorial.html#Issue:-Checkpoint-file-corrupted">Issue: Checkpoint file corrupted</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorial.html#Further-Resources">Further Resources</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api/modules.html">PySIPS API Documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../api/pysips.html">API Reference</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../api/pysips.html#main-components">Main Components</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../api/pysips.html#pysipsregressor">PysipsRegressor</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/pysips.html#core-modules">Core Modules</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../api/pysips.html#module-pysips.sampler">Sampler</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/pysips.html#module-pysips.prior">Prior</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/pysips.html#module-pysips.metropolis">Metropolis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/pysips.html#module-pysips.laplace_nmll">Laplace NMLL</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/pysips.html#proposal-mechanisms">Proposal Mechanisms</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../api/pysips.html#module-pysips.mutation_proposal">Mutation Proposal</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/pysips.html#module-pysips.crossover_proposal">Crossover Proposal</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/pysips.html#module-pysips.random_choice_proposal">Random Choice Proposal</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/modules.html#quick-links">Quick Links</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">PySIPS</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">pysips.sampler</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for pysips.sampler</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Sequential Monte Carlo (SMC) Sampling with Custom Prior and MCMC Kernel.</span>
+
+<span class="sd">This module provides high-level functions for performing Sequential Monte Carlo</span>
+<span class="sd">sampling using custom prior distributions and Metropolis-Hastings MCMC kernels.</span>
+<span class="sd">It integrates with the smcpy library to provide adaptive sampling capabilities</span>
+<span class="sd">with unique value generation and optional checkpointing support.</span>
+
+<span class="sd">The module is designed for scenarios where you need to sample from a parameter</span>
+<span class="sd">space using a custom generator function while ensuring uniqueness of samples</span>
+<span class="sd">and applying likelihood-based filtering. Checkpointing allows for resuming</span>
+<span class="sd">interrupted sampling runs and provides fault tolerance for long-running</span>
+<span class="sd">computations.</span>
+
+<span class="sd">Example</span>
+<span class="sd">-------</span>
+<span class="sd">&gt;&gt;&gt; def my_likelihood(x):</span>
+<span class="sd">...     return np.exp(-0.5 * x**2)  # Gaussian-like likelihood</span>
+<span class="sd">&gt;&gt;&gt;</span>
+<span class="sd">&gt;&gt;&gt; def my_proposal(x):</span>
+<span class="sd">...     return x + np.random.normal(0, 0.1)  # Random walk proposal</span>
+<span class="sd">&gt;&gt;&gt;</span>
+<span class="sd">&gt;&gt;&gt; def my_generator():</span>
+<span class="sd">...     return np.random.uniform(-5, 5)  # Uniform parameter generator</span>
+<span class="sd">&gt;&gt;&gt;</span>
+<span class="sd">&gt;&gt;&gt; # Basic usage without checkpointing</span>
+<span class="sd">&gt;&gt;&gt; models, likelihoods = sample(my_likelihood, my_proposal, my_generator)</span>
+<span class="sd">&gt;&gt;&gt; print(f&quot;Found {len(models)} models with likelihoods&quot;)</span>
+<span class="sd">&gt;&gt;&gt;</span>
+<span class="sd">&gt;&gt;&gt; # Usage with checkpointing</span>
+<span class="sd">&gt;&gt;&gt; models, likelihoods = sample(my_likelihood, my_proposal, my_generator,</span>
+<span class="sd">...                              checkpoint_file=&quot;my_sampling.pkl&quot;)</span>
+<span class="sd">&gt;&gt;&gt; print(f&quot;Checkpointed run completed with {len(models)} models&quot;)</span>
+
+<span class="sd">Notes</span>
+<span class="sd">-----</span>
+<span class="sd">This module uses the following workflow:</span>
+<span class="sd">1. Creates a custom Prior that generates unique models</span>
+<span class="sd">2. Sets up a Metropolis-Hastings MCMC kernel</span>
+<span class="sd">3. Optionally enables checkpointing for progress persistence</span>
+<span class="sd">4. Runs adaptive SMC sampling</span>
+<span class="sd">5. Returns the final population of models and their likelihoods</span>
+
+<span class="sd">The covariance calculation is disabled in the mutator as a workaround for</span>
+<span class="sd">object-based parameters that may not support standard covariance computation.</span>
+
+<span class="sd">Checkpointing automatically saves sampling progress and can resume from the</span>
+<span class="sd">last saved state if the checkpoint file exists when sampling begins.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c1"># pylint: disable=R0913,R0917</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">smcpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">VectorMCMCKernel</span><span class="p">,</span> <span class="n">AdaptiveSampler</span><span class="p">,</span> <span class="n">FixedTimeSampler</span><span class="p">,</span> <span class="n">MaxStepSampler</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">smcpy.utils.storage</span><span class="w"> </span><span class="kn">import</span> <span class="n">PickleStorage</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.metropolis</span><span class="w"> </span><span class="kn">import</span> <span class="n">Metropolis</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.prior</span><span class="w"> </span><span class="kn">import</span> <span class="n">Prior</span>
+
+
+<div class="viewcode-block" id="sample">
+<a class="viewcode-back" href="../../api/pysips.html#pysips.sampler.sample">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">sample</span><span class="p">(</span>
+    <span class="n">likelihood</span><span class="p">,</span>
+    <span class="n">proposal</span><span class="p">,</span>
+    <span class="n">generator</span><span class="p">,</span>
+    <span class="n">max_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">max_equation_evals</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">multiprocess</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">checkpoint_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">show_progress_bar</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Perform Sequential Monte Carlo sampling with default parameters.</span>
+
+<span class="sd">    This is a high-level convenience function that sets up and runs SMC sampling</span>
+<span class="sd">    with commonly used default parameters. For more control over the sampling</span>
+<span class="sd">    process, use run_smc directly.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    likelihood : callable</span>
+<span class="sd">        Function that computes the likelihood of a given parameter value.</span>
+<span class="sd">        Should accept a single parameter and return a scalar likelihood value.</span>
+<span class="sd">    proposal : callable</span>
+<span class="sd">        Function that proposes new parameter values given a current value.</span>
+<span class="sd">        Used in the Metropolis-Hastings MCMC steps.</span>
+<span class="sd">    generator : callable</span>
+<span class="sd">        Function that generates initial parameter values when called with no</span>
+<span class="sd">        arguments. Should return hashable values for uniqueness tracking.</span>
+<span class="sd">    max_time : float, optional</span>
+<span class="sd">        Maximum compute time limit for the sampling, in seconds (default no time limit).</span>
+<span class="sd">    max_equation_evals : int, optional</span>
+<span class="sd">        Maximum number of equation evaluations allowed during sampling (default: no limit).</span>
+<span class="sd">    multiprocess : bool, optional</span>
+<span class="sd">        Whether to use multiprocessing for likelihood evaluations (default: False).</span>
+<span class="sd">    kwargs : dict, optional</span>
+<span class="sd">        Additional keyword arguments to override default SMC parameters.</span>
+<span class="sd">        Default parameters are {&quot;num_particles&quot;: 5000, &quot;num_mcmc_samples&quot;: 10}.</span>
+<span class="sd">    seed : int, optional</span>
+<span class="sd">        Random seed for reproducible results (default: None).</span>
+<span class="sd">    checkpoint_file : str, optional</span>
+<span class="sd">        File path for saving and loading sampling progress. If the checkpoint</span>
+<span class="sd">        file exists, sampling will attempt to resume from the saved state and</span>
+<span class="sd">        continue updating the checkpoint as it proceeds. If None, no</span>
+<span class="sd">        checkpointing is performed (default: None).</span>
+<span class="sd">    show_progress_bar : bool, optional</span>
+<span class="sd">        Whether to display a progress bar during sampling. When False, the</span>
+<span class="sd">        progress bar will be hidden, which is useful for hyperparameter</span>
+<span class="sd">        tuning or when running multiple fits in parallel (default: True).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    models : list</span>
+<span class="sd">        List of parameter values from the final SMC population.</span>
+<span class="sd">    likelihoods : list</span>
+<span class="sd">        List of likelihood values corresponding to each model in the final population.</span>
+<span class="sd">    phis : list</span>
+<span class="sd">        List of phi values (tempering parameters) from the SMC sequence.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; def likelihood_func(x):</span>
+<span class="sd">    ...     return np.exp(-0.5 * (x - 2)**2)</span>
+<span class="sd">    &gt;&gt;&gt;</span>
+<span class="sd">    &gt;&gt;&gt; def proposal_func(x):</span>
+<span class="sd">    ...     return x + np.random.normal(0, 0.5)</span>
+<span class="sd">    &gt;&gt;&gt;</span>
+<span class="sd">    &gt;&gt;&gt; def generator_func():</span>
+<span class="sd">    ...     return np.random.uniform(-10, 10)</span>
+<span class="sd">    &gt;&gt;&gt;</span>
+<span class="sd">    &gt;&gt;&gt; # Basic sampling without checkpointing</span>
+<span class="sd">    &gt;&gt;&gt; models, likes, phis = sample(likelihood_func, proposal_func, generator_func)</span>
+<span class="sd">    &gt;&gt;&gt; print(f&quot;Sampled {len(models)} models&quot;)</span>
+<span class="sd">    &gt;&gt;&gt;</span>
+<span class="sd">    &gt;&gt;&gt; # Sampling with checkpointing</span>
+<span class="sd">    &gt;&gt;&gt; models, likes, phis = sample(likelihood_func, proposal_func, generator_func,</span>
+<span class="sd">    ...                              checkpoint_file=&quot;progress.pkl&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; print(f&quot;Checkpointed sampling completed&quot;)</span>
+<span class="sd">    &gt;&gt;&gt;</span>
+<span class="sd">    &gt;&gt;&gt; # Sampling with max equation evaluations limit</span>
+<span class="sd">    &gt;&gt;&gt; models, likes, phis = sample(likelihood_func, proposal_func, generator_func,</span>
+<span class="sd">    ...                              max_equation_evals=10000)</span>
+<span class="sd">    &gt;&gt;&gt; print(f&quot;Sampling completed with evaluation limit&quot;)</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    This function internally calls run_smc with default parameters. The default</span>
+<span class="sd">    configuration uses 5000 particles and 10 MCMC samples per SMC step, which</span>
+<span class="sd">    provides a reasonable balance between accuracy and computational cost for</span>
+<span class="sd">    many applications.</span>
+
+<span class="sd">    When checkpointing is enabled:</span>
+<span class="sd">    - If the checkpoint file exists, sampling resumes from the saved state</span>
+<span class="sd">    - Progress is automatically saved during the sampling process</span>
+<span class="sd">    - The checkpoint file uses pickle format for serialization</span>
+<span class="sd">    - Interrupted runs can be restarted from the last checkpoint</span>
+
+<span class="sd">    When max_equation_evals and max_time are specified:</span>
+<span class="sd">    - max_time takes precedence over max_equation_evals</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+
+    <span class="n">smc_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;num_particles&quot;</span><span class="p">:</span> <span class="mi">5000</span><span class="p">,</span> <span class="s2">&quot;num_mcmc_samples&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">}</span>
+    <span class="k">if</span> <span class="n">kwargs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">smc_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">run_smc</span><span class="p">(</span>
+        <span class="n">likelihood</span><span class="p">,</span>
+        <span class="n">proposal</span><span class="p">,</span>
+        <span class="n">generator</span><span class="p">,</span>
+        <span class="n">max_time</span><span class="p">,</span>
+        <span class="n">max_equation_evals</span><span class="p">,</span>
+        <span class="n">multiprocess</span><span class="p">,</span>
+        <span class="n">smc_kwargs</span><span class="p">,</span>
+        <span class="n">rng</span><span class="p">,</span>
+        <span class="n">checkpoint_file</span><span class="p">,</span>
+        <span class="n">show_progress_bar</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="run_smc">
+<a class="viewcode-back" href="../../api/pysips.html#pysips.sampler.run_smc">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">run_smc</span><span class="p">(</span>
+    <span class="n">likelihood</span><span class="p">,</span>
+    <span class="n">proposal</span><span class="p">,</span>
+    <span class="n">generator</span><span class="p">,</span>
+    <span class="n">max_time</span><span class="p">,</span>
+    <span class="n">max_equation_evals</span><span class="p">,</span>
+    <span class="n">multiprocess</span><span class="p">,</span>
+    <span class="n">kwargs</span><span class="p">,</span>
+    <span class="n">rng</span><span class="p">,</span>
+    <span class="n">checkpoint_file</span><span class="p">,</span>
+    <span class="n">show_progress_bar</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Execute Sequential Monte Carlo sampling with full parameter control.</span>
+
+<span class="sd">    This function implements the core SMC sampling algorithm using a custom</span>
+<span class="sd">    prior distribution and Metropolis-Hastings MCMC kernel. It provides</span>
+<span class="sd">    complete control over all sampling parameters and optional checkpointing.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    likelihood : callable</span>
+<span class="sd">        Function that computes the likelihood of a given parameter value.</span>
+<span class="sd">    proposal : callable</span>
+<span class="sd">        Function that proposes new parameter values in MCMC steps.</span>
+<span class="sd">    generator : callable</span>
+<span class="sd">        Function that generates unique initial parameter values.</span>
+<span class="sd">    max_time : float, None</span>
+<span class="sd">        Maximum compute time limit for the sampling, in seconds. None value indicates</span>
+<span class="sd">        no time limit.</span>
+<span class="sd">    max_equation_evals : int, None</span>
+<span class="sd">        Maximum number of equation evaluations allowed during sampling.</span>
+<span class="sd">        None value indicates no evaluation limit.</span>
+<span class="sd">    multiprocess : bool</span>
+<span class="sd">        Whether to enable multiprocessing for likelihood evaluations.</span>
+<span class="sd">    kwargs : dict</span>
+<span class="sd">        Keyword arguments for the SMC sampler (e.g., num_particles, num_mcmc_samples).</span>
+<span class="sd">    rng : numpy.random.Generator</span>
+<span class="sd">        Random number generator instance for reproducible sampling.</span>
+<span class="sd">    checkpoint_file : str, None</span>
+<span class="sd">        File path for checkpointing. If None, no checkpointing is performed.</span>
+<span class="sd">        If provided, sampling progress will be saved to this file and can be</span>
+<span class="sd">        resumed if the file exists from a previous run.</span>
+<span class="sd">    show_progress_bar : bool</span>
+<span class="sd">        Whether to display a progress bar during sampling. When False, progress</span>
+<span class="sd">        updates are suppressed.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    models : list</span>
+<span class="sd">        Parameter values from the final SMC population, converted to list format.</span>
+<span class="sd">    likelihoods : list</span>
+<span class="sd">        Likelihood values for each model in the final population, computed</span>
+<span class="sd">        fresh to ensure consistency.</span>
+<span class="sd">    phis : list</span>
+<span class="sd">        Phi values (tempering parameters) from the SMC sequence.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    The checkpointing mechanism uses SMCPy&#39;s PickleStorage context manager:</span>
+<span class="sd">    - Automatically detects existing checkpoint files and resumes</span>
+<span class="sd">    - Saves progress incrementally during sampling</span>
+<span class="sd">    - Uses append mode (&#39;a&#39;) by default for safe restarts</span>
+<span class="sd">    - Handles serialization of the complete sampler state</span>
+
+<span class="sd">    Sampling strategy selection logic:</span>
+<span class="sd">    - If max_time is specified FixedTimeSampler is used</span>
+<span class="sd">    - If max_equation_evals is specified (and max_time is not), MaxStepSampler is used</span>
+<span class="sd">    - If neither is specified, AdaptiveSampler is used</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">kernel</span> <span class="o">=</span> <span class="n">_create_mcmc_kernel</span><span class="p">(</span><span class="n">likelihood</span><span class="p">,</span> <span class="n">proposal</span><span class="p">,</span> <span class="n">generator</span><span class="p">,</span> <span class="n">multiprocess</span><span class="p">,</span> <span class="n">rng</span><span class="p">)</span>
+
+    <span class="c1"># Execute sampling with or without checkpointing</span>
+    <span class="k">if</span> <span class="n">checkpoint_file</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">steps</span><span class="p">,</span> <span class="n">phis</span> <span class="o">=</span> <span class="n">_smc_call</span><span class="p">(</span><span class="n">max_time</span><span class="p">,</span> <span class="n">max_equation_evals</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">,</span> <span class="n">kernel</span><span class="p">,</span> <span class="n">show_progress_bar</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">PickleStorage</span><span class="p">(</span><span class="n">checkpoint_file</span><span class="p">):</span>
+            <span class="n">steps</span><span class="p">,</span> <span class="n">phis</span> <span class="o">=</span> <span class="n">_smc_call</span><span class="p">(</span><span class="n">max_time</span><span class="p">,</span> <span class="n">max_equation_evals</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">,</span> <span class="n">kernel</span><span class="p">,</span> <span class="n">show_progress_bar</span><span class="p">)</span>
+
+    <span class="n">models</span> <span class="o">=</span> <span class="n">steps</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">params</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+    <span class="n">likelihoods</span> <span class="o">=</span> <span class="p">[</span><span class="n">likelihood</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">models</span><span class="p">]</span>  <span class="c1"># fit final pop of equ</span>
+
+    <span class="k">return</span> <span class="n">models</span><span class="p">,</span> <span class="n">likelihoods</span><span class="p">,</span> <span class="n">phis</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_create_mcmc_kernel</span><span class="p">(</span><span class="n">likelihood</span><span class="p">,</span> <span class="n">proposal</span><span class="p">,</span> <span class="n">generator</span><span class="p">,</span> <span class="n">multiprocess</span><span class="p">,</span> <span class="n">rng</span><span class="p">):</span>
+    <span class="n">prior</span> <span class="o">=</span> <span class="n">Prior</span><span class="p">(</span><span class="n">generator</span><span class="p">)</span>
+    <span class="n">mcmc</span> <span class="o">=</span> <span class="n">Metropolis</span><span class="p">(</span>
+        <span class="n">likelihood</span><span class="o">=</span><span class="n">likelihood</span><span class="p">,</span>
+        <span class="n">proposal</span><span class="o">=</span><span class="n">proposal</span><span class="p">,</span>
+        <span class="n">prior</span><span class="o">=</span><span class="n">prior</span><span class="p">,</span>
+        <span class="n">multiprocess</span><span class="o">=</span><span class="n">multiprocess</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">VectorMCMCKernel</span><span class="p">(</span><span class="n">mcmc</span><span class="p">,</span> <span class="n">param_order</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;f&quot;</span><span class="p">],</span> <span class="n">rng</span><span class="o">=</span><span class="n">rng</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_smc_call</span><span class="p">(</span><span class="n">max_time</span><span class="p">,</span> <span class="n">max_equation_evals</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">,</span> <span class="n">kernel</span><span class="p">,</span> <span class="n">show_progress_bar</span><span class="p">):</span>
+    <span class="c1"># Choose sampler based on specified constraints</span>
+    <span class="k">if</span> <span class="n">max_time</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">smc</span> <span class="o">=</span> <span class="n">FixedTimeSampler</span><span class="p">(</span><span class="n">kernel</span><span class="p">,</span> <span class="n">max_time</span><span class="p">,</span> <span class="n">show_progress_bar</span><span class="o">=</span><span class="n">show_progress_bar</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">max_equation_evals</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">max_steps</span> <span class="o">=</span> <span class="n">max_equation_evals</span> <span class="o">//</span> <span class="p">(</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;num_particles&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;num_mcmc_samples&quot;</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="n">smc</span> <span class="o">=</span> <span class="n">MaxStepSampler</span><span class="p">(</span><span class="n">kernel</span><span class="p">,</span> <span class="n">max_steps</span><span class="o">=</span><span class="n">max_steps</span><span class="p">,</span> <span class="n">show_progress_bar</span><span class="o">=</span><span class="n">show_progress_bar</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">smc</span> <span class="o">=</span> <span class="n">AdaptiveSampler</span><span class="p">(</span><span class="n">kernel</span><span class="p">,</span> <span class="n">show_progress_bar</span><span class="o">=</span><span class="n">show_progress_bar</span><span class="p">)</span>
+
+    <span class="c1"># pylint: disable=W0212</span>
+    <span class="n">smc</span><span class="o">.</span><span class="n">_mutator</span><span class="o">.</span><span class="n">_compute_cov</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># hack to bypass covariance calc on obj</span>
+    <span class="n">steps</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">smc</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="n">phis</span> <span class="o">=</span> <span class="n">smc</span><span class="o">.</span><span class="n">phi_sequence</span>
+    <span class="k">return</span> <span class="n">steps</span><span class="p">,</span> <span class="n">phis</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, United States Government as represented by the Administrator of the National Aeronautics and Space Administration.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

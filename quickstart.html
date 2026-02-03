@@ -1,0 +1,287 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quickstart Guide &mdash; PySIPS 0.1.dev1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=6aee1ebc"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="PySIPS Tutorial" href="tutorial.html" />
+    <link rel="prev" title="PySIPS: Python package for Symbolic Inference via Posterior Sampling" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            PySIPS
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Quickstart Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#basic-usage">Basic Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#expected-output">Expected Output</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#understanding-the-parameters">Understanding the Parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#accessing-results">Accessing Results</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#next-steps">Next Steps</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#common-issues">Common Issues</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">PySIPS Tutorial</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tutorial.html#Table-of-Contents">Table of Contents</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial.html#1.-Basic-Symbolic-Regression">1. Basic Symbolic Regression</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial.html#2.-Multivariate-Regression">2. Multivariate Regression</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial.html#3.-Customizing-Available-Operators">3. Customizing Available Operators</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tutorial.html#Available-operators:">Available operators:</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial.html#4.-Model-Selection-Strategies">4. Model Selection Strategies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial.html#5.-Checkpointing-for-Long-Runs">5. Checkpointing for Long Runs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial.html#6.-Hyperparameter-Tuning">6. Hyperparameter Tuning</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial.html#7.-Analyzing-the-Posterior-Distribution">7. Analyzing the Posterior Distribution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial.html#Advanced-Topics">Advanced Topics</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tutorial.html#Mutation-and-Crossover-Control">Mutation and Crossover Control</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tutorial.html#Expression-Complexity-Control">Expression Complexity Control</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tutorial.html#SMC-Sampling-Control">SMC Sampling Control</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial.html#Best-Practices">Best Practices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial.html#Troubleshooting">Troubleshooting</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tutorial.html#Issue:-Fitting-is-too-slow">Issue: Fitting is too slow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tutorial.html#Issue:-Poor-model-quality">Issue: Poor model quality</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tutorial.html#Issue:-Overfitting">Issue: Overfitting</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tutorial.html#Issue:-Checkpoint-file-corrupted">Issue: Checkpoint file corrupted</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial.html#Further-Resources">Further Resources</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api/modules.html">PySIPS API Documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/pysips.html">API Reference</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/pysips.html#main-components">Main Components</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/pysips.html#pysipsregressor">PysipsRegressor</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="api/pysips.html#core-modules">Core Modules</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/pysips.html#module-pysips.sampler">Sampler</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/pysips.html#module-pysips.prior">Prior</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/pysips.html#module-pysips.metropolis">Metropolis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/pysips.html#module-pysips.laplace_nmll">Laplace NMLL</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="api/pysips.html#proposal-mechanisms">Proposal Mechanisms</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/pysips.html#module-pysips.mutation_proposal">Mutation Proposal</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/pysips.html#module-pysips.crossover_proposal">Crossover Proposal</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/pysips.html#module-pysips.random_choice_proposal">Random Choice Proposal</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api/modules.html#quick-links">Quick Links</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">PySIPS</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Quickstart Guide</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/quickstart.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="quickstart-guide">
+<h1>Quickstart Guide<a class="headerlink" href="#quickstart-guide" title="Link to this heading"></a></h1>
+<p>This quickstart guide will help you get up and running with PySIPS in under 5 minutes.</p>
+<section id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Link to this heading"></a></h2>
+<p>Install PySIPS using pip:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>pysips
+</pre></div>
+</div>
+</section>
+<section id="basic-usage">
+<h2>Basic Usage<a class="headerlink" href="#basic-usage" title="Link to this heading"></a></h2>
+<p>Here’s a minimal example to get you started with symbolic regression:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pysips</span><span class="w"> </span><span class="kn">import</span> <span class="n">PysipsRegressor</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.model_selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">train_test_split</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.metrics</span><span class="w"> </span><span class="kn">import</span> <span class="n">r2_score</span>
+
+<span class="c1"># Generate synthetic data: y = x^2 + noise</span>
+<span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
+<span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">X</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+<span class="c1"># Split into training and testing sets</span>
+<span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span>
+    <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span>
+<span class="p">)</span>
+
+<span class="c1"># Create the regressor</span>
+<span class="n">regressor</span> <span class="o">=</span> <span class="n">PysipsRegressor</span><span class="p">(</span>
+    <span class="n">operators</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;+&#39;</span><span class="p">,</span> <span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="s1">&#39;*&#39;</span><span class="p">],</span>  <span class="c1"># Available operators</span>
+    <span class="n">max_complexity</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>          <span class="c1"># Maximum expression size</span>
+    <span class="n">num_particles</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>          <span class="c1"># Population size</span>
+    <span class="n">num_mcmc_samples</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>        <span class="c1"># MCMC steps per iteration</span>
+    <span class="n">max_time</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span>                <span class="c1"># Maximum runtime in seconds</span>
+    <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span>
+<span class="p">)</span>
+
+<span class="c1"># Fit the regressor</span>
+<span class="n">regressor</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+
+<span class="c1"># Make predictions</span>
+<span class="n">y_pred</span> <span class="o">=</span> <span class="n">regressor</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+
+<span class="c1"># Get the discovered expression</span>
+<span class="n">expression</span> <span class="o">=</span> <span class="n">regressor</span><span class="o">.</span><span class="n">get_expression</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Discovered expression: </span><span class="si">{</span><span class="n">expression</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;R² score: </span><span class="si">{</span><span class="n">r2_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span><span class="w"> </span><span class="n">y_pred</span><span class="p">)</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="expected-output">
+<h2>Expected Output<a class="headerlink" href="#expected-output" title="Link to this heading"></a></h2>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Discovered expression: x_0^2
+R² score: 0.9987
+</pre></div>
+</div>
+</section>
+<section id="understanding-the-parameters">
+<h2>Understanding the Parameters<a class="headerlink" href="#understanding-the-parameters" title="Link to this heading"></a></h2>
+<p><strong>Essential Parameters:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">operators</span></code>: List of mathematical operators to use (e.g., <code class="docutils literal notranslate"><span class="pre">['+',</span> <span class="pre">'-',</span> <span class="pre">'*',</span> <span class="pre">'/',</span> <span class="pre">'pow']</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">max_complexity</span></code>: Maximum size of the expression graph (controls model complexity)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">num_particles</span></code>: Number of particles in the SMC population (higher = better exploration)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">random_state</span></code>: Random seed for reproducibility</p></li>
+</ul>
+<p><strong>Time Control:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">max_time</span></code>: Maximum runtime in seconds (default: no limit)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">show_progress_bar</span></code>: Display progress during fitting (default: True)</p></li>
+</ul>
+<p><strong>Model Selection:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">model_selection</span></code>: Choose <code class="docutils literal notranslate"><span class="pre">'mode'</span></code> (most frequent) or <code class="docutils literal notranslate"><span class="pre">'max_likelihood'</span></code> (best scoring)</p></li>
+</ul>
+</section>
+<section id="accessing-results">
+<h2>Accessing Results<a class="headerlink" href="#accessing-results" title="Link to this heading"></a></h2>
+<p>After fitting, you can access various results:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Get the best expression as a string</span>
+<span class="n">expression</span> <span class="o">=</span> <span class="n">regressor</span><span class="o">.</span><span class="n">get_expression</span><span class="p">()</span>
+
+<span class="c1"># Get all unique models and their likelihoods</span>
+<span class="n">models</span><span class="p">,</span> <span class="n">likelihoods</span> <span class="o">=</span> <span class="n">regressor</span><span class="o">.</span><span class="n">get_models</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Number of unique models: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">models</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># Make predictions on new data</span>
+<span class="n">y_pred</span> <span class="o">=</span> <span class="n">regressor</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_new</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="next-steps">
+<h2>Next Steps<a class="headerlink" href="#next-steps" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Continue to the <a class="reference internal" href="tutorial.html"><span class="doc">PySIPS Tutorial</span></a> for more advanced usage and examples</p></li>
+<li><p>Explore the <a class="reference internal" href="api/modules.html"><span class="doc">PySIPS API Documentation</span></a> for detailed API documentation</p></li>
+<li><p>Check out the examples in the <code class="docutils literal notranslate"><span class="pre">demos/</span></code> directory of the repository</p></li>
+</ul>
+</section>
+<section id="common-issues">
+<h2>Common Issues<a class="headerlink" href="#common-issues" title="Link to this heading"></a></h2>
+<p><strong>Long Runtime:</strong></p>
+<p>If fitting takes too long, try:
+- Reducing <code class="docutils literal notranslate"><span class="pre">num_particles</span></code> (e.g., 50-100 for quick experiments)
+- Reducing <code class="docutils literal notranslate"><span class="pre">max_complexity</span></code> (e.g., 10-15 for simpler expressions)
+- Setting <code class="docutils literal notranslate"><span class="pre">max_time</span></code> to limit the runtime</p>
+<p><strong>Poor Results:</strong></p>
+<p>If the discovered expression is not accurate, try:
+- Increasing <code class="docutils literal notranslate"><span class="pre">num_particles</span></code> (e.g., 200-500 for better exploration)
+- Adjusting the available <code class="docutils literal notranslate"><span class="pre">operators</span></code>
+- Increasing <code class="docutils literal notranslate"><span class="pre">max_complexity</span></code> if you expect more complex relationships
+- Running for longer (increase or remove <code class="docutils literal notranslate"><span class="pre">max_time</span></code>)</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="PySIPS: Python package for Symbolic Inference via Posterior Sampling" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="tutorial.html" class="btn btn-neutral float-right" title="PySIPS Tutorial" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, United States Government as represented by the Administrator of the National Aeronautics and Space Administration.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

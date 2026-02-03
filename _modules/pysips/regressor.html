@@ -1,0 +1,715 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pysips.regressor &mdash; PySIPS 0.1.dev1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=6aee1ebc"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            PySIPS
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart.html">Quickstart Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../quickstart.html#installation">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../quickstart.html#basic-usage">Basic Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../quickstart.html#expected-output">Expected Output</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../quickstart.html#understanding-the-parameters">Understanding the Parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../quickstart.html#accessing-results">Accessing Results</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../quickstart.html#next-steps">Next Steps</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../quickstart.html#common-issues">Common Issues</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial.html">PySIPS Tutorial</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorial.html#Table-of-Contents">Table of Contents</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorial.html#1.-Basic-Symbolic-Regression">1. Basic Symbolic Regression</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorial.html#2.-Multivariate-Regression">2. Multivariate Regression</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorial.html#3.-Customizing-Available-Operators">3. Customizing Available Operators</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../tutorial.html#Available-operators:">Available operators:</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorial.html#4.-Model-Selection-Strategies">4. Model Selection Strategies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorial.html#5.-Checkpointing-for-Long-Runs">5. Checkpointing for Long Runs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorial.html#6.-Hyperparameter-Tuning">6. Hyperparameter Tuning</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorial.html#7.-Analyzing-the-Posterior-Distribution">7. Analyzing the Posterior Distribution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorial.html#Advanced-Topics">Advanced Topics</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../tutorial.html#Mutation-and-Crossover-Control">Mutation and Crossover Control</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../tutorial.html#Expression-Complexity-Control">Expression Complexity Control</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../tutorial.html#SMC-Sampling-Control">SMC Sampling Control</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorial.html#Best-Practices">Best Practices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorial.html#Troubleshooting">Troubleshooting</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../tutorial.html#Issue:-Fitting-is-too-slow">Issue: Fitting is too slow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../tutorial.html#Issue:-Poor-model-quality">Issue: Poor model quality</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../tutorial.html#Issue:-Overfitting">Issue: Overfitting</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../tutorial.html#Issue:-Checkpoint-file-corrupted">Issue: Checkpoint file corrupted</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorial.html#Further-Resources">Further Resources</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api/modules.html">PySIPS API Documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../api/pysips.html">API Reference</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../api/pysips.html#main-components">Main Components</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../api/pysips.html#pysipsregressor">PysipsRegressor</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/pysips.html#core-modules">Core Modules</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../api/pysips.html#module-pysips.sampler">Sampler</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/pysips.html#module-pysips.prior">Prior</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/pysips.html#module-pysips.metropolis">Metropolis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/pysips.html#module-pysips.laplace_nmll">Laplace NMLL</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/pysips.html#proposal-mechanisms">Proposal Mechanisms</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../api/pysips.html#module-pysips.mutation_proposal">Mutation Proposal</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/pysips.html#module-pysips.crossover_proposal">Crossover Proposal</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/pysips.html#module-pysips.random_choice_proposal">Random Choice Proposal</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/modules.html#quick-links">Quick Links</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">PySIPS</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">pysips.regressor</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for pysips.regressor</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">PySIPS: Python package for Symbolic Inference via Posterior Sampling</span>
+
+<span class="sd">This module provides a scikit-learn compatible interface for symbolic regression</span>
+<span class="sd">using Sequential Monte Carlo (SMC) sampling with Bayesian model selection. It</span>
+<span class="sd">combines symbolic expression generation, probabilistic proposal mechanisms, and</span>
+<span class="sd">Laplace approximation for normalized marginal likelihood estimation to discover</span>
+<span class="sd">mathematical expressions that best explain observed data.</span>
+
+<span class="sd">The approach uses SMC to sample from a posterior distribution over symbolic</span>
+<span class="sd">expressions, allowing for principled uncertainty quantification and model</span>
+<span class="sd">selection in symbolic regression tasks. Unlike traditional genetic programming</span>
+<span class="sd">approaches, this method provides probabilistic estimates of model quality and</span>
+<span class="sd">can naturally handle model uncertainty.</span>
+
+<span class="sd">Methodology</span>
+<span class="sd">-----------</span>
+<span class="sd">The algorithm works through the following steps:</span>
+
+<span class="sd">1. **Expression Generation**: Creates initial symbolic expressions using</span>
+<span class="sd">   configurable operators and complexity constraints</span>
+
+<span class="sd">2. **Proposal Mechanisms**: Uses probabilistic combination of:</span>
+<span class="sd">   - Mutation operations (structural changes to expressions)</span>
+<span class="sd">   - Crossover operations (combining expressions from gene pool)</span>
+
+<span class="sd">3. **Likelihood Evaluation**: Employs Laplace approximation to estimate</span>
+<span class="sd">   normalized marginal likelihood for Bayesian model comparison</span>
+
+<span class="sd">4. **SMC Sampling**: Uses Sequential Monte Carlo to sample from the</span>
+<span class="sd">   posterior distribution over symbolic expressions</span>
+
+<span class="sd">5. **Model Selection**: Chooses final model using either:</span>
+<span class="sd">   - Mode selection (most frequently sampled expression)</span>
+<span class="sd">   - Maximum likelihood selection (highest scoring expression)</span>
+
+<span class="sd">Parameters Overview</span>
+<span class="sd">-------------------</span>
+<span class="sd">Expression Generation:</span>
+<span class="sd">    - operators: Mathematical operators to include</span>
+<span class="sd">    - max_complexity: Maximum expression graph size</span>
+<span class="sd">    - terminal_probability: Probability of terminal node selection</span>
+<span class="sd">    - constant_probability: Probability of constant vs variable terminals</span>
+
+<span class="sd">Mutation Parameters:</span>
+<span class="sd">    - command_probability: Probability of operation changes</span>
+<span class="sd">    - node_probability: Probability of node replacement</span>
+<span class="sd">    - parameter_probability: Probability of constant modification</span>
+<span class="sd">    - prune_probability: Probability of expression pruning</span>
+<span class="sd">    - fork_probability: Probability of expression expansion</span>
+
+<span class="sd">Sampling Parameters:</span>
+<span class="sd">    - num_particles: Population size for SMC</span>
+<span class="sd">    - num_mcmc_samples: MCMC steps per SMC iteration</span>
+<span class="sd">    - target_ess: Target effective sample size</span>
+<span class="sd">    - crossover_pool_size: Size of crossover gene pool</span>
+<span class="sd">    - max_time: Maximum runtime for sampling process</span>
+
+<span class="sd">Checkpointing:</span>
+<span class="sd">    - checkpoint_file: File path for saving/loading sampling progress</span>
+<span class="sd">      If the checkpoint file exists, fitting will attempt to resume from</span>
+<span class="sd">      the saved state and continue updating the checkpoint as it proceeds</span>
+
+<span class="sd">Usage Example</span>
+<span class="sd">-------------</span>
+<span class="sd">&gt;&gt;&gt; from pysips import PysipsRegressor</span>
+<span class="sd">&gt;&gt;&gt; import numpy as np</span>
+<span class="sd">&gt;&gt;&gt;</span>
+<span class="sd">&gt;&gt;&gt; # Generate sample data</span>
+<span class="sd">&gt;&gt;&gt; X = np.random.randn(100, 2)</span>
+<span class="sd">&gt;&gt;&gt; y = X[:, 0]**2 + 2*X[:, 1] + np.random.normal(0, 0.1, 100)</span>
+<span class="sd">&gt;&gt;&gt;</span>
+<span class="sd">&gt;&gt;&gt; # Create and fit regressor</span>
+<span class="sd">&gt;&gt;&gt; regressor = PysipsRegressor(</span>
+<span class="sd">...     operators=[&#39;+&#39;, &#39;*&#39;, &#39;pow&#39;],</span>
+<span class="sd">...     max_complexity=20,</span>
+<span class="sd">...     num_particles=100,</span>
+<span class="sd">...     model_selection=&#39;mode&#39;,</span>
+<span class="sd">...     checkpoint_file=&#39;my_run.checkpoint&#39;,</span>
+<span class="sd">...     random_state=42</span>
+<span class="sd">... )</span>
+<span class="sd">&gt;&gt;&gt; regressor.fit(X, y)</span>
+<span class="sd">&gt;&gt;&gt;</span>
+<span class="sd">&gt;&gt;&gt; # Make predictions</span>
+<span class="sd">&gt;&gt;&gt; y_pred = regressor.predict(X)</span>
+<span class="sd">&gt;&gt;&gt;</span>
+<span class="sd">&gt;&gt;&gt; # Get discovered expression</span>
+<span class="sd">&gt;&gt;&gt; expression = regressor.get_expression()</span>
+<span class="sd">&gt;&gt;&gt; print(f&quot;Discovered expression: {expression}&quot;)</span>
+<span class="sd">&gt;&gt;&gt;</span>
+<span class="sd">&gt;&gt;&gt; # Get all sampled models</span>
+<span class="sd">&gt;&gt;&gt; models, likelihoods = regressor.get_models()</span>
+<span class="sd">&gt;&gt;&gt;</span>
+<span class="sd">&gt;&gt;&gt; # For hyperparameter tuning, disable progress bar</span>
+<span class="sd">&gt;&gt;&gt; regressor_quiet = PysipsRegressor(</span>
+<span class="sd">...     operators=[&#39;+&#39;, &#39;*&#39;],</span>
+<span class="sd">...     num_particles=50,</span>
+<span class="sd">...     show_progress_bar=False,  # No progress output</span>
+<span class="sd">...     random_state=42</span>
+<span class="sd">... )</span>
+<span class="sd">&gt;&gt;&gt; regressor_quiet.fit(X, y)  # Silent fitting</span>
+
+<span class="sd">Applications</span>
+<span class="sd">------------</span>
+<span class="sd">This approach is particularly well-suited for:</span>
+<span class="sd">- Scientific discovery where interpretability is crucial</span>
+<span class="sd">- Problems requiring uncertainty quantification in model selection</span>
+<span class="sd">- Cases where multiple plausible models exist and need to be ranked</span>
+<span class="sd">- Regression tasks where symbolic relationships are preferred over black-box models</span>
+<span class="sd">- Applications requiring principled model complexity control</span>
+
+<span class="sd">Notes</span>
+<span class="sd">-----</span>
+<span class="sd">The method balances exploration and exploitation through:</span>
+<span class="sd">- Probabilistic proposal selection between mutation and crossover</span>
+<span class="sd">- Adaptive sampling that focuses on promising regions of expression space</span>
+<span class="sd">- Multiple model selection criteria to handle different use cases</span>
+
+<span class="sd">For best results, consider:</span>
+<span class="sd">- Adjusting complexity limits based on problem difficulty</span>
+<span class="sd">- Tuning mutation/crossover probabilities for your domain</span>
+<span class="sd">- Using sufficient particles for good posterior approximation</span>
+<span class="sd">- Setting appropriate number of MCMC samples for mixing</span>
+
+<span class="sd">Checkpointing allows for:</span>
+<span class="sd">- Resuming interrupted long-running fits</span>
+<span class="sd">- Incremental progress saving during extended sampling runs</span>
+<span class="sd">- Recovery from system failures or resource limitations</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">Counter</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseEstimator</span><span class="p">,</span> <span class="n">RegressorMixin</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.utils.validation</span><span class="w"> </span><span class="kn">import</span> <span class="n">check_X_y</span><span class="p">,</span> <span class="n">check_array</span><span class="p">,</span> <span class="n">check_is_fitted</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">bingo.symbolic_regression</span><span class="w"> </span><span class="kn">import</span> <span class="n">ComponentGenerator</span><span class="p">,</span> <span class="n">AGraphGenerator</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.laplace_nmll</span><span class="w"> </span><span class="kn">import</span> <span class="n">LaplaceNmll</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.mutation_proposal</span><span class="w"> </span><span class="kn">import</span> <span class="n">MutationProposal</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.crossover_proposal</span><span class="w"> </span><span class="kn">import</span> <span class="n">CrossoverProposal</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.random_choice_proposal</span><span class="w"> </span><span class="kn">import</span> <span class="n">RandomChoiceProposal</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.sampler</span><span class="w"> </span><span class="kn">import</span> <span class="n">sample</span>
+
+<span class="n">USE_PYTHON</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="n">USE_SIMPLIFICATION</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="n">DEFAULT_OPERATORS</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;+&quot;</span><span class="p">,</span> <span class="s2">&quot;*&quot;</span><span class="p">]</span>
+<span class="n">DEFALT_PARAMETER_INITIALIZATION_BOUNDS</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">]</span>
+
+
+<span class="c1"># pylint: disable=R0902,R0913,R0917,R0914</span>
+<div class="viewcode-block" id="PysipsRegressor">
+<a class="viewcode-back" href="../../api/pysips.html#pysips.PysipsRegressor">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">PysipsRegressor</span><span class="p">(</span><span class="n">BaseEstimator</span><span class="p">,</span> <span class="n">RegressorMixin</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A scikit-learn compatible wrapper for PySIPS symbolic regression.</span>
+
+<span class="sd">    This regressor uses Sequential Monte Carlo (SMC) sampling to explore</span>
+<span class="sd">    the space of symbolic expressions and find mathematical models that</span>
+<span class="sd">    best explain the observed data. The approach provides principled</span>
+<span class="sd">    uncertainty quantification and supports checkpointing for long-running</span>
+<span class="sd">    fits.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    operators : list, default=[&#39;+&#39;, &#39;*&#39;]</span>
+<span class="sd">        List of operators to use in symbolic expressions.</span>
+
+<span class="sd">    max_complexity : int, default=24</span>
+<span class="sd">        Maximum complexity of symbolic expressions.</span>
+
+<span class="sd">    terminal_probability : float, default=0.1</span>
+<span class="sd">        Probability of selecting a terminal during expression generation.</span>
+
+<span class="sd">    constant_probability : float or None, default=None</span>
+<span class="sd">        Probability of selecting a constant terminal. If None, will be set to 1/(x_dim + 1).</span>
+
+<span class="sd">    command_probability : float, default=0.2</span>
+<span class="sd">        Probability of command mutation.</span>
+
+<span class="sd">    node_probability : float, default=0.2</span>
+<span class="sd">        Probability of node mutation.</span>
+
+<span class="sd">    parameter_probability : float, default=0.2</span>
+<span class="sd">        Probability of parameter mutation.</span>
+
+<span class="sd">    prune_probability : float, default=0.2</span>
+<span class="sd">        Probability of pruning mutation.</span>
+
+<span class="sd">    fork_probability : float, default=0.2</span>
+<span class="sd">        Probability of fork mutation.</span>
+
+<span class="sd">    repeat_mutation_probability : float, default=0.05</span>
+<span class="sd">        Probability of repeating a mutation.</span>
+
+<span class="sd">    crossover_pool_size : int, default=num_particles</span>
+<span class="sd">        Size of the crossover pool.</span>
+
+<span class="sd">    mutation_prob : float, default=0.75</span>
+<span class="sd">        Probability of mutation (vs crossover).</span>
+
+<span class="sd">    crossover_prob : float, default=0.25</span>
+<span class="sd">        Probability of crossover (vs mutation).</span>
+
+<span class="sd">    exclusive : bool, default=True</span>
+<span class="sd">        Whether mutation and crossover are exclusive.</span>
+
+<span class="sd">    num_particles : int, default=50</span>
+<span class="sd">        Number of particles for sampling.</span>
+
+<span class="sd">    num_mcmc_samples : int, default=5</span>
+<span class="sd">        Number of MCMC samples.</span>
+
+<span class="sd">    target_ess : float, default=0.8</span>
+<span class="sd">        Target effective sample size.</span>
+
+<span class="sd">    param_init_bounds : list, default=[-5, 5]</span>
+<span class="sd">        Bounds for parameter initialization.</span>
+
+<span class="sd">    opt_restarts : int, default=1</span>
+<span class="sd">        Number of optimization restarts.</span>
+
+<span class="sd">    model_selection : str, default=&quot;mode&quot;</span>
+<span class="sd">        The way to choose a best model from the produced distribution of</span>
+<span class="sd">        models.  Current options are &quot;mode&quot; for the most frequently occuring</span>
+<span class="sd">        model and &quot;max_nml&quot; for the model with maximum normalized marginal</span>
+<span class="sd">        likelihood.</span>
+
+<span class="sd">    checkpoint_file : str or None, default=None</span>
+<span class="sd">        File path for saving and loading sampling progress. If the checkpoint</span>
+<span class="sd">        file exists, fitting will attempt to resume from the saved state and</span>
+<span class="sd">        continue updating the checkpoint as sampling proceeds. If None, no</span>
+<span class="sd">        checkpointing is performed.</span>
+
+<span class="sd">    random_state : int or None, default=None</span>
+<span class="sd">        Random seed for reproducibility.</span>
+
+<span class="sd">    max_time : float or None, default=None</span>
+<span class="sd">        Maximum time in seconds to run the sampling process. If None,</span>
+<span class="sd">        the sampling will run until completion without time constraints.</span>
+<span class="sd">        Cannot be used together with max_equation_evals.</span>
+
+<span class="sd">    max_equation_evals : int or None, default=None</span>
+<span class="sd">        Maximum number of evaluations during the sampling process. If None,</span>
+<span class="sd">        the sampling will run until completion without time constraints.</span>
+<span class="sd">        Cannot be used together with max_time.</span>
+
+<span class="sd">    show_progress_bar : bool, default=True</span>
+<span class="sd">        Whether to display a progress bar during fitting. When False, the</span>
+<span class="sd">        progress bar will be hidden, which is useful for hyperparameter</span>
+<span class="sd">        tuning or when running multiple fits in parallel.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="PysipsRegressor.__init__">
+<a class="viewcode-back" href="../../api/pysips.html#pysips.PysipsRegressor.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">operators</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">max_complexity</span><span class="o">=</span><span class="mi">24</span><span class="p">,</span>
+        <span class="n">terminal_probability</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+        <span class="n">constant_probability</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">command_probability</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
+        <span class="n">node_probability</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
+        <span class="n">parameter_probability</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
+        <span class="n">prune_probability</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
+        <span class="n">fork_probability</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
+        <span class="n">repeat_mutation_probability</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
+        <span class="n">crossover_pool_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">mutation_prob</span><span class="o">=</span><span class="mf">0.75</span><span class="p">,</span>
+        <span class="n">crossover_prob</span><span class="o">=</span><span class="mf">0.25</span><span class="p">,</span>
+        <span class="n">exclusive</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">num_particles</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
+        <span class="n">num_mcmc_samples</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+        <span class="n">target_ess</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span>
+        <span class="n">param_init_bounds</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">opt_restarts</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">model_selection</span><span class="o">=</span><span class="s2">&quot;mode&quot;</span><span class="p">,</span>
+        <span class="n">checkpoint_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">random_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">max_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">max_equation_evals</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">show_progress_bar</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="c1"># Validate that max_time and max_equation_evals are not both specified</span>
+        <span class="k">if</span> <span class="n">max_time</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">max_equation_evals</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;max_time and max_equation_evals cannot both be specified. &quot;</span>
+                <span class="s2">&quot;Please choose one constraint method.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">operators</span> <span class="o">=</span> <span class="n">operators</span> <span class="k">if</span> <span class="n">operators</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">DEFAULT_OPERATORS</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_complexity</span> <span class="o">=</span> <span class="n">max_complexity</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">terminal_probability</span> <span class="o">=</span> <span class="n">terminal_probability</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">constant_probability</span> <span class="o">=</span> <span class="n">constant_probability</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">command_probability</span> <span class="o">=</span> <span class="n">command_probability</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">node_probability</span> <span class="o">=</span> <span class="n">node_probability</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameter_probability</span> <span class="o">=</span> <span class="n">parameter_probability</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">prune_probability</span> <span class="o">=</span> <span class="n">prune_probability</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fork_probability</span> <span class="o">=</span> <span class="n">fork_probability</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">repeat_mutation_probability</span> <span class="o">=</span> <span class="n">repeat_mutation_probability</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">crossover_pool_size</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">crossover_pool_size</span> <span class="k">if</span> <span class="n">crossover_pool_size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">num_particles</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mutation_prob</span> <span class="o">=</span> <span class="n">mutation_prob</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">crossover_prob</span> <span class="o">=</span> <span class="n">crossover_prob</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">exclusive</span> <span class="o">=</span> <span class="n">exclusive</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_particles</span> <span class="o">=</span> <span class="n">num_particles</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_mcmc_samples</span> <span class="o">=</span> <span class="n">num_mcmc_samples</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target_ess</span> <span class="o">=</span> <span class="n">target_ess</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">param_init_bounds</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">param_init_bounds</span>
+            <span class="k">if</span> <span class="n">param_init_bounds</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="k">else</span> <span class="n">DEFALT_PARAMETER_INITIALIZATION_BOUNDS</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">opt_restarts</span> <span class="o">=</span> <span class="n">opt_restarts</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_selection</span> <span class="o">=</span> <span class="n">model_selection</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checkpoint_file</span> <span class="o">=</span> <span class="n">checkpoint_file</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">random_state</span> <span class="o">=</span> <span class="n">random_state</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_time</span> <span class="o">=</span> <span class="n">max_time</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_equation_evals</span> <span class="o">=</span> <span class="n">max_equation_evals</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">show_progress_bar</span> <span class="o">=</span> <span class="n">show_progress_bar</span>
+
+        <span class="c1"># attributes set after fitting</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_features_in_</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">models_</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">likelihoods_</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">phis_</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">best_model_</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">best_likelihood_</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_generator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x_dim</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create expression generator.&quot;&quot;&quot;</span>
+        <span class="n">constant_prob</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">constant_probability</span>
+        <span class="k">if</span> <span class="n">constant_prob</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">constant_prob</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">x_dim</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">component_generator</span> <span class="o">=</span> <span class="n">ComponentGenerator</span><span class="p">(</span>
+            <span class="n">input_x_dimension</span><span class="o">=</span><span class="n">x_dim</span><span class="p">,</span>
+            <span class="n">terminal_probability</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">terminal_probability</span><span class="p">,</span>
+            <span class="n">constant_probability</span><span class="o">=</span><span class="n">constant_prob</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">for</span> <span class="n">comp</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">operators</span><span class="p">:</span>
+            <span class="n">component_generator</span><span class="o">.</span><span class="n">add_operator</span><span class="p">(</span><span class="n">comp</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">AGraphGenerator</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">max_complexity</span><span class="p">,</span>
+            <span class="n">component_generator</span><span class="p">,</span>
+            <span class="n">use_python</span><span class="o">=</span><span class="n">USE_PYTHON</span><span class="p">,</span>
+            <span class="n">use_simplification</span><span class="o">=</span><span class="n">USE_SIMPLIFICATION</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_proposal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x_dim</span><span class="p">,</span> <span class="n">generator</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create proposal operator.&quot;&quot;&quot;</span>
+        <span class="n">constant_prob</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">constant_probability</span>
+        <span class="k">if</span> <span class="n">constant_prob</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">constant_prob</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">x_dim</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">mutation</span> <span class="o">=</span> <span class="n">MutationProposal</span><span class="p">(</span>
+            <span class="n">x_dim</span><span class="p">,</span>
+            <span class="n">operators</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">operators</span><span class="p">,</span>
+            <span class="n">terminal_probability</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">terminal_probability</span><span class="p">,</span>
+            <span class="n">constant_probability</span><span class="o">=</span><span class="n">constant_prob</span><span class="p">,</span>
+            <span class="n">command_probability</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">command_probability</span><span class="p">,</span>
+            <span class="n">node_probability</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">node_probability</span><span class="p">,</span>
+            <span class="n">parameter_probability</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parameter_probability</span><span class="p">,</span>
+            <span class="n">prune_probability</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">prune_probability</span><span class="p">,</span>
+            <span class="n">fork_probability</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">fork_probability</span><span class="p">,</span>
+            <span class="n">repeat_mutation_probability</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">repeat_mutation_probability</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Generate crossover pool</span>
+        <span class="n">pool</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">pool</span><span class="p">)</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">crossover_pool_size</span><span class="p">:</span>
+            <span class="n">pool</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">generator</span><span class="p">())</span>
+        <span class="n">crossover</span> <span class="o">=</span> <span class="n">CrossoverProposal</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">pool</span><span class="p">))</span>
+
+        <span class="c1"># Create combined proposal</span>
+        <span class="k">return</span> <span class="n">RandomChoiceProposal</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">mutation</span><span class="p">,</span> <span class="n">crossover</span><span class="p">],</span>
+            <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">mutation_prob</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">crossover_prob</span><span class="p">],</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">exclusive</span><span class="p">,</span>
+        <span class="p">)</span>
+
+<div class="viewcode-block" id="PysipsRegressor.fit">
+<a class="viewcode-back" href="../../api/pysips.html#pysips.PysipsRegressor.fit">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Fit the symbolic regression model to training data.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        X : array-like of shape (n_samples, n_features)</span>
+<span class="sd">            Training input samples.</span>
+<span class="sd">        y : array-like of shape (n_samples,)</span>
+<span class="sd">            Target values.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        self : object</span>
+<span class="sd">            Returns self.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Check and validate input data</span>
+        <span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">check_X_y</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">y_numeric</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_features_in_</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="c1"># Set up the sampling config</span>
+        <span class="n">x_dim</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="c1"># Create generator, proposal, and likelihood</span>
+        <span class="n">generator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_generator</span><span class="p">(</span><span class="n">x_dim</span><span class="p">)</span>
+        <span class="n">proposal</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_proposal</span><span class="p">(</span><span class="n">x_dim</span><span class="p">,</span> <span class="n">generator</span><span class="p">)</span>
+        <span class="n">likelihood</span> <span class="o">=</span> <span class="n">LaplaceNmll</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+
+        <span class="c1"># Run sampling</span>
+        <span class="n">models</span><span class="p">,</span> <span class="n">likelihoods</span><span class="p">,</span> <span class="n">phis</span> <span class="o">=</span> <span class="n">sample</span><span class="p">(</span>
+            <span class="n">likelihood</span><span class="p">,</span>
+            <span class="n">proposal</span><span class="p">,</span>
+            <span class="n">generator</span><span class="p">,</span>
+            <span class="n">max_time</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">max_time</span><span class="p">,</span>
+            <span class="n">max_equation_evals</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">max_equation_evals</span><span class="p">,</span>
+            <span class="n">seed</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">random_state</span><span class="p">,</span>
+            <span class="n">checkpoint_file</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">checkpoint_file</span><span class="p">,</span>
+            <span class="n">show_progress_bar</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">show_progress_bar</span><span class="p">,</span>
+            <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span>
+                <span class="s2">&quot;num_particles&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_particles</span><span class="p">,</span>
+                <span class="s2">&quot;num_mcmc_samples&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_mcmc_samples</span><span class="p">,</span>
+                <span class="s2">&quot;target_ess&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_ess</span><span class="p">,</span>
+            <span class="p">},</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Save the models and their likelihoods</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">models_</span> <span class="o">=</span> <span class="n">models</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">likelihoods_</span> <span class="o">=</span> <span class="n">likelihoods</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">phis_</span> <span class="o">=</span> <span class="n">phis</span>
+
+        <span class="c1"># Select the best model</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_selection</span> <span class="o">==</span> <span class="s2">&quot;max_nml&quot;</span><span class="p">:</span>
+            <span class="n">best_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">likelihoods</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_selection</span> <span class="o">==</span> <span class="s2">&quot;mode&quot;</span><span class="p">:</span>
+            <span class="n">model_indices</span> <span class="o">=</span> <span class="p">{</span><span class="n">model</span><span class="p">:</span> <span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">model</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">models</span><span class="p">)}</span>
+            <span class="n">model_counts</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">(</span><span class="n">model</span> <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">models_</span><span class="p">)</span>
+            <span class="n">most_common_model</span> <span class="o">=</span> <span class="n">model_counts</span><span class="o">.</span><span class="n">most_common</span><span class="p">(</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">best_idx</span> <span class="o">=</span> <span class="n">model_indices</span><span class="p">[</span><span class="n">most_common_model</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;model_selection method </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">model_selection</span><span class="si">}</span><span class="s2"> not recognized.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">best_model_</span> <span class="o">=</span> <span class="n">models</span><span class="p">[</span><span class="n">best_idx</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">best_likelihood_</span> <span class="o">=</span> <span class="n">likelihoods</span><span class="p">[</span><span class="n">best_idx</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+
+<div class="viewcode-block" id="PysipsRegressor.predict">
+<a class="viewcode-back" href="../../api/pysips.html#pysips.PysipsRegressor.predict">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Predict using the best symbolic regression model.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        X : array-like of shape (n_samples, n_features)</span>
+<span class="sd">            Samples to predict.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        y_pred : array-like of shape (n_samples,)</span>
+<span class="sd">            Returns predicted values.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">check_is_fitted</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;best_model_&quot;</span><span class="p">,</span> <span class="s2">&quot;models_&quot;</span><span class="p">])</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">check_array</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+
+        <span class="c1"># Ensure consistent feature count</span>
+        <span class="k">if</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_features_in_</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;X has </span><span class="si">{</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2"> features, but BayesRRegressor was &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;trained with </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n_features_in_</span><span class="si">}</span><span class="s2"> features.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Use the best model for prediction</span>
+        <span class="n">prediction</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">best_model_</span><span class="o">.</span><span class="n">evaluate_equation_at</span><span class="p">(</span><span class="n">X</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">prediction</span></div>
+
+
+<div class="viewcode-block" id="PysipsRegressor.score">
+<a class="viewcode-back" href="../../api/pysips.html#pysips.PysipsRegressor.score">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">score</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">sample_weight</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the coefficient of determination R^2 of the prediction.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        X : array-like of shape (n_samples, n_features)</span>
+<span class="sd">            Test samples.</span>
+<span class="sd">        y : array-like of shape (n_samples,)</span>
+<span class="sd">            True values for X.</span>
+<span class="sd">        sample_weight : array-like of shape (n_samples,), default=None</span>
+<span class="sd">            Sample weights.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        score : float</span>
+<span class="sd">            R^2 of self.predict(X) with respect to y.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Use default implementation from scikit-learn</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">score</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">sample_weight</span><span class="o">=</span><span class="n">sample_weight</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="c1"># catch error cause by NaN or inf values in prediction e.g. log(0)</span>
+            <span class="k">if</span> <span class="s2">&quot;Input contains NaN&quot;</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">&quot;Input contains infinity&quot;</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">):</span>
+                <span class="k">return</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+            <span class="k">raise</span>
+        <span class="k">return</span> <span class="n">score</span></div>
+
+
+<div class="viewcode-block" id="PysipsRegressor.get_expression">
+<a class="viewcode-back" href="../../api/pysips.html#pysips.PysipsRegressor.get_expression">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_expression</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the symbolic expression of the best model.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        expression : str</span>
+<span class="sd">            String representation of the best model.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">check_is_fitted</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;best_model_&quot;</span><span class="p">])</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">best_model_</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="PysipsRegressor.get_models">
+<a class="viewcode-back" href="../../api/pysips.html#pysips.PysipsRegressor.get_models">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_models</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get all sampled models and their likelihoods.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        models : list</span>
+<span class="sd">            List of all sampled models.</span>
+<span class="sd">        likelihoods : numpy.ndarray</span>
+<span class="sd">            Array of corresponding likelihoods.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">check_is_fitted</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;models_&quot;</span><span class="p">,</span> <span class="s2">&quot;likelihoods_&quot;</span><span class="p">])</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">models_</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">likelihoods_</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, United States Government as represented by the Administrator of the National Aeronautics and Space Administration.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

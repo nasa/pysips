@@ -1,0 +1,1333 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>API Reference &mdash; PySIPS 0.1.dev1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=6aee1ebc"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="PySIPS API Documentation" href="modules.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            PySIPS
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quickstart Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../quickstart.html#installation">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../quickstart.html#basic-usage">Basic Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../quickstart.html#expected-output">Expected Output</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../quickstart.html#understanding-the-parameters">Understanding the Parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../quickstart.html#accessing-results">Accessing Results</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../quickstart.html#next-steps">Next Steps</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../quickstart.html#common-issues">Common Issues</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial.html">PySIPS Tutorial</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../tutorial.html#Table-of-Contents">Table of Contents</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorial.html#1.-Basic-Symbolic-Regression">1. Basic Symbolic Regression</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorial.html#2.-Multivariate-Regression">2. Multivariate Regression</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorial.html#3.-Customizing-Available-Operators">3. Customizing Available Operators</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../tutorial.html#Available-operators:">Available operators:</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorial.html#4.-Model-Selection-Strategies">4. Model Selection Strategies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorial.html#5.-Checkpointing-for-Long-Runs">5. Checkpointing for Long Runs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorial.html#6.-Hyperparameter-Tuning">6. Hyperparameter Tuning</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorial.html#7.-Analyzing-the-Posterior-Distribution">7. Analyzing the Posterior Distribution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorial.html#Advanced-Topics">Advanced Topics</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../tutorial.html#Mutation-and-Crossover-Control">Mutation and Crossover Control</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutorial.html#Expression-Complexity-Control">Expression Complexity Control</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutorial.html#SMC-Sampling-Control">SMC Sampling Control</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorial.html#Best-Practices">Best Practices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorial.html#Troubleshooting">Troubleshooting</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../tutorial.html#Issue:-Fitting-is-too-slow">Issue: Fitting is too slow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutorial.html#Issue:-Poor-model-quality">Issue: Poor model quality</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutorial.html#Issue:-Overfitting">Issue: Overfitting</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutorial.html#Issue:-Checkpoint-file-corrupted">Issue: Checkpoint file corrupted</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorial.html#Further-Resources">Further Resources</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">PySIPS API Documentation</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">API Reference</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#main-components">Main Components</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pysipsregressor">PysipsRegressor</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#core-modules">Core Modules</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#module-pysips.sampler">Sampler</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-pysips.prior">Prior</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-pysips.metropolis">Metropolis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-pysips.laplace_nmll">Laplace NMLL</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#proposal-mechanisms">Proposal Mechanisms</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#module-pysips.mutation_proposal">Mutation Proposal</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-pysips.crossover_proposal">Crossover Proposal</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-pysips.random_choice_proposal">Random Choice Proposal</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="modules.html#quick-links">Quick Links</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PySIPS</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">PySIPS API Documentation</a></li>
+      <li class="breadcrumb-item active">API Reference</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/pysips.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="api-reference">
+<h1>API Reference<a class="headerlink" href="#api-reference" title="Link to this heading"></a></h1>
+<p>This section contains the complete API documentation for PySIPS.</p>
+<section id="main-components">
+<h2>Main Components<a class="headerlink" href="#main-components" title="Link to this heading"></a></h2>
+<p>The primary interface to PySIPS is through the <a class="reference internal" href="#pysips.PysipsRegressor" title="pysips.PysipsRegressor"><code class="xref py py-class docutils literal notranslate"><span class="pre">PysipsRegressor</span></code></a> class, which provides a scikit-learn compatible API for Bayesian symbolic regression.</p>
+<section id="pysipsregressor">
+<h3>PysipsRegressor<a class="headerlink" href="#pysipsregressor" title="Link to this heading"></a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="pysips.PysipsRegressor">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pysips.</span></span><span class="sig-name descname"><span class="pre">PysipsRegressor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">operators</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_complexity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">24</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">terminal_probability</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">constant_probability</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">command_probability</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node_probability</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameter_probability</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prune_probability</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fork_probability</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">repeat_mutation_probability</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">crossover_pool_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mutation_prob</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.75</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">crossover_prob</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.25</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclusive</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_particles</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_mcmc_samples</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_ess</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param_init_bounds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opt_restarts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_selection</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mode'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">checkpoint_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_equation_evals</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_progress_bar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysips/regressor.html#PysipsRegressor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pysips.PysipsRegressor" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.base.BaseEstimator.html#sklearn.base.BaseEstimator" title="(in scikit-learn v1.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseEstimator</span></code></a>, <a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.base.RegressorMixin.html#sklearn.base.RegressorMixin" title="(in scikit-learn v1.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">RegressorMixin</span></code></a></p>
+<p>A scikit-learn compatible wrapper for PySIPS symbolic regression.</p>
+<p>This regressor uses Sequential Monte Carlo (SMC) sampling to explore
+the space of symbolic expressions and find mathematical models that
+best explain the observed data. The approach provides principled
+uncertainty quantification and supports checkpointing for long-running
+fits.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>operators</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em>, </em><em>default=</em><em>[</em><em>'+'</em><em>, </em><em>'*'</em><em>]</em>) – List of operators to use in symbolic expressions.</p></li>
+<li><p><strong>max_complexity</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>default=24</em>) – Maximum complexity of symbolic expressions.</p></li>
+<li><p><strong>terminal_probability</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>default=0.1</em>) – Probability of selecting a terminal during expression generation.</p></li>
+<li><p><strong>constant_probability</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em> or </em><em>None</em><em>, </em><em>default=None</em>) – Probability of selecting a constant terminal. If None, will be set to 1/(x_dim + 1).</p></li>
+<li><p><strong>command_probability</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>default=0.2</em>) – Probability of command mutation.</p></li>
+<li><p><strong>node_probability</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>default=0.2</em>) – Probability of node mutation.</p></li>
+<li><p><strong>parameter_probability</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>default=0.2</em>) – Probability of parameter mutation.</p></li>
+<li><p><strong>prune_probability</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>default=0.2</em>) – Probability of pruning mutation.</p></li>
+<li><p><strong>fork_probability</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>default=0.2</em>) – Probability of fork mutation.</p></li>
+<li><p><strong>repeat_mutation_probability</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>default=0.05</em>) – Probability of repeating a mutation.</p></li>
+<li><p><strong>crossover_pool_size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>default=num_particles</em>) – Size of the crossover pool.</p></li>
+<li><p><strong>mutation_prob</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>default=0.75</em>) – Probability of mutation (vs crossover).</p></li>
+<li><p><strong>crossover_prob</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>default=0.25</em>) – Probability of crossover (vs mutation).</p></li>
+<li><p><strong>exclusive</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>default=True</em>) – Whether mutation and crossover are exclusive.</p></li>
+<li><p><strong>num_particles</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>default=50</em>) – Number of particles for sampling.</p></li>
+<li><p><strong>num_mcmc_samples</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>default=5</em>) – Number of MCMC samples.</p></li>
+<li><p><strong>target_ess</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>default=0.8</em>) – Target effective sample size.</p></li>
+<li><p><strong>param_init_bounds</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em>, </em><em>default=</em><em>[</em><em>-5</em><em>, </em><em>5</em><em>]</em>) – Bounds for parameter initialization.</p></li>
+<li><p><strong>opt_restarts</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>default=1</em>) – Number of optimization restarts.</p></li>
+<li><p><strong>model_selection</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>default=&quot;mode&quot;</em>) – The way to choose a best model from the produced distribution of
+models.  Current options are “mode” for the most frequently occuring
+model and “max_nml” for the model with maximum normalized marginal
+likelihood.</p></li>
+<li><p><strong>checkpoint_file</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> or </em><em>None</em><em>, </em><em>default=None</em>) – File path for saving and loading sampling progress. If the checkpoint
+file exists, fitting will attempt to resume from the saved state and
+continue updating the checkpoint as sampling proceeds. If None, no
+checkpointing is performed.</p></li>
+<li><p><strong>random_state</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em> or </em><em>None</em><em>, </em><em>default=None</em>) – Random seed for reproducibility.</p></li>
+<li><p><strong>max_time</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em> or </em><em>None</em><em>, </em><em>default=None</em>) – Maximum time in seconds to run the sampling process. If None,
+the sampling will run until completion without time constraints.
+Cannot be used together with max_equation_evals.</p></li>
+<li><p><strong>max_equation_evals</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em> or </em><em>None</em><em>, </em><em>default=None</em>) – Maximum number of evaluations during the sampling process. If None,
+the sampling will run until completion without time constraints.
+Cannot be used together with max_time.</p></li>
+<li><p><strong>show_progress_bar</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>default=True</em>) – Whether to display a progress bar during fitting. When False, the
+progress bar will be hidden, which is useful for hyperparameter
+tuning or when running multiple fits in parallel.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pysips.PysipsRegressor.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">operators</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_complexity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">24</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">terminal_probability</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">constant_probability</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">command_probability</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node_probability</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameter_probability</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prune_probability</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fork_probability</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">repeat_mutation_probability</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">crossover_pool_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mutation_prob</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.75</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">crossover_prob</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.25</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclusive</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_particles</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_mcmc_samples</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_ess</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param_init_bounds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opt_restarts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_selection</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mode'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">checkpoint_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_equation_evals</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_progress_bar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysips/regressor.html#PysipsRegressor.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pysips.PysipsRegressor.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pysips.PysipsRegressor.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysips/regressor.html#PysipsRegressor.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pysips.PysipsRegressor.fit" title="Link to this definition"></a></dt>
+<dd><p>Fit the symbolic regression model to training data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> (<em>array-like</em><em> of </em><em>shape</em><em> (</em><em>n_samples</em><em>, </em><em>n_features</em><em>)</em>) – Training input samples.</p></li>
+<li><p><strong>y</strong> (<em>array-like</em><em> of </em><em>shape</em><em> (</em><em>n_samples</em><em>,</em><em>)</em>) – Target values.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>self</strong> – Returns self.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)">object</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pysips.PysipsRegressor.predict">
+<span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysips/regressor.html#PysipsRegressor.predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pysips.PysipsRegressor.predict" title="Link to this definition"></a></dt>
+<dd><p>Predict using the best symbolic regression model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>X</strong> (<em>array-like</em><em> of </em><em>shape</em><em> (</em><em>n_samples</em><em>, </em><em>n_features</em><em>)</em>) – Samples to predict.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>y_pred</strong> – Returns predicted values.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>array-like of shape (n_samples,)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pysips.PysipsRegressor.score">
+<span class="sig-name descname"><span class="pre">score</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_weight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysips/regressor.html#PysipsRegressor.score"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pysips.PysipsRegressor.score" title="Link to this definition"></a></dt>
+<dd><p>Return the coefficient of determination R^2 of the prediction.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> (<em>array-like</em><em> of </em><em>shape</em><em> (</em><em>n_samples</em><em>, </em><em>n_features</em><em>)</em>) – Test samples.</p></li>
+<li><p><strong>y</strong> (<em>array-like</em><em> of </em><em>shape</em><em> (</em><em>n_samples</em><em>,</em><em>)</em>) – True values for X.</p></li>
+<li><p><strong>sample_weight</strong> (<em>array-like</em><em> of </em><em>shape</em><em> (</em><em>n_samples</em><em>,</em><em>)</em><em>, </em><em>default=None</em>) – Sample weights.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>score</strong> – R^2 of self.predict(X) with respect to y.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pysips.PysipsRegressor.get_expression">
+<span class="sig-name descname"><span class="pre">get_expression</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysips/regressor.html#PysipsRegressor.get_expression"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pysips.PysipsRegressor.get_expression" title="Link to this definition"></a></dt>
+<dd><p>Get the symbolic expression of the best model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>expression</strong> – String representation of the best model.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pysips.PysipsRegressor.get_models">
+<span class="sig-name descname"><span class="pre">get_models</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysips/regressor.html#PysipsRegressor.get_models"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pysips.PysipsRegressor.get_models" title="Link to this definition"></a></dt>
+<dd><p>Get all sampled models and their likelihoods.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p><strong>models</strong> (<em>list</em>) – List of all sampled models.</p></li>
+<li><p><strong>likelihoods</strong> (<em>numpy.ndarray</em>) – Array of corresponding likelihoods.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pysips.PysipsRegressor.__init_subclass__">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">__init_subclass__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysips.PysipsRegressor.__init_subclass__" title="Link to this definition"></a></dt>
+<dd><p>Set the <code class="docutils literal notranslate"><span class="pre">set_{method}_request</span></code> methods.</p>
+<p>This uses PEP-487 <a class="footnote-reference brackets" href="#id2" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a> to set the <code class="docutils literal notranslate"><span class="pre">set_{method}_request</span></code> methods. It
+looks for the information available in the set default values which are
+set using <code class="docutils literal notranslate"><span class="pre">__metadata_request__*</span></code> class attributes, or inferred
+from method signatures.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">__metadata_request__*</span></code> class attributes are used when a method
+does not explicitly accept a metadata through its arguments or if the
+developer would like to specify a request value for those metadata
+which are different from the default <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
+<p class="rubric">References</p>
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="id2" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">1</a><span class="fn-bracket">]</span></span>
+<p><a class="reference external" href="https://www.python.org/dev/peps/pep-0487">https://www.python.org/dev/peps/pep-0487</a></p>
+</aside>
+</aside>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pysips.PysipsRegressor.get_metadata_routing">
+<span class="sig-name descname"><span class="pre">get_metadata_routing</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pysips.PysipsRegressor.get_metadata_routing" title="Link to this definition"></a></dt>
+<dd><p>Get metadata routing of this object.</p>
+<p>Please check <a class="reference external" href="https://scikit-learn.org/stable/metadata_routing.html#metadata-routing" title="(in scikit-learn v1.8)"><span class="xref std std-ref">User Guide</span></a> on how the routing
+mechanism works.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>routing</strong> – A <a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.utils.metadata_routing.MetadataRequest.html#sklearn.utils.metadata_routing.MetadataRequest" title="(in scikit-learn v1.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">MetadataRequest</span></code></a> encapsulating
+routing information.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>MetadataRequest</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pysips.PysipsRegressor.get_params">
+<span class="sig-name descname"><span class="pre">get_params</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">deep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysips.PysipsRegressor.get_params" title="Link to this definition"></a></dt>
+<dd><p>Get parameters for this estimator.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>deep</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>default=True</em>) – If True, will return the parameters for this estimator and
+contained subobjects that are estimators.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>params</strong> – Parameter names mapped to their values.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pysips.PysipsRegressor.set_params">
+<span class="sig-name descname"><span class="pre">set_params</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysips.PysipsRegressor.set_params" title="Link to this definition"></a></dt>
+<dd><p>Set the parameters of this estimator.</p>
+<p>The method works on simple estimators as well as on nested objects
+(such as <a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.pipeline.Pipeline.html#sklearn.pipeline.Pipeline" title="(in scikit-learn v1.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Pipeline</span></code></a>). The latter have
+parameters of the form <code class="docutils literal notranslate"><span class="pre">&lt;component&gt;__&lt;parameter&gt;</span></code> so that it’s
+possible to update each component of a nested object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>**params</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a>) – Estimator parameters.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>self</strong> – Estimator instance.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>estimator instance</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pysips.PysipsRegressor.set_score_request">
+<span class="sig-name descname"><span class="pre">set_score_request</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_weight</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'$UNCHANGED$'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pysips.PysipsRegressor" title="pysips.regressor.PysipsRegressor"><span class="pre">PysipsRegressor</span></a></span></span><a class="headerlink" href="#pysips.PysipsRegressor.set_score_request" title="Link to this definition"></a></dt>
+<dd><p>Configure whether metadata should be requested to be passed to the <code class="docutils literal notranslate"><span class="pre">score</span></code> method.</p>
+<p>Note that this method is only relevant when this estimator is used as a
+sub-estimator within a <a class="reference external" href="https://scikit-learn.org/stable/glossary.html#term-meta-estimator" title="(in scikit-learn v1.8)"><span class="xref std std-term">meta-estimator</span></a> and metadata routing is enabled
+with <code class="docutils literal notranslate"><span class="pre">enable_metadata_routing=True</span></code> (see <a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.set_config.html#sklearn.set_config" title="(in scikit-learn v1.8)"><code class="xref py py-func docutils literal notranslate"><span class="pre">sklearn.set_config()</span></code></a>).
+Please check the <a class="reference external" href="https://scikit-learn.org/stable/metadata_routing.html#metadata-routing" title="(in scikit-learn v1.8)"><span class="xref std std-ref">User Guide</span></a> on how the routing
+mechanism works.</p>
+<p>The options for each parameter are:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">True</span></code>: metadata is requested, and passed to <code class="docutils literal notranslate"><span class="pre">score</span></code> if provided. The request is ignored if metadata is not provided.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">False</span></code>: metadata is not requested and the meta-estimator will not pass it to <code class="docutils literal notranslate"><span class="pre">score</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">None</span></code>: metadata is not requested, and the meta-estimator will raise an error if the user provides it.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">str</span></code>: metadata should be passed to the meta-estimator with this given alias instead of the original name.</p></li>
+</ul>
+<p>The default (<code class="docutils literal notranslate"><span class="pre">sklearn.utils.metadata_routing.UNCHANGED</span></code>) retains the
+existing request. This allows you to change the request for some
+parameters and not others.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.3.</span></p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>sample_weight</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>True</em><em>, </em><em>False</em><em>, or </em><em>None</em><em>,                     </em><em>default=sklearn.utils.metadata_routing.UNCHANGED</em>) – Metadata routing for <code class="docutils literal notranslate"><span class="pre">sample_weight</span></code> parameter in <code class="docutils literal notranslate"><span class="pre">score</span></code>.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>self</strong> – The updated object.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)">object</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+<section id="core-modules">
+<h2>Core Modules<a class="headerlink" href="#core-modules" title="Link to this heading"></a></h2>
+<p>These modules provide the underlying implementation of the symbolic regression algorithm.</p>
+<section id="module-pysips.sampler">
+<span id="sampler"></span><h3>Sampler<a class="headerlink" href="#module-pysips.sampler" title="Link to this heading"></a></h3>
+<p>Sequential Monte Carlo (SMC) Sampling with Custom Prior and MCMC Kernel.</p>
+<p>This module provides high-level functions for performing Sequential Monte Carlo
+sampling using custom prior distributions and Metropolis-Hastings MCMC kernels.
+It integrates with the smcpy library to provide adaptive sampling capabilities
+with unique value generation and optional checkpointing support.</p>
+<p>The module is designed for scenarios where you need to sample from a parameter
+space using a custom generator function while ensuring uniqueness of samples
+and applying likelihood-based filtering. Checkpointing allows for resuming
+interrupted sampling runs and provides fault tolerance for long-running
+computations.</p>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">my_likelihood</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">x</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>  <span class="c1"># Gaussian-like likelihood</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">my_proposal</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="k">return</span> <span class="n">x</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">)</span>  <span class="c1"># Random walk proposal</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">my_generator</span><span class="p">():</span>
+<span class="gp">... </span>    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>  <span class="c1"># Uniform parameter generator</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Basic usage without checkpointing</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">models</span><span class="p">,</span> <span class="n">likelihoods</span> <span class="o">=</span> <span class="n">sample</span><span class="p">(</span><span class="n">my_likelihood</span><span class="p">,</span> <span class="n">my_proposal</span><span class="p">,</span> <span class="n">my_generator</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Found </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">models</span><span class="p">)</span><span class="si">}</span><span class="s2"> models with likelihoods&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Usage with checkpointing</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">models</span><span class="p">,</span> <span class="n">likelihoods</span> <span class="o">=</span> <span class="n">sample</span><span class="p">(</span><span class="n">my_likelihood</span><span class="p">,</span> <span class="n">my_proposal</span><span class="p">,</span> <span class="n">my_generator</span><span class="p">,</span>
+<span class="gp">... </span>                             <span class="n">checkpoint_file</span><span class="o">=</span><span class="s2">&quot;my_sampling.pkl&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Checkpointed run completed with </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">models</span><span class="p">)</span><span class="si">}</span><span class="s2"> models&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="rubric">Notes</p>
+<p>This module uses the following workflow:
+1. Creates a custom Prior that generates unique models
+2. Sets up a Metropolis-Hastings MCMC kernel
+3. Optionally enables checkpointing for progress persistence
+4. Runs adaptive SMC sampling
+5. Returns the final population of models and their likelihoods</p>
+<p>The covariance calculation is disabled in the mutator as a workaround for
+object-based parameters that may not support standard covariance computation.</p>
+<p>Checkpointing automatically saves sampling progress and can resume from the
+last saved state if the checkpoint file exists when sampling begins.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="pysips.sampler.sample">
+<span class="sig-prename descclassname"><span class="pre">pysips.sampler.</span></span><span class="sig-name descname"><span class="pre">sample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">likelihood</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proposal</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">generator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_equation_evals</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">multiprocess</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">checkpoint_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_progress_bar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysips/sampler.html#sample"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pysips.sampler.sample" title="Link to this definition"></a></dt>
+<dd><p>Perform Sequential Monte Carlo sampling with default parameters.</p>
+<p>This is a high-level convenience function that sets up and runs SMC sampling
+with commonly used default parameters. For more control over the sampling
+process, use run_smc directly.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>likelihood</strong> (<em>callable</em>) – Function that computes the likelihood of a given parameter value.
+Should accept a single parameter and return a scalar likelihood value.</p></li>
+<li><p><strong>proposal</strong> (<em>callable</em>) – Function that proposes new parameter values given a current value.
+Used in the Metropolis-Hastings MCMC steps.</p></li>
+<li><p><strong>generator</strong> (<em>callable</em>) – Function that generates initial parameter values when called with no
+arguments. Should return hashable values for uniqueness tracking.</p></li>
+<li><p><strong>max_time</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>optional</em>) – Maximum compute time limit for the sampling, in seconds (default no time limit).</p></li>
+<li><p><strong>max_equation_evals</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>optional</em>) – Maximum number of equation evaluations allowed during sampling (default: no limit).</p></li>
+<li><p><strong>multiprocess</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether to use multiprocessing for likelihood evaluations (default: False).</p></li>
+<li><p><strong>kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a><em>, </em><em>optional</em>) – Additional keyword arguments to override default SMC parameters.
+Default parameters are {“num_particles”: 5000, “num_mcmc_samples”: 10}.</p></li>
+<li><p><strong>seed</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>optional</em>) – Random seed for reproducible results (default: None).</p></li>
+<li><p><strong>checkpoint_file</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – File path for saving and loading sampling progress. If the checkpoint
+file exists, sampling will attempt to resume from the saved state and
+continue updating the checkpoint as it proceeds. If None, no
+checkpointing is performed (default: None).</p></li>
+<li><p><strong>show_progress_bar</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether to display a progress bar during sampling. When False, the
+progress bar will be hidden, which is useful for hyperparameter
+tuning or when running multiple fits in parallel (default: True).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>models</strong> (<em>list</em>) – List of parameter values from the final SMC population.</p></li>
+<li><p><strong>likelihoods</strong> (<em>list</em>) – List of likelihood values corresponding to each model in the final population.</p></li>
+<li><p><strong>phis</strong> (<em>list</em>) – List of phi values (tempering parameters) from the SMC sequence.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">likelihood_func</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="mi">2</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">proposal_func</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="k">return</span> <span class="n">x</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">generator_func</span><span class="p">():</span>
+<span class="gp">... </span>    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Basic sampling without checkpointing</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">models</span><span class="p">,</span> <span class="n">likes</span><span class="p">,</span> <span class="n">phis</span> <span class="o">=</span> <span class="n">sample</span><span class="p">(</span><span class="n">likelihood_func</span><span class="p">,</span> <span class="n">proposal_func</span><span class="p">,</span> <span class="n">generator_func</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Sampled </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">models</span><span class="p">)</span><span class="si">}</span><span class="s2"> models&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Sampling with checkpointing</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">models</span><span class="p">,</span> <span class="n">likes</span><span class="p">,</span> <span class="n">phis</span> <span class="o">=</span> <span class="n">sample</span><span class="p">(</span><span class="n">likelihood_func</span><span class="p">,</span> <span class="n">proposal_func</span><span class="p">,</span> <span class="n">generator_func</span><span class="p">,</span>
+<span class="gp">... </span>                             <span class="n">checkpoint_file</span><span class="o">=</span><span class="s2">&quot;progress.pkl&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Checkpointed sampling completed&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Sampling with max equation evaluations limit</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">models</span><span class="p">,</span> <span class="n">likes</span><span class="p">,</span> <span class="n">phis</span> <span class="o">=</span> <span class="n">sample</span><span class="p">(</span><span class="n">likelihood_func</span><span class="p">,</span> <span class="n">proposal_func</span><span class="p">,</span> <span class="n">generator_func</span><span class="p">,</span>
+<span class="gp">... </span>                             <span class="n">max_equation_evals</span><span class="o">=</span><span class="mi">10000</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Sampling completed with evaluation limit&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="rubric">Notes</p>
+<p>This function internally calls run_smc with default parameters. The default
+configuration uses 5000 particles and 10 MCMC samples per SMC step, which
+provides a reasonable balance between accuracy and computational cost for
+many applications.</p>
+<p>When checkpointing is enabled:
+- If the checkpoint file exists, sampling resumes from the saved state
+- Progress is automatically saved during the sampling process
+- The checkpoint file uses pickle format for serialization
+- Interrupted runs can be restarted from the last checkpoint</p>
+<p>When max_equation_evals and max_time are specified:
+- max_time takes precedence over max_equation_evals</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pysips.sampler.run_smc">
+<span class="sig-prename descclassname"><span class="pre">pysips.sampler.</span></span><span class="sig-name descname"><span class="pre">run_smc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">likelihood</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proposal</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">generator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_equation_evals</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">multiprocess</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kwargs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rng</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">checkpoint_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_progress_bar</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysips/sampler.html#run_smc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pysips.sampler.run_smc" title="Link to this definition"></a></dt>
+<dd><p>Execute Sequential Monte Carlo sampling with full parameter control.</p>
+<p>This function implements the core SMC sampling algorithm using a custom
+prior distribution and Metropolis-Hastings MCMC kernel. It provides
+complete control over all sampling parameters and optional checkpointing.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>likelihood</strong> (<em>callable</em>) – Function that computes the likelihood of a given parameter value.</p></li>
+<li><p><strong>proposal</strong> (<em>callable</em>) – Function that proposes new parameter values in MCMC steps.</p></li>
+<li><p><strong>generator</strong> (<em>callable</em>) – Function that generates unique initial parameter values.</p></li>
+<li><p><strong>max_time</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>None</em>) – Maximum compute time limit for the sampling, in seconds. None value indicates
+no time limit.</p></li>
+<li><p><strong>max_equation_evals</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>None</em>) – Maximum number of equation evaluations allowed during sampling.
+None value indicates no evaluation limit.</p></li>
+<li><p><strong>multiprocess</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – Whether to enable multiprocessing for likelihood evaluations.</p></li>
+<li><p><strong>kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a>) – Keyword arguments for the SMC sampler (e.g., num_particles, num_mcmc_samples).</p></li>
+<li><p><strong>rng</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.Generator" title="(in NumPy v2.4)"><em>numpy.random.Generator</em></a>) – Random number generator instance for reproducible sampling.</p></li>
+<li><p><strong>checkpoint_file</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>None</em>) – File path for checkpointing. If None, no checkpointing is performed.
+If provided, sampling progress will be saved to this file and can be
+resumed if the file exists from a previous run.</p></li>
+<li><p><strong>show_progress_bar</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – Whether to display a progress bar during sampling. When False, progress
+updates are suppressed.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>models</strong> (<em>list</em>) – Parameter values from the final SMC population, converted to list format.</p></li>
+<li><p><strong>likelihoods</strong> (<em>list</em>) – Likelihood values for each model in the final population, computed
+fresh to ensure consistency.</p></li>
+<li><p><strong>phis</strong> (<em>list</em>) – Phi values (tempering parameters) from the SMC sequence.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>The checkpointing mechanism uses SMCPy’s PickleStorage context manager:
+- Automatically detects existing checkpoint files and resumes
+- Saves progress incrementally during sampling
+- Uses append mode (‘a’) by default for safe restarts
+- Handles serialization of the complete sampler state</p>
+<p>Sampling strategy selection logic:
+- If max_time is specified FixedTimeSampler is used
+- If max_equation_evals is specified (and max_time is not), MaxStepSampler is used
+- If neither is specified, AdaptiveSampler is used</p>
+</dd></dl>
+
+</section>
+<section id="module-pysips.prior">
+<span id="prior"></span><h3>Prior<a class="headerlink" href="#module-pysips.prior" title="Link to this heading"></a></h3>
+<p>Custom Prior Distribution for Unique Random Value Generation.</p>
+<p>This module provides a specialized prior distribution class that extends the
+ImproperUniform prior from smcpy to generate unique random values using a
+custom generator function. It is designed to prevent duplicate values in
+sampling scenarios where uniqueness is required.</p>
+<section id="constants">
+<h4>Constants<a class="headerlink" href="#constants" title="Link to this heading"></a></h4>
+<dl class="simple">
+<dt>MAX_REPEATS<span class="classifier">int</span></dt><dd><p>Maximum number of consecutive attempts allowed before warning about
+potential generator issues (default: 100).</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">my_generator</span><span class="p">():</span>
+<span class="gp">... </span>    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1000</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">prior</span> <span class="o">=</span> <span class="n">Prior</span><span class="p">(</span><span class="n">my_generator</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">samples</span> <span class="o">=</span> <span class="n">prior</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>  <span class="c1"># Generate 10 unique samples</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">samples</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+<span class="go">(10, 1)</span>
+</pre></div>
+</div>
+</section>
+<dl class="py class">
+<dt class="sig sig-object py" id="pysips.prior.Prior">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pysips.prior.</span></span><span class="sig-name descname"><span class="pre">Prior</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">generator</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysips/prior.html#Prior"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pysips.prior.Prior" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ImproperUniform</span></code></p>
+<p>A class that extends ImproperUniform to generate unique random values.</p>
+<p>This prior uses a custom generator function to produce unique random values
+and warns if the generator repeatedly produces duplicates.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>generator</strong> (<em>callable</em>) – A function that generates random values when called with no arguments.
+This generator should return a hashable type.</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>This class tracks duplicate values and warns if the generator fails to
+produce a unique value after a set number of consecutive attempts.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pysips.prior.Prior.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">generator</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysips/prior.html#Prior.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pysips.prior.Prior.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pysips.prior.Prior.rvs">
+<span class="sig-name descname"><span class="pre">rvs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">N</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysips/prior.html#Prior.rvs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pysips.prior.Prior.rvs" title="Link to this definition"></a></dt>
+<dd><p>Generate N unique random values using the generator.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>N</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – Number of unique random values to generate.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Array of shape (N, 1) containing unique values generated by the generator.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ndarray</p>
+</dd>
+<dt class="field-even">Warns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>UserWarning</strong> – If the generator fails to produce a new unique value after MAX_REPEATS
+consecutive attempts.</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>The random_state parameter is included for compatibility with scipy.stats
+distributions but is not actually used by this method.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-pysips.metropolis">
+<span id="metropolis"></span><h3>Metropolis<a class="headerlink" href="#module-pysips.metropolis" title="Link to this heading"></a></h3>
+<p>Metropolis-Hastings MCMC Implementation for Symbolic Regression.</p>
+<p>This module provides a specialized Metropolis-Hastings Markov Chain Monte Carlo
+(MCMC) sampler designed for symbolic regression models. It extends the smcpy
+VectorMCMC class to handle symbolic expressions (bingo AGraph objects) as parameters,
+with custom proposal mechanisms and likelihood evaluation for equation discovery.</p>
+<p>The implementation supports both single-process and multiprocess likelihood
+evaluation, making it suitable for computationally intensive symbolic regression
+tasks where model evaluation is the computational bottleneck.</p>
+<section id="algorithm-overview">
+<h4>Algorithm Overview<a class="headerlink" href="#algorithm-overview" title="Link to this heading"></a></h4>
+<p>The Metropolis algorithm follows the standard accept/reject framework:</p>
+<ol class="arabic simple">
+<li><p><strong>Proposal Generation</strong>: Uses a provided proposal function to generate
+new symbolic expressions from current ones</p></li>
+<li><p><strong>Likelihood Evaluation</strong>: Computes log-likelihood for proposed expressions
+using the provided likelihood function</p></li>
+<li><p><strong>Accept/Reject Decision</strong>: Accepts or rejects proposals based on the
+Metropolis criterion comparing likelihoods</p></li>
+<li><p><strong>Chain Evolution</strong>: Iteratively builds a Markov chain of symbolic
+expressions that converges to the target distribution</p></li>
+</ol>
+<p>The key adaptation for symbolic regression is handling discrete, structured
+parameter spaces (symbolic expressions) rather than continuous parameters.</p>
+</section>
+<section id="example-integration">
+<h4>Example Integration<a class="headerlink" href="#example-integration" title="Link to this heading"></a></h4>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">bingo.symbolic_regression</span><span class="w"> </span><span class="kn">import</span> <span class="n">AGraph</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">likelihood_func</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="c1"># Evaluate model on data and return log-likelihood</span>
+<span class="gp">... </span>    <span class="k">return</span> <span class="n">model</span><span class="o">.</span><span class="n">evaluate_fitness_vector</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">proposal_func</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="c1"># Generate new model via mutation</span>
+<span class="gp">... </span>    <span class="k">return</span> <span class="n">mutate</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mcmc</span> <span class="o">=</span> <span class="n">Metropolis</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">likelihood</span><span class="o">=</span><span class="n">likelihood_func</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">proposal</span><span class="o">=</span><span class="n">proposal_func</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">prior</span><span class="o">=</span><span class="n">uniform_prior</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">multiprocess</span><span class="o">=</span><span class="kc">True</span>
+<span class="gp">... </span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="implementation-notes">
+<h4>Implementation Notes<a class="headerlink" href="#implementation-notes" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p>Uniform priors are assumed (evaluate_log_priors returns ones)</p></li>
+<li><p>Proposal updates are called after each sampling round to maintain
+an adaptive gene pool for crossover operations</p></li>
+<li><p>Fitness values are cached on AGraph objects to avoid redundant computation</p></li>
+<li><p>The implementation handles vectorized operations for efficiency</p></li>
+</ul>
+</section>
+<dl class="py class">
+<dt class="sig sig-object py" id="pysips.metropolis.Metropolis">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pysips.metropolis.</span></span><span class="sig-name descname"><span class="pre">Metropolis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">likelihood</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proposal</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prior</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">multiprocess</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysips/metropolis.html#Metropolis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pysips.metropolis.Metropolis" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">VectorMCMC</span></code></p>
+<p>Class for running basic MCMC w/ the Metropolis algorithm</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>likelihood</strong> (<em>callable</em>) – Computes marginal log likelihood given a bingo AGraph</p></li>
+<li><p><strong>proposal</strong> (<em>callable</em>) – Proposes a new AGraph conditioned on an existing AGraph; must be
+symmetric.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pysips.metropolis.Metropolis.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">likelihood</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proposal</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prior</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">multiprocess</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysips/metropolis.html#Metropolis.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pysips.metropolis.Metropolis.__init__" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> (<em>callable</em>) – maps inputs to outputs</p></li>
+<li><p><strong>data</strong> (<em>1D array</em>) – data corresponding to model outputs</p></li>
+<li><p><strong>priors</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em> of </em><em>objects</em>) – random variable objects with a pdf and rvs method (e.g.
+scipy stats random variable objects); note that the rvs method will
+also receive a numpy random number generator as an argument, which
+must be accounted for with custom prior objects</p></li>
+<li><p><strong>log_like_args</strong> (<em>1D array</em><em> or </em><em>None</em>) – any fixed parameters that define the likelihood
+function (e.g., standard deviation for a Gaussian likelihood).</p></li>
+<li><p><strong>log_like_func</strong> (<em>callable</em>) – log likelihood function that takes inputs, model,
+data, and hyperparameters and returns log likelihoods</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pysips.metropolis.Metropolis.smc_metropolis">
+<span class="sig-name descname"><span class="pre">smc_metropolis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cov</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysips/metropolis.html#Metropolis.smc_metropolis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pysips.metropolis.Metropolis.smc_metropolis" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> (<em>AGraph</em>) – model at which Markov chain initiates</p></li>
+<li><p><strong>num_samples</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – number of samples in the chain; includes burnin</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pysips.metropolis.Metropolis.evaluate_model">
+<span class="sig-name descname"><span class="pre">evaluate_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">_</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysips/metropolis.html#Metropolis.evaluate_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pysips.metropolis.Metropolis.evaluate_model" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pysips.metropolis.Metropolis.evaluate_log_priors">
+<span class="sig-name descname"><span class="pre">evaluate_log_priors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysips/metropolis.html#Metropolis.evaluate_log_priors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pysips.metropolis.Metropolis.evaluate_log_priors" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pysips.metropolis.Metropolis.evaluate_log_likelihood">
+<span class="sig-name descname"><span class="pre">evaluate_log_likelihood</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysips/metropolis.html#Metropolis.evaluate_log_likelihood"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pysips.metropolis.Metropolis.evaluate_log_likelihood" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-pysips.laplace_nmll">
+<span id="laplace-nmll"></span><h3>Laplace NMLL<a class="headerlink" href="#module-pysips.laplace_nmll" title="Link to this heading"></a></h3>
+<p>Laplace Approximation for Normalized Marginal Log-Likelihood Estimation.</p>
+<p>This module provides functionality for computing the Normalized Marginal Log-Likelihood
+(NMLL) using the Laplace approximation method. It integrates with the bingo symbolic
+regression library to evaluate the likelihood of symbolic mathematical models given
+observed data.</p>
+<p>The Laplace approximation is a method for approximating integrals that appear in
+Bayesian model selection, particularly useful for comparing different symbolic
+regression models. It approximates the marginal likelihood by making a Gaussian
+approximation around the maximum a posteriori (MAP) estimate of the parameters.</p>
+<section id="key-features">
+<h4>Key Features<a class="headerlink" href="#key-features" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p>Integration with bingo’s symbolic regression framework</p></li>
+<li><p>Multiple optimization restarts to avoid local minima</p></li>
+<li><p>Configurable scipy-based optimization backend</p></li>
+<li><p>Automatic parameter bound initialization for robust optimization</p></li>
+</ul>
+</section>
+<section id="usage-example">
+<h4>Usage Example<a class="headerlink" href="#usage-example" title="Link to this heading"></a></h4>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">bingo.symbolic_regression</span><span class="w"> </span><span class="kn">import</span> <span class="n">AGraph</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Generate sample data</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">X</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">X</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Create NMLL evaluator</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">nmll_evaluator</span> <span class="o">=</span> <span class="n">LaplaceNmll</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">opt_restarts</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Evaluate a symbolic model (assuming you have an AGraph model)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># nmll_score = nmll_evaluator(model)</span>
+</pre></div>
+</div>
+<p class="rubric">Notes</p>
+<p>The multiple restart strategy helps ensure robust optimization by avoiding
+local minima in the parameter space, which is especially important for
+complex symbolic expressions.</p>
+</section>
+<dl class="py class">
+<dt class="sig sig-object py" id="pysips.laplace_nmll.LaplaceNmll">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pysips.laplace_nmll.</span></span><span class="sig-name descname"><span class="pre">LaplaceNmll</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opt_restarts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">optimizer_kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysips/laplace_nmll.html#LaplaceNmll"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pysips.laplace_nmll.LaplaceNmll" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Normalized Marginal Likelihood using Laplace approximation</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> (<em>2d Numpy Array</em>) – Array of shape [num_datapoints, num_features] representing the input features</p></li>
+<li><p><strong>y</strong> (<em>1d Numpy Array</em>) – Array of labels of shape [num_datapoints]</p></li>
+<li><p><strong>opt_restarts</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>optional</em>) – number of times to perform gradient based optimization, each with different
+random initialization, by default 1</p></li>
+<li><p><strong>**optimizer_kwargs</strong> – any keyword arguments to be passed to bingo’s scipy optimizer</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pysips.laplace_nmll.LaplaceNmll.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opt_restarts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">optimizer_kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysips/laplace_nmll.html#LaplaceNmll.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pysips.laplace_nmll.LaplaceNmll.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pysips.laplace_nmll.LaplaceNmll.__call__">
+<span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysips/laplace_nmll.html#LaplaceNmll.__call__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pysips.laplace_nmll.LaplaceNmll.__call__" title="Link to this definition"></a></dt>
+<dd><p>calaculates NMLL using the Laplace approximation</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>model</strong> (<em>AGraph</em>) – a bingo equation using the AGraph representation</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+<section id="proposal-mechanisms">
+<h2>Proposal Mechanisms<a class="headerlink" href="#proposal-mechanisms" title="Link to this heading"></a></h2>
+<section id="module-pysips.mutation_proposal">
+<span id="mutation-proposal"></span><h3>Mutation Proposal<a class="headerlink" href="#module-pysips.mutation_proposal" title="Link to this heading"></a></h3>
+<p>Mutation-Based Proposal Generator for Symbolic Regression Models.</p>
+<p>This module provides a proposal mechanism for symbolic regression that uses
+bingo’s AGraph mutation operations to generate new candidate models from existing
+ones. It is designed to work within Markov Chain Monte Carlo (MCMC) sampling
+frameworks where new model proposals are needed at each step.</p>
+<p>The module implements a configurable mutation strategy that can perform various
+types of structural changes to symbolic mathematical expressions, including
+adding/removing nodes, changing operations, modifying parameters, and pruning
+or expanding expression trees.</p>
+<section id="id3">
+<h4>Key Features<a class="headerlink" href="#id3" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p>Multiple mutation types: command, node, parameter, prune, and fork mutations</p></li>
+<li><p>Configurable probabilities for each mutation type</p></li>
+<li><p>Repeat mutation capability for more dramatic changes</p></li>
+<li><p>Ensures non-identical proposals (prevents proposing the same model)</p></li>
+<li><p>Seeded random number generation for reproducible results</p></li>
+<li><p>Integration with bingo’s ComponentGenerator for operator management</p></li>
+</ul>
+</section>
+<section id="mutation-types">
+<h4>Mutation Types<a class="headerlink" href="#mutation-types" title="Link to this heading"></a></h4>
+<dl class="simple">
+<dt>Command Mutation</dt><dd><p>Changes the operation at a node (e.g., ‘+’ to ‘*’)</p>
+</dd>
+<dt>Node Mutation</dt><dd><p>Replaces a node with a new randomly generated subtree</p>
+</dd>
+<dt>Parameter Mutation</dt><dd><p>Modifies the numeric constants in the expression</p>
+</dd>
+<dt>Prune Mutation</dt><dd><p>Removes a portion of the expression tree</p>
+</dd>
+<dt>Fork Mutation</dt><dd><p>Adds a new branch to the expression tree</p>
+</dd>
+<dt>Repeat Mutation</dt><dd><p>Recursively applies additional mutations with specified probability</p>
+</dd>
+</dl>
+</section>
+<section id="id4">
+<h4>Usage Example<a class="headerlink" href="#id4" title="Link to this heading"></a></h4>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Create a mutation proposal generator</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">proposal</span> <span class="o">=</span> <span class="n">MutationProposal</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">X_dim</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>  <span class="c1"># 3 input features</span>
+<span class="gp">... </span>    <span class="n">operators</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;+&quot;</span><span class="p">,</span> <span class="s2">&quot;subtract&quot;</span><span class="p">,</span> <span class="s2">&quot;multiply&quot;</span><span class="p">,</span> <span class="s2">&quot;divide&quot;</span><span class="p">],</span>
+<span class="gp">... </span>    <span class="n">terminal_probability</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">command_probability</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">node_probability</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">seed</span><span class="o">=</span><span class="mi">42</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Use in MCMC sampling (assuming you have a model)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># new_model = proposal(current_model)</span>
+</pre></div>
+</div>
+<p class="rubric">Notes</p>
+<p>The proposal generator ensures that new proposals are always different from
+the input model by repeatedly applying mutations until a change occurs. This
+prevents MCMC chains from getting stuck with identical consecutive states.</p>
+<p>The update() method is provided for compatibility with adaptive MCMC frameworks
+but currently performs no operations, as the mutation probabilities are fixed
+at initialization.</p>
+</section>
+<dl class="py class">
+<dt class="sig sig-object py" id="pysips.mutation_proposal.MutationProposal">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pysips.mutation_proposal.</span></span><span class="sig-name descname"><span class="pre">MutationProposal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">operators</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">terminal_probability</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">constant_probability</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">command_probability</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node_probability</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameter_probability</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prune_probability</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fork_probability</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">repeat_mutation_probability</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysips/mutation_proposal.html#MutationProposal"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pysips.mutation_proposal.MutationProposal" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Proposal functor that performs bingo’s Agraph mutation</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x_dim</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – dimension of input data (number of features in dataset)</p></li>
+<li><p><strong>operators</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em> of </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – list of equation primatives to allow, e.g. [“+”, “subtraction”, “pow”]</p></li>
+<li><p><strong>terminal_probability</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>optional</em>) – [0.0-1.0] probability that a new node will be a terminal, by default 0.1</p></li>
+<li><p><strong>constant_probability</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>optional</em>) – [0.0-1.0] probability that a new terminal will be a constant, by default
+weighted the same as a single feature of the input data</p></li>
+<li><p><strong>command_probability</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>optional</em>) – probability of command mutation, by default 0.2</p></li>
+<li><p><strong>node_probability</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>optional</em>) – probability of node mutation, by default 0.2</p></li>
+<li><p><strong>parameter_probability</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>optional</em>) – probability of parameter mutation, by default 0.2</p></li>
+<li><p><strong>prune_probability</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>optional</em>) – probability of pruning (removing a portion of the equation), by default 0.2</p></li>
+<li><p><strong>fork_probability</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>optional</em>) – probability of forking (adding an additional branch to the equation),
+by default 0.2</p></li>
+<li><p><strong>repeat_mutation_probability</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>optional</em>) – probability of a repeated mutation (applied recursively). default 0.0</p></li>
+<li><p><strong>seed</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>optional</em>) – random seed used to control repeatability</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pysips.mutation_proposal.MutationProposal.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">operators</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">terminal_probability</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">constant_probability</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">command_probability</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node_probability</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameter_probability</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prune_probability</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fork_probability</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">repeat_mutation_probability</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysips/mutation_proposal.html#MutationProposal.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pysips.mutation_proposal.MutationProposal.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pysips.mutation_proposal.MutationProposal.__call__">
+<span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysips/mutation_proposal.html#MutationProposal.__call__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pysips.mutation_proposal.MutationProposal.__call__" title="Link to this definition"></a></dt>
+<dd><p>Apply mutation to generate a new symbolic expression model.</p>
+<p>This method takes a symbolic regression model (AGraph) as input and returns
+a new model created by applying one or more mutation operations. The method
+guarantees that the returned model is different from the input model by
+repeating mutations if necessary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>model</strong> (<em>AGraph</em>) – The input symbolic regression model to be mutated. This should be a
+bingo AGraph instance representing a mathematical expression.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>AGraph</em> – A new symbolic regression model created by applying mutation(s) to
+the input model. Guaranteed to be different from the input model.</p></li>
+<li><p><em>Mutation Process</em></p></li>
+<li><p><em>—————</em></p></li>
+<li><p><strong>1. **Initial Mutation**</strong> (<em>Applies the configured mutation operation to the model</em>)</p></li>
+<li><p><strong>2. **Repeat Mutations**</strong> (<em>May apply additional mutations based on repeat_mutation_probability</em>)</p></li>
+<li><p><strong>3. **Difference Check**</strong> (<em>Ensures the new model differs from the original one</em>)</p></li>
+<li><p><strong>4. **Repeated Attempts**</strong> (<em>If the mutation produces an identical model, tries again</em>)</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>The mutation type applied is selected probabilistically based on the</p></li>
+</ul>
+<p>probabilities specified during initialization (command_probability,
+node_probability, etc.)
+- The repeat mutation feature allows for more dramatic changes by applying
+multiple mutations in sequence with probability repeat_mutation_probability
+- This method will always return a different model, never the same as the input</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">AGraphMutation</span></code></dt><dd><p>Bingo’s mutation implementation used internally</p>
+</dd>
+</dl>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pysips.mutation_proposal.MutationProposal.update">
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysips/mutation_proposal.html#MutationProposal.update"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pysips.mutation_proposal.MutationProposal.update" title="Link to this definition"></a></dt>
+<dd><p>Update method for compatibility with adaptive MCMC frameworks.</p>
+<p>This method is provided to maintain API compatibility with other proposal
+mechanisms that support adaptive behavior. In the current implementation,
+the method is a no-op as the mutation proposal does not adapt its behavior
+based on sampling history.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>*args</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><em>tuple</em></a>) – Positional arguments (not used in the current implementation).</p></li>
+<li><p><strong>**kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a>) – Keyword arguments (not used in the current implementation).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>This method does not return any value.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>Future versions might implement adaptive behavior such as:
+- Adjusting mutation probabilities based on acceptance rates
+- Learning which mutation types are more effective for a given problem</p>
+<p>In composite proposal mechanisms that combine multiple proposal types
+(such as RandomChoiceProposal), this method will be called as part
+of the update process, but currently has no effect on this proposal.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-pysips.crossover_proposal">
+<span id="crossover-proposal"></span><h3>Crossover Proposal<a class="headerlink" href="#module-pysips.crossover_proposal" title="Link to this heading"></a></h3>
+<p>Crossover-Based Proposal Generator for Symbolic Regression Models.</p>
+<p>This module provides a crossover-based proposal mechanism for symbolic regression
+that creates new candidate models by combining genetic material from existing
+models. It implements genetic programming crossover operations using bingo’s
+AGraphCrossover functionality within an MCMC or evolutionary algorithm framework.</p>
+<p>The crossover operation mimics biological reproduction by exchanging subtrees
+between two parent expressions to create offspring that inherit characteristics
+from both parents. This approach can effectively explore the space of symbolic
+expressions by combining successful components from different models.</p>
+<section id="id5">
+<h4>Key Features<a class="headerlink" href="#id5" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p>Random partner selection from a configurable gene pool</p></li>
+<li><p>Stochastic child selection (50/50 probability between two crossover offspring)</p></li>
+<li><p>Avoids self-crossover by ensuring different parent selection</p></li>
+<li><p>Updateable gene pool for adaptive sampling strategies</p></li>
+<li><p>Seeded random number generation for reproducible results</p></li>
+</ul>
+</section>
+<section id="crossover-mechanism">
+<h4>Crossover Mechanism<a class="headerlink" href="#crossover-mechanism" title="Link to this heading"></a></h4>
+<p>The crossover operation works by:
+1. Selecting a random crossover point in each parent expression tree
+2. Swapping the subtrees at those points between the two parents
+3. Producing two offspring that combine features from both parents
+4. Randomly selecting one of the two offspring as the proposal</p>
+<p>This process allows successful expression fragments to be preserved and
+recombined in novel ways, potentially discovering better solutions through
+the exploration of hybrid models.</p>
+</section>
+<section id="id6">
+<h4>Usage Example<a class="headerlink" href="#id6" title="Link to this heading"></a></h4>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Assume you have a collection of symbolic models</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">gene_pool</span> <span class="o">=</span> <span class="p">[</span><span class="n">model1</span><span class="p">,</span> <span class="n">model2</span><span class="p">,</span> <span class="n">model3</span><span class="p">,</span> <span class="n">model4</span><span class="p">]</span>  <span class="c1"># List of AGraph models</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Create crossover proposal generator</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">crossover</span> <span class="o">=</span> <span class="n">CrossoverProposal</span><span class="p">(</span><span class="n">gene_pool</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Use in MCMC or evolutionary sampling</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">current_model</span> <span class="o">=</span> <span class="n">model1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">new_proposal</span> <span class="o">=</span> <span class="n">crossover</span><span class="p">(</span><span class="n">current_model</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Update gene pool as better models are discovered</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">updated_pool</span> <span class="o">=</span> <span class="p">[</span><span class="n">best_model1</span><span class="p">,</span> <span class="n">best_model2</span><span class="p">,</span> <span class="n">new_good_model</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">crossover</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">updated_pool</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="integration-notes">
+<h4>Integration Notes<a class="headerlink" href="#integration-notes" title="Link to this heading"></a></h4>
+<p>The update() method allows for dynamic gene pool management, enabling
+adaptive strategies where successful models from the sampling process
+can be added to influence future proposals.</p>
+</section>
+<dl class="py class">
+<dt class="sig sig-object py" id="pysips.crossover_proposal.CrossoverProposal">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pysips.crossover_proposal.</span></span><span class="sig-name descname"><span class="pre">CrossoverProposal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gene_pool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysips/crossover_proposal.html#CrossoverProposal"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pysips.crossover_proposal.CrossoverProposal" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>A proposal operator that performs crossover between AGraph models.</p>
+<p>This class implements a callable object that creates new models by performing
+crossover operations between an input model and randomly selected partners
+from a gene pool. It utilizes bingo’s AGraphCrossover mechanism and randomly
+selects one of the two children produced by each crossover operation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>gene_pool</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em> of </em><em>AGraph</em>) – A collection of AGraph models that will be used as potential partners
+during crossover operations</p></li>
+<li><p><strong>seed</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>optional</em>) – Random seed for the internal random number generator, used to control
+repeatability of operations</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pysips.crossover_proposal.CrossoverProposal.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gene_pool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysips/crossover_proposal.html#CrossoverProposal.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pysips.crossover_proposal.CrossoverProposal.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pysips.crossover_proposal.CrossoverProposal.__call__">
+<span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysips/crossover_proposal.html#CrossoverProposal.__call__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pysips.crossover_proposal.CrossoverProposal.__call__" title="Link to this definition"></a></dt>
+<dd><p>Perform crossover between the input model and a randomly selected one from the gene pool.</p>
+<p>This method randomly selects a parent from the gene pool, performs crossover between
+the input model and the selected parent, and returns one of the two resulting children
+with equal probability.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>model</strong> (<em>AGraph</em>) – The model to be used as the first parent in the crossover operation</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A new model resulting from crossover between the input model and a
+randomly selected model from the gene pool</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>AGraph</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pysips.crossover_proposal.CrossoverProposal.update">
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gene_pool</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">_</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">__</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysips/crossover_proposal.html#CrossoverProposal.update"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pysips.crossover_proposal.CrossoverProposal.update" title="Link to this definition"></a></dt>
+<dd><p>Update the gene pool used for selecting crossover partners.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>gene_pool</strong> (<em>iterable</em><em> of </em><em>AGraph</em>) – The new collection of AGraph models to use as the gene pool</p></li>
+<li><p><strong>*_</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><em>tuple</em></a>) – Additional positional arguments (ignored)</p></li>
+<li><p><strong>**__</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a>) – Additional keyword arguments (ignored)</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>This method allows for updating the gene pool while maintaining the same
+crossover behavior. The additional parameters are included for compatibility
+with other proposal update interfaces but are not used.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-pysips.random_choice_proposal">
+<span id="random-choice-proposal"></span><h3>Random Choice Proposal<a class="headerlink" href="#module-pysips.random_choice_proposal" title="Link to this heading"></a></h3>
+<p>Composite Proposal Generator with Probabilistic Selection.</p>
+<p>This module provides a meta-proposal mechanism that probabilistically selects
+and applies one or more proposal operators from a collection of available
+proposals. It supports both exclusive selection (choosing exactly one proposal)
+and non-exclusive selection (choosing multiple proposals to apply sequentially).</p>
+<p>This approach allows for flexible proposal strategies in MCMC sampling or
+evolutionary algorithms by combining different types of modifications (e.g.,
+mutation, crossover, local optimization) with configurable probabilities.</p>
+<section id="selection-modes">
+<h4>Selection Modes<a class="headerlink" href="#selection-modes" title="Link to this heading"></a></h4>
+<dl class="simple">
+<dt>Exclusive Mode (default)</dt><dd><p>Selects exactly one proposal based on the provided probabilities using
+weighted random selection. The probabilities are automatically normalized
+to sum to the cumulative total.</p>
+</dd>
+<dt>Non-Exclusive Mode</dt><dd><p>Each proposal is independently selected based on its probability. If no
+proposals are selected in a round, the process repeats until at least one
+is chosen. Selected proposals are applied sequentially in random order.</p>
+</dd>
+</dl>
+</section>
+<section id="usage-examples">
+<h4>Usage Examples<a class="headerlink" href="#usage-examples" title="Link to this heading"></a></h4>
+<p>Exclusive selection (choose one proposal type):
+&gt;&gt;&gt; from mutation import MutationProposal
+&gt;&gt;&gt; from crossover import CrossoverProposal
+&gt;&gt;&gt;
+&gt;&gt;&gt; mutation = MutationProposal(X_dim=3, operators=[“+”, “*”])
+&gt;&gt;&gt; crossover = CrossoverProposal(gene_pool)
+&gt;&gt;&gt;
+&gt;&gt;&gt; # 70% mutation, 30% crossover
+&gt;&gt;&gt; proposal = RandomChoiceProposal(
+…     [mutation, crossover],
+…     [0.7, 0.3],
+…     exclusive=True
+… )</p>
+<p>Non-exclusive selection (can apply multiple proposals):
+&gt;&gt;&gt; # Each proposal has independent 40% chance of being applied
+&gt;&gt;&gt; proposal = RandomChoiceProposal(
+…     [mutation, crossover, local_optimizer],
+…     [0.4, 0.4, 0.2],
+…     exclusive=False
+… )</p>
+</section>
+<section id="id7">
+<h4>Integration Notes<a class="headerlink" href="#id7" title="Link to this heading"></a></h4>
+<p>The update() method automatically propagates parameter updates to all
+constituent proposals, making this class compatible with adaptive sampling
+frameworks that modify proposal parameters during execution.</p>
+<p>All constituent proposals must implement:
+- __call__(model) method for applying the proposal
+- update(<a href="#id8"><span class="problematic" id="id9">*</span></a>args, <a href="#id10"><span class="problematic" id="id11">**</span></a>kwargs) method for parameter updates (optional)</p>
+</section>
+<dl class="py class">
+<dt class="sig sig-object py" id="pysips.random_choice_proposal.RandomChoiceProposal">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pysips.random_choice_proposal.</span></span><span class="sig-name descname"><span class="pre">RandomChoiceProposal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">proposals</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">probabilities</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclusive</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysips/random_choice_proposal.html#RandomChoiceProposal"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pysips.random_choice_proposal.RandomChoiceProposal" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Randomly choose a proposal to use</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>proposals</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em> of </em><em>proposals</em>) – options for the proposal</p></li>
+<li><p><strong>probabilities</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em> of </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a>) – probabilties of choosing each proposal</p></li>
+<li><p><strong>exclusive</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – whether the proposals are mutually exclusive or if they can all be
+performed at once, by default True</p></li>
+<li><p><strong>seed</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>optional</em>) – random seed used to control repeatability</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pysips.random_choice_proposal.RandomChoiceProposal.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">proposals</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">probabilities</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclusive</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysips/random_choice_proposal.html#RandomChoiceProposal.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pysips.random_choice_proposal.RandomChoiceProposal.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pysips.random_choice_proposal.RandomChoiceProposal.__call__">
+<span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysips/random_choice_proposal.html#RandomChoiceProposal.__call__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pysips.random_choice_proposal.RandomChoiceProposal.__call__" title="Link to this definition"></a></dt>
+<dd><p>Apply randomly selected proposal(s) to generate a new model.</p>
+<p>This method implements the core functionality of the composite proposal
+generator. It selects one or more proposals based on the configured
+probabilities and selection mode, then applies them sequentially to
+transform the input model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>model</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><em>object</em></a>) – The input model to be transformed. This should be compatible with
+all constituent proposal operators (typically an AGraph for symbolic
+regression or similar structured representation).</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>object</em> – A new model resulting from applying the selected proposal(s).
+The type matches the input model type.</p></li>
+<li><p><em>Process Overview</em></p></li>
+<li><p><em>—————-</em></p></li>
+<li><p><strong>1. **Selection Phase**</strong> (<em>Randomly selects active proposals based on:</em>)</p></li>
+<li><p><strong>- Exclusive mode</strong> (<em>Exactly one proposal via weighted selection</em>)</p></li>
+<li><p><strong>- Non-exclusive mode</strong> (<em>Zero or more proposals via independent trials</em>)</p></li>
+<li><p><strong>2. **Application Phase**</strong> (<em>Applies selected proposals sequentially:</em>)</p></li>
+<li><p><em>- First proposal transforms the original model</em></p></li>
+<li><p><em>- Subsequent proposals transform the result of previous applications</em></p></li>
+<li><p><em>- Order is randomized in non-exclusive mode to avoid bias</em></p></li>
+</ul>
+</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>In non-exclusive mode, if no proposals are initially selected, the</p></li>
+</ul>
+<p>selection process repeats until at least one proposal is chosen
+- Sequential application means later proposals operate on the results
+of earlier ones, potentially creating compound transformations</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pysips.random_choice_proposal.RandomChoiceProposal.update">
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pysips/random_choice_proposal.html#RandomChoiceProposal.update"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pysips.random_choice_proposal.RandomChoiceProposal.update" title="Link to this definition"></a></dt>
+<dd><p>Propagate parameter updates to all constituent proposals.</p>
+<p>This method forwards update calls to all constituent proposal operators,
+enabling the composite proposal to participate in adaptive sampling
+schemes where proposal parameters are modified during the sampling process.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>*args</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><em>tuple</em></a>) – Positional arguments to be passed to each constituent proposal’s
+update method. Common examples include new gene pools, population
+statistics, or adaptation parameters.</p></li>
+<li><p><strong>**kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a>) – Keyword arguments to be passed to each constituent proposal’s
+update method. May include parameters like learning rates,
+temperature schedules, or other adaptive parameters.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>This method modifies the constituent proposals in-place and does
+not return any values.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="modules.html" class="btn btn-neutral float-left" title="PySIPS API Documentation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, United States Government as represented by the Administrator of the National Aeronautics and Space Administration.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

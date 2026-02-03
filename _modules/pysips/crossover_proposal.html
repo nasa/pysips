@@ -1,0 +1,317 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pysips.crossover_proposal &mdash; PySIPS 0.1.dev1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=6aee1ebc"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            PySIPS
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart.html">Quickstart Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../quickstart.html#installation">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../quickstart.html#basic-usage">Basic Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../quickstart.html#expected-output">Expected Output</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../quickstart.html#understanding-the-parameters">Understanding the Parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../quickstart.html#accessing-results">Accessing Results</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../quickstart.html#next-steps">Next Steps</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../quickstart.html#common-issues">Common Issues</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial.html">PySIPS Tutorial</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorial.html#Table-of-Contents">Table of Contents</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorial.html#1.-Basic-Symbolic-Regression">1. Basic Symbolic Regression</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorial.html#2.-Multivariate-Regression">2. Multivariate Regression</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorial.html#3.-Customizing-Available-Operators">3. Customizing Available Operators</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../tutorial.html#Available-operators:">Available operators:</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorial.html#4.-Model-Selection-Strategies">4. Model Selection Strategies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorial.html#5.-Checkpointing-for-Long-Runs">5. Checkpointing for Long Runs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorial.html#6.-Hyperparameter-Tuning">6. Hyperparameter Tuning</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorial.html#7.-Analyzing-the-Posterior-Distribution">7. Analyzing the Posterior Distribution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorial.html#Advanced-Topics">Advanced Topics</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../tutorial.html#Mutation-and-Crossover-Control">Mutation and Crossover Control</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../tutorial.html#Expression-Complexity-Control">Expression Complexity Control</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../tutorial.html#SMC-Sampling-Control">SMC Sampling Control</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorial.html#Best-Practices">Best Practices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorial.html#Troubleshooting">Troubleshooting</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../tutorial.html#Issue:-Fitting-is-too-slow">Issue: Fitting is too slow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../tutorial.html#Issue:-Poor-model-quality">Issue: Poor model quality</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../tutorial.html#Issue:-Overfitting">Issue: Overfitting</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../tutorial.html#Issue:-Checkpoint-file-corrupted">Issue: Checkpoint file corrupted</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorial.html#Further-Resources">Further Resources</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api/modules.html">PySIPS API Documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../api/pysips.html">API Reference</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../api/pysips.html#main-components">Main Components</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../api/pysips.html#pysipsregressor">PysipsRegressor</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/pysips.html#core-modules">Core Modules</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../api/pysips.html#module-pysips.sampler">Sampler</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/pysips.html#module-pysips.prior">Prior</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/pysips.html#module-pysips.metropolis">Metropolis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/pysips.html#module-pysips.laplace_nmll">Laplace NMLL</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/pysips.html#proposal-mechanisms">Proposal Mechanisms</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../api/pysips.html#module-pysips.mutation_proposal">Mutation Proposal</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/pysips.html#module-pysips.crossover_proposal">Crossover Proposal</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/pysips.html#module-pysips.random_choice_proposal">Random Choice Proposal</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/modules.html#quick-links">Quick Links</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">PySIPS</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">pysips.crossover_proposal</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for pysips.crossover_proposal</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Crossover-Based Proposal Generator for Symbolic Regression Models.</span>
+
+<span class="sd">This module provides a crossover-based proposal mechanism for symbolic regression</span>
+<span class="sd">that creates new candidate models by combining genetic material from existing</span>
+<span class="sd">models. It implements genetic programming crossover operations using bingo&#39;s</span>
+<span class="sd">AGraphCrossover functionality within an MCMC or evolutionary algorithm framework.</span>
+
+<span class="sd">The crossover operation mimics biological reproduction by exchanging subtrees</span>
+<span class="sd">between two parent expressions to create offspring that inherit characteristics</span>
+<span class="sd">from both parents. This approach can effectively explore the space of symbolic</span>
+<span class="sd">expressions by combining successful components from different models.</span>
+
+<span class="sd">Key Features</span>
+<span class="sd">------------</span>
+<span class="sd">- Random partner selection from a configurable gene pool</span>
+<span class="sd">- Stochastic child selection (50/50 probability between two crossover offspring)</span>
+<span class="sd">- Avoids self-crossover by ensuring different parent selection</span>
+<span class="sd">- Updateable gene pool for adaptive sampling strategies</span>
+<span class="sd">- Seeded random number generation for reproducible results</span>
+
+<span class="sd">Crossover Mechanism</span>
+<span class="sd">-------------------</span>
+<span class="sd">The crossover operation works by:</span>
+<span class="sd">1. Selecting a random crossover point in each parent expression tree</span>
+<span class="sd">2. Swapping the subtrees at those points between the two parents</span>
+<span class="sd">3. Producing two offspring that combine features from both parents</span>
+<span class="sd">4. Randomly selecting one of the two offspring as the proposal</span>
+
+<span class="sd">This process allows successful expression fragments to be preserved and</span>
+<span class="sd">recombined in novel ways, potentially discovering better solutions through</span>
+<span class="sd">the exploration of hybrid models.</span>
+
+<span class="sd">Usage Example</span>
+<span class="sd">-------------</span>
+<span class="sd">&gt;&gt;&gt; # Assume you have a collection of symbolic models</span>
+<span class="sd">&gt;&gt;&gt; gene_pool = [model1, model2, model3, model4]  # List of AGraph models</span>
+<span class="sd">&gt;&gt;&gt;</span>
+<span class="sd">&gt;&gt;&gt; # Create crossover proposal generator</span>
+<span class="sd">&gt;&gt;&gt; crossover = CrossoverProposal(gene_pool, seed=42)</span>
+<span class="sd">&gt;&gt;&gt;</span>
+<span class="sd">&gt;&gt;&gt; # Use in MCMC or evolutionary sampling</span>
+<span class="sd">&gt;&gt;&gt; current_model = model1</span>
+<span class="sd">&gt;&gt;&gt; new_proposal = crossover(current_model)</span>
+<span class="sd">&gt;&gt;&gt;</span>
+<span class="sd">&gt;&gt;&gt; # Update gene pool as better models are discovered</span>
+<span class="sd">&gt;&gt;&gt; updated_pool = [best_model1, best_model2, new_good_model]</span>
+<span class="sd">&gt;&gt;&gt; crossover.update(updated_pool)</span>
+
+<span class="sd">Integration Notes</span>
+<span class="sd">-----------------</span>
+<span class="sd">The update() method allows for dynamic gene pool management, enabling</span>
+<span class="sd">adaptive strategies where successful models from the sampling process</span>
+<span class="sd">can be added to influence future proposals.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">bingo.symbolic_regression</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">AGraphCrossover</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<div class="viewcode-block" id="CrossoverProposal">
+<a class="viewcode-back" href="../../api/pysips.html#pysips.crossover_proposal.CrossoverProposal">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">CrossoverProposal</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A proposal operator that performs crossover between AGraph models.</span>
+
+<span class="sd">    This class implements a callable object that creates new models by performing</span>
+<span class="sd">    crossover operations between an input model and randomly selected partners</span>
+<span class="sd">    from a gene pool. It utilizes bingo&#39;s AGraphCrossover mechanism and randomly</span>
+<span class="sd">    selects one of the two children produced by each crossover operation.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    gene_pool : list of AGraph</span>
+<span class="sd">        A collection of AGraph models that will be used as potential partners</span>
+<span class="sd">        during crossover operations</span>
+<span class="sd">    seed : int, optional</span>
+<span class="sd">        Random seed for the internal random number generator, used to control</span>
+<span class="sd">        repeatability of operations</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="CrossoverProposal.__init__">
+<a class="viewcode-back" href="../../api/pysips.html#pysips.crossover_proposal.CrossoverProposal.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gene_pool</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_crossover</span> <span class="o">=</span> <span class="n">AGraphCrossover</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_gene_pool</span> <span class="o">=</span> <span class="n">gene_pool</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_select_other_parent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
+        <span class="n">ind</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rng</span><span class="o">.</span><span class="n">integers</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_gene_pool</span><span class="p">))</span>
+        <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gene_pool</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">==</span> <span class="n">model</span><span class="p">:</span>
+            <span class="n">ind</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rng</span><span class="o">.</span><span class="n">integers</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_gene_pool</span><span class="p">))</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gene_pool</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_do_crossover</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">other_parent</span><span class="p">):</span>
+        <span class="n">child_1</span><span class="p">,</span> <span class="n">child_2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_crossover</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">other_parent</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rng</span><span class="o">.</span><span class="n">random</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mf">0.5</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">child_1</span>
+        <span class="k">return</span> <span class="n">child_2</span>
+
+<div class="viewcode-block" id="CrossoverProposal.__call__">
+<a class="viewcode-back" href="../../api/pysips.html#pysips.crossover_proposal.CrossoverProposal.__call__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Perform crossover between the input model and a randomly selected one from the gene pool.</span>
+
+<span class="sd">        This method randomly selects a parent from the gene pool, performs crossover between</span>
+<span class="sd">        the input model and the selected parent, and returns one of the two resulting children</span>
+<span class="sd">        with equal probability.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        model : AGraph</span>
+<span class="sd">            The model to be used as the first parent in the crossover operation</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        AGraph</span>
+<span class="sd">            A new model resulting from crossover between the input model and a</span>
+<span class="sd">            randomly selected model from the gene pool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">other_parent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_select_other_parent</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="n">new_model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_do_crossover</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">other_parent</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">new_model</span></div>
+
+
+<div class="viewcode-block" id="CrossoverProposal.update">
+<a class="viewcode-back" href="../../api/pysips.html#pysips.crossover_proposal.CrossoverProposal.update">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gene_pool</span><span class="p">,</span> <span class="o">*</span><span class="n">_</span><span class="p">,</span> <span class="o">**</span><span class="n">__</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Update the gene pool used for selecting crossover partners.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        gene_pool : iterable of AGraph</span>
+<span class="sd">            The new collection of AGraph models to use as the gene pool</span>
+<span class="sd">        *_ : tuple</span>
+<span class="sd">            Additional positional arguments (ignored)</span>
+<span class="sd">        **__ : dict</span>
+<span class="sd">            Additional keyword arguments (ignored)</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        This method allows for updating the gene pool while maintaining the same</span>
+<span class="sd">        crossover behavior. The additional parameters are included for compatibility</span>
+<span class="sd">        with other proposal update interfaces but are not used.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_gene_pool</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">gene_pool</span><span class="p">)</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, United States Government as represented by the Administrator of the National Aeronautics and Space Administration.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

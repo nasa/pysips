@@ -1,0 +1,612 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PySIPS Tutorial &mdash; PySIPS 0.1.dev1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="_static/nbsphinx-code-cells.css?v=2aa19091" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=6aee1ebc"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+      <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="PySIPS API Documentation" href="api/modules.html" />
+    <link rel="prev" title="Quickstart Guide" href="quickstart.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            PySIPS
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="quickstart.html#installation">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="quickstart.html#basic-usage">Basic Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="quickstart.html#expected-output">Expected Output</a></li>
+<li class="toctree-l2"><a class="reference internal" href="quickstart.html#understanding-the-parameters">Understanding the Parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="quickstart.html#accessing-results">Accessing Results</a></li>
+<li class="toctree-l2"><a class="reference internal" href="quickstart.html#next-steps">Next Steps</a></li>
+<li class="toctree-l2"><a class="reference internal" href="quickstart.html#common-issues">Common Issues</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">PySIPS Tutorial</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#Table-of-Contents">Table of Contents</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#1.-Basic-Symbolic-Regression">1. Basic Symbolic Regression</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#2.-Multivariate-Regression">2. Multivariate Regression</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#3.-Customizing-Available-Operators">3. Customizing Available Operators</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#Available-operators:">Available operators:</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#4.-Model-Selection-Strategies">4. Model Selection Strategies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#5.-Checkpointing-for-Long-Runs">5. Checkpointing for Long Runs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#6.-Hyperparameter-Tuning">6. Hyperparameter Tuning</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#7.-Analyzing-the-Posterior-Distribution">7. Analyzing the Posterior Distribution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Advanced-Topics">Advanced Topics</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#Mutation-and-Crossover-Control">Mutation and Crossover Control</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Expression-Complexity-Control">Expression Complexity Control</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#SMC-Sampling-Control">SMC Sampling Control</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#Best-Practices">Best Practices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Troubleshooting">Troubleshooting</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#Issue:-Fitting-is-too-slow">Issue: Fitting is too slow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Issue:-Poor-model-quality">Issue: Poor model quality</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Issue:-Overfitting">Issue: Overfitting</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Issue:-Checkpoint-file-corrupted">Issue: Checkpoint file corrupted</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#Further-Resources">Further Resources</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api/modules.html">PySIPS API Documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/pysips.html">API Reference</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/pysips.html#main-components">Main Components</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/pysips.html#pysipsregressor">PysipsRegressor</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="api/pysips.html#core-modules">Core Modules</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/pysips.html#module-pysips.sampler">Sampler</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/pysips.html#module-pysips.prior">Prior</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/pysips.html#module-pysips.metropolis">Metropolis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/pysips.html#module-pysips.laplace_nmll">Laplace NMLL</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="api/pysips.html#proposal-mechanisms">Proposal Mechanisms</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/pysips.html#module-pysips.mutation_proposal">Mutation Proposal</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/pysips.html#module-pysips.crossover_proposal">Crossover Proposal</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/pysips.html#module-pysips.random_choice_proposal">Random Choice Proposal</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api/modules.html#quick-links">Quick Links</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">PySIPS</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">PySIPS Tutorial</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/tutorial.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="PySIPS-Tutorial">
+<h1>PySIPS Tutorial<a class="headerlink" href="#PySIPS-Tutorial" title="Link to this heading"></a></h1>
+<p>This tutorial demonstrates key features of PySIPS through practical examples and common use cases.</p>
+<p><strong>Note:</strong> This is an interactive tutorial notebook. You can download and run it locally to experiment with the examples.</p>
+<section id="Table-of-Contents">
+<h2>Table of Contents<a class="headerlink" href="#Table-of-Contents" title="Link to this heading"></a></h2>
+<ol class="arabic simple">
+<li><p><a class="reference internal" href="#1.-Basic-Symbolic-Regression"><span class="std std-ref">Basic Symbolic Regression</span></a></p></li>
+<li><p><a class="reference internal" href="#2.-Multivariate-Regression"><span class="std std-ref">Multivariate Regression</span></a></p></li>
+<li><p><a class="reference internal" href="#3.-Customizing-Available-Operators"><span class="std std-ref">Custom Operators</span></a></p></li>
+<li><p><a class="reference internal" href="#4.-Model-Selection-Strategies"><span class="std std-ref">Model Selection Strategies</span></a></p></li>
+<li><p><a class="reference internal" href="#5.-Checkpointing-for-Long-Runs"><span class="std std-ref">Checkpointing for Long Runs</span></a></p></li>
+<li><p><a class="reference internal" href="#6.-Hyperparameter-Tuning"><span class="std std-ref">Hyperparameter Tuning</span></a></p></li>
+<li><p><a class="reference internal" href="#7.-Analyzing-the-Posterior-Distribution"><span class="std std-ref">Analyzing the Posterior Distribution</span></a></p></li>
+</ol>
+</section>
+<section id="1.-Basic-Symbolic-Regression">
+<h2>1. Basic Symbolic Regression<a class="headerlink" href="#1.-Basic-Symbolic-Regression" title="Link to this heading"></a></h2>
+<p>Let’s start with a simple univariate symbolic regression problem.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pysips</span><span class="w"> </span><span class="kn">import</span> <span class="n">PysipsRegressor</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+
+<span class="c1"># Generate data: y = sin(x) + noise</span>
+<span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
+<span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">X</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+<span class="c1"># Create and fit the regressor</span>
+<span class="n">regressor</span> <span class="o">=</span> <span class="n">PysipsRegressor</span><span class="p">(</span>
+    <span class="n">operators</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;+&#39;</span><span class="p">,</span> <span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="s1">&#39;/&#39;</span><span class="p">],</span>
+    <span class="n">max_complexity</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span>
+    <span class="n">num_particles</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+    <span class="n">num_mcmc_samples</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">max_time</span><span class="o">=</span><span class="mi">120</span><span class="p">,</span>
+    <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span>
+<span class="p">)</span>
+
+<span class="n">regressor</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+
+<span class="c1"># Get results</span>
+<span class="n">expression</span> <span class="o">=</span> <span class="n">regressor</span><span class="o">.</span><span class="n">get_expression</span><span class="p">()</span>
+<span class="n">y_pred</span> <span class="o">=</span> <span class="n">regressor</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Discovered expression: </span><span class="si">{</span><span class="n">expression</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># Visualize results</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Data&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="s1">&#39;r-&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Predicted&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;y&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Discovered: </span><span class="si">{</span><span class="n">expression</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="2.-Multivariate-Regression">
+<h2>2. Multivariate Regression<a class="headerlink" href="#2.-Multivariate-Regression" title="Link to this heading"></a></h2>
+<p>PySIPS handles multiple input variables naturally.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.model_selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">train_test_split</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.metrics</span><span class="w"> </span><span class="kn">import</span> <span class="n">r2_score</span><span class="p">,</span> <span class="n">mean_squared_error</span>
+
+<span class="c1"># Generate data: y = x0^2 + 2*x1 - 3*x2 + noise</span>
+<span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
+<span class="n">n_samples</span> <span class="o">=</span> <span class="mi">200</span>
+<span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">n_samples</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">X</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">X</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">3</span><span class="o">*</span><span class="n">X</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="n">n_samples</span><span class="p">)</span>
+
+<span class="c1"># Split the data</span>
+<span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span>
+    <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span>
+<span class="p">)</span>
+
+<span class="c1"># Create regressor with power operator</span>
+<span class="n">regressor</span> <span class="o">=</span> <span class="n">PysipsRegressor</span><span class="p">(</span>
+    <span class="n">operators</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;+&#39;</span><span class="p">,</span> <span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="s1">&#39;pow&#39;</span><span class="p">],</span>
+    <span class="n">max_complexity</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+    <span class="n">num_particles</span><span class="o">=</span><span class="mi">150</span><span class="p">,</span>
+    <span class="n">num_mcmc_samples</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">max_time</span><span class="o">=</span><span class="mi">180</span><span class="p">,</span>
+    <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span>
+<span class="p">)</span>
+
+<span class="c1"># Fit and evaluate</span>
+<span class="n">regressor</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+<span class="n">y_pred</span> <span class="o">=</span> <span class="n">regressor</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+
+<span class="n">expression</span> <span class="o">=</span> <span class="n">regressor</span><span class="o">.</span><span class="n">get_expression</span><span class="p">()</span>
+<span class="n">r2</span> <span class="o">=</span> <span class="n">r2_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)</span>
+<span class="n">mse</span> <span class="o">=</span> <span class="n">mean_squared_error</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Discovered expression: </span><span class="si">{</span><span class="n">expression</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;R² score: </span><span class="si">{</span><span class="n">r2</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;MSE: </span><span class="si">{</span><span class="n">mse</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="3.-Customizing-Available-Operators">
+<h2>3. Customizing Available Operators<a class="headerlink" href="#3.-Customizing-Available-Operators" title="Link to this heading"></a></h2>
+<p>You can control which mathematical operators are available.</p>
+<section id="Available-operators:">
+<h3>Available operators:<a class="headerlink" href="#Available-operators:" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Arithmetic: <code class="docutils literal notranslate"><span class="pre">'+'</span></code>, <code class="docutils literal notranslate"><span class="pre">'-'</span></code>, <code class="docutils literal notranslate"><span class="pre">'*'</span></code>, <code class="docutils literal notranslate"><span class="pre">'/'</span></code></p></li>
+<li><p>Power: <code class="docutils literal notranslate"><span class="pre">'pow'</span></code>, <code class="docutils literal notranslate"><span class="pre">'sqrt'</span></code></p></li>
+<li><p>Trigonometric: <code class="docutils literal notranslate"><span class="pre">'sin'</span></code>, <code class="docutils literal notranslate"><span class="pre">'cos'</span></code>, <code class="docutils literal notranslate"><span class="pre">'tan'</span></code></p></li>
+<li><p>Exponential/Logarithmic: <code class="docutils literal notranslate"><span class="pre">'exp'</span></code>, <code class="docutils literal notranslate"><span class="pre">'log'</span></code></p></li>
+<li><p>Other: <code class="docutils literal notranslate"><span class="pre">'abs'</span></code></p></li>
+</ul>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Example 1: Simple arithmetic only</span>
+<span class="n">regressor_simple</span> <span class="o">=</span> <span class="n">PysipsRegressor</span><span class="p">(</span>
+    <span class="n">operators</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;+&#39;</span><span class="p">,</span> <span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="s1">&#39;*&#39;</span><span class="p">],</span>  <span class="c1"># No division</span>
+    <span class="n">max_complexity</span><span class="o">=</span><span class="mi">10</span>
+<span class="p">)</span>
+
+<span class="c1"># Example 2: Include division and power</span>
+<span class="n">regressor_extended</span> <span class="o">=</span> <span class="n">PysipsRegressor</span><span class="p">(</span>
+    <span class="n">operators</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;+&#39;</span><span class="p">,</span> <span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="s1">&#39;pow&#39;</span><span class="p">],</span>
+    <span class="n">max_complexity</span><span class="o">=</span><span class="mi">15</span>
+<span class="p">)</span>
+
+<span class="c1"># Example 3: Include trigonometric functions</span>
+<span class="n">regressor_trig</span> <span class="o">=</span> <span class="n">PysipsRegressor</span><span class="p">(</span>
+    <span class="n">operators</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;+&#39;</span><span class="p">,</span> <span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="s1">&#39;sin&#39;</span><span class="p">,</span> <span class="s1">&#39;cos&#39;</span><span class="p">],</span>
+    <span class="n">max_complexity</span><span class="o">=</span><span class="mi">15</span>
+<span class="p">)</span>
+
+<span class="c1"># Example 4: Include exponential and logarithm</span>
+<span class="n">regressor_exp</span> <span class="o">=</span> <span class="n">PysipsRegressor</span><span class="p">(</span>
+    <span class="n">operators</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;+&#39;</span><span class="p">,</span> <span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="s1">&#39;exp&#39;</span><span class="p">,</span> <span class="s1">&#39;log&#39;</span><span class="p">],</span>
+    <span class="n">max_complexity</span><span class="o">=</span><span class="mi">15</span>
+<span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Operators configured successfully!&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+<section id="4.-Model-Selection-Strategies">
+<h2>4. Model Selection Strategies<a class="headerlink" href="#4.-Model-Selection-Strategies" title="Link to this heading"></a></h2>
+<p>PySIPS offers two strategies for selecting the final model:</p>
+<ul class="simple">
+<li><p><strong>``’mode’``</strong>: More robust, favors expressions that appear frequently in the posterior</p></li>
+<li><p><strong>``’max_likelihood’``</strong>: Favors the single best-scoring expression, may overfit</p></li>
+</ul>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">X</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">X</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+
+<span class="c1"># Strategy 1: Mode selection (most frequently sampled)</span>
+<span class="n">regressor_mode</span> <span class="o">=</span> <span class="n">PysipsRegressor</span><span class="p">(</span>
+    <span class="n">operators</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;+&#39;</span><span class="p">,</span> <span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="s1">&#39;pow&#39;</span><span class="p">],</span>
+    <span class="n">model_selection</span><span class="o">=</span><span class="s1">&#39;mode&#39;</span><span class="p">,</span>  <span class="c1"># Default</span>
+    <span class="n">num_particles</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+    <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span>
+<span class="p">)</span>
+<span class="n">regressor_mode</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Mode selection: </span><span class="si">{</span><span class="n">regressor_mode</span><span class="o">.</span><span class="n">get_expression</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># Strategy 2: Maximum likelihood selection</span>
+<span class="n">regressor_maxlik</span> <span class="o">=</span> <span class="n">PysipsRegressor</span><span class="p">(</span>
+    <span class="n">operators</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;+&#39;</span><span class="p">,</span> <span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="s1">&#39;pow&#39;</span><span class="p">],</span>
+    <span class="n">model_selection</span><span class="o">=</span><span class="s1">&#39;max_likelihood&#39;</span><span class="p">,</span>
+    <span class="n">num_particles</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+    <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span>
+<span class="p">)</span>
+<span class="n">regressor_maxlik</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Max likelihood selection: </span><span class="si">{</span><span class="n">regressor_maxlik</span><span class="o">.</span><span class="n">get_expression</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="5.-Checkpointing-for-Long-Runs">
+<h2>5. Checkpointing for Long Runs<a class="headerlink" href="#5.-Checkpointing-for-Long-Runs" title="Link to this heading"></a></h2>
+<p>For long-running experiments, use checkpointing to save progress.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">500</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">X</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mi">500</span><span class="p">)</span>
+
+<span class="c1"># Specify a checkpoint file</span>
+<span class="n">regressor</span> <span class="o">=</span> <span class="n">PysipsRegressor</span><span class="p">(</span>
+    <span class="n">operators</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;+&#39;</span><span class="p">,</span> <span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="s1">&#39;pow&#39;</span><span class="p">],</span>
+    <span class="n">max_complexity</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span>
+    <span class="n">num_particles</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span>
+    <span class="n">checkpoint_file</span><span class="o">=</span><span class="s1">&#39;tutorial_experiment.checkpoint&#39;</span><span class="p">,</span>  <span class="c1"># Save/load from this file</span>
+    <span class="n">max_time</span><span class="o">=</span><span class="mi">600</span><span class="p">,</span>  <span class="c1"># 10 minutes</span>
+    <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span>
+<span class="p">)</span>
+
+<span class="c1"># First run: starts from scratch and saves progress</span>
+<span class="n">regressor</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+
+<span class="n">expression</span> <span class="o">=</span> <span class="n">regressor</span><span class="o">.</span><span class="n">get_expression</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Discovered expression: </span><span class="si">{</span><span class="n">expression</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># Note: If interrupted, subsequent runs will resume from checkpoint</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="6.-Hyperparameter-Tuning">
+<h2>6. Hyperparameter Tuning<a class="headerlink" href="#6.-Hyperparameter-Tuning" title="Link to this heading"></a></h2>
+<p>PySIPS is compatible with scikit-learn’s hyperparameter tuning tools.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.model_selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">GridSearchCV</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.datasets</span><span class="w"> </span><span class="kn">import</span> <span class="n">make_friedman1</span>
+
+<span class="c1"># Generate data</span>
+<span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">make_friedman1</span><span class="p">(</span><span class="n">n_samples</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">n_features</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">noise</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
+
+<span class="c1"># Define parameter grid</span>
+<span class="n">param_grid</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;max_complexity&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">20</span><span class="p">],</span>
+    <span class="s1">&#39;num_particles&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">50</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">150</span><span class="p">],</span>
+<span class="p">}</span>
+
+<span class="c1"># Create base regressor (disable progress bar for cleaner output)</span>
+<span class="n">base_regressor</span> <span class="o">=</span> <span class="n">PysipsRegressor</span><span class="p">(</span>
+    <span class="n">operators</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;+&#39;</span><span class="p">,</span> <span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="s1">&#39;*&#39;</span><span class="p">],</span>
+    <span class="n">num_mcmc_samples</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">max_time</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span>
+    <span class="n">show_progress_bar</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>  <span class="c1"># Important for grid search</span>
+    <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span>
+<span class="p">)</span>
+
+<span class="c1"># Perform grid search</span>
+<span class="n">grid_search</span> <span class="o">=</span> <span class="n">GridSearchCV</span><span class="p">(</span>
+    <span class="n">base_regressor</span><span class="p">,</span>
+    <span class="n">param_grid</span><span class="p">,</span>
+    <span class="n">cv</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+    <span class="n">scoring</span><span class="o">=</span><span class="s1">&#39;r2&#39;</span><span class="p">,</span>
+    <span class="n">n_jobs</span><span class="o">=</span><span class="mi">1</span>  <span class="c1"># PySIPS doesn&#39;t support parallelization at this level</span>
+<span class="p">)</span>
+
+<span class="n">grid_search</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Best parameters: </span><span class="si">{</span><span class="n">grid_search</span><span class="o">.</span><span class="n">best_params_</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Best score: </span><span class="si">{</span><span class="n">grid_search</span><span class="o">.</span><span class="n">best_score_</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># Use best estimator</span>
+<span class="n">best_expression</span> <span class="o">=</span> <span class="n">grid_search</span><span class="o">.</span><span class="n">best_estimator_</span><span class="o">.</span><span class="n">get_expression</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Best expression: </span><span class="si">{</span><span class="n">best_expression</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="7.-Analyzing-the-Posterior-Distribution">
+<h2>7. Analyzing the Posterior Distribution<a class="headerlink" href="#7.-Analyzing-the-Posterior-Distribution" title="Link to this heading"></a></h2>
+<p>Access the full posterior distribution for uncertainty quantification.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Generate data</span>
+<span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
+<span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">X</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">X</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+
+<span class="c1"># Fit regressor</span>
+<span class="n">regressor</span> <span class="o">=</span> <span class="n">PysipsRegressor</span><span class="p">(</span>
+    <span class="n">operators</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;+&#39;</span><span class="p">,</span> <span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="s1">&#39;pow&#39;</span><span class="p">],</span>
+    <span class="n">max_complexity</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span>
+    <span class="n">num_particles</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span>
+    <span class="n">num_mcmc_samples</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">max_time</span><span class="o">=</span><span class="mi">120</span><span class="p">,</span>
+    <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span>
+<span class="p">)</span>
+<span class="n">regressor</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+
+<span class="c1"># Get all sampled models and their likelihoods</span>
+<span class="n">models</span><span class="p">,</span> <span class="n">likelihoods</span> <span class="o">=</span> <span class="n">regressor</span><span class="o">.</span><span class="n">get_models</span><span class="p">()</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Total unique models sampled: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">models</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Top 5 models by likelihood:&quot;</span><span class="p">)</span>
+
+<span class="c1"># Sort by likelihood</span>
+<span class="n">sorted_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">likelihoods</span><span class="p">)[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">models</span><span class="p">))):</span>
+    <span class="n">idx</span> <span class="o">=</span> <span class="n">sorted_indices</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2">. </span><span class="si">{</span><span class="n">models</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="si">}</span><span class="s2"> (likelihood: </span><span class="si">{</span><span class="n">likelihoods</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+
+<span class="c1"># Count frequency of each model in the posterior</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Selected model: </span><span class="si">{</span><span class="n">regressor</span><span class="o">.</span><span class="n">get_expression</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;(This is the most frequently sampled model)&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="Advanced-Topics">
+<h2>Advanced Topics<a class="headerlink" href="#Advanced-Topics" title="Link to this heading"></a></h2>
+<section id="Mutation-and-Crossover-Control">
+<h3>Mutation and Crossover Control<a class="headerlink" href="#Mutation-and-Crossover-Control" title="Link to this heading"></a></h3>
+<p>Fine-tune the proposal mechanism probabilities:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">regressor</span> <span class="o">=</span> <span class="n">PysipsRegressor</span><span class="p">(</span>
+    <span class="n">operators</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;+&#39;</span><span class="p">,</span> <span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="s1">&#39;*&#39;</span><span class="p">],</span>
+    <span class="c1"># Mutation probabilities</span>
+    <span class="n">command_probability</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>    <span class="c1"># Probability of changing an operator</span>
+    <span class="n">node_probability</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>        <span class="c1"># Probability of replacing a node</span>
+    <span class="n">parameter_probability</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>   <span class="c1"># Probability of changing edges in an expression graph</span>
+    <span class="n">prune_probability</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>       <span class="c1"># Probability of simplifying</span>
+    <span class="n">fork_probability</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>        <span class="c1"># Probability of expanding</span>
+    <span class="c1"># Crossover settings</span>
+    <span class="n">crossover_pool_size</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>      <span class="c1"># Size of gene pool for crossover</span>
+    <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span>
+<span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Advanced configuration set!&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="Expression-Complexity-Control">
+<h3>Expression Complexity Control<a class="headerlink" href="#Expression-Complexity-Control" title="Link to this heading"></a></h3>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">regressor</span> <span class="o">=</span> <span class="n">PysipsRegressor</span><span class="p">(</span>
+    <span class="n">operators</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;+&#39;</span><span class="p">,</span> <span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="s1">&#39;*&#39;</span><span class="p">],</span>
+    <span class="n">max_complexity</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>              <span class="c1"># Maximum expression size</span>
+    <span class="n">terminal_probability</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>       <span class="c1"># Probability of leaf nodes</span>
+    <span class="n">constant_probability</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>       <span class="c1"># Probability of constants vs variables</span>
+    <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span>
+<span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Complexity controls configured!&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="SMC-Sampling-Control">
+<h3>SMC Sampling Control<a class="headerlink" href="#SMC-Sampling-Control" title="Link to this heading"></a></h3>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">regressor</span> <span class="o">=</span> <span class="n">PysipsRegressor</span><span class="p">(</span>
+    <span class="n">operators</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;+&#39;</span><span class="p">,</span> <span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="s1">&#39;*&#39;</span><span class="p">],</span>
+    <span class="n">num_particles</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>          <span class="c1"># Population size</span>
+    <span class="n">num_mcmc_samples</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>        <span class="c1"># MCMC steps per SMC iteration</span>
+    <span class="n">target_ess</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span>             <span class="c1"># Target effective sample size (0-1)</span>
+    <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span>
+<span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;SMC parameters configured!&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+<section id="Best-Practices">
+<h2>Best Practices<a class="headerlink" href="#Best-Practices" title="Link to this heading"></a></h2>
+<ol class="arabic simple">
+<li><p><strong>Start simple</strong>: Begin with basic operators and small complexity limits</p></li>
+<li><p><strong>Use checkpoints</strong>: For experiments taking &gt;5 minutes, always use checkpointing</p></li>
+<li><p><strong>Reproducibility</strong>: Always set <code class="docutils literal notranslate"><span class="pre">random_state</span></code> for reproducible results</p></li>
+<li><p><strong>Progress monitoring</strong>: Use <code class="docutils literal notranslate"><span class="pre">show_progress_bar=True</span></code> (default) for interactive use</p></li>
+<li><p><strong>Hyperparameter tuning</strong>: Disable progress bar when using GridSearchCV</p></li>
+<li><p><strong>Model validation</strong>: Always validate on held-out test data</p></li>
+<li><p><strong>Posterior inspection</strong>: Check the full posterior distribution, not just the best model</p></li>
+</ol>
+</section>
+<section id="Troubleshooting">
+<h2>Troubleshooting<a class="headerlink" href="#Troubleshooting" title="Link to this heading"></a></h2>
+<section id="Issue:-Fitting-is-too-slow">
+<h3>Issue: Fitting is too slow<a class="headerlink" href="#Issue:-Fitting-is-too-slow" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Reduce <code class="docutils literal notranslate"><span class="pre">num_particles</span></code> (e.g., 50-100)</p></li>
+<li><p>Reduce <code class="docutils literal notranslate"><span class="pre">max_complexity</span></code> (e.g., 10-15)</p></li>
+<li><p>Set <code class="docutils literal notranslate"><span class="pre">max_time</span></code> to limit runtime</p></li>
+<li><p>Simplify the operator set</p></li>
+</ul>
+</section>
+<section id="Issue:-Poor-model-quality">
+<h3>Issue: Poor model quality<a class="headerlink" href="#Issue:-Poor-model-quality" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Increase <code class="docutils literal notranslate"><span class="pre">num_particles</span></code> (e.g., 200-500)</p></li>
+<li><p>Increase <code class="docutils literal notranslate"><span class="pre">num_mcmc_samples</span></code> (e.g., 20-50)</p></li>
+<li><p>Increase <code class="docutils literal notranslate"><span class="pre">max_complexity</span></code> if needed</p></li>
+<li><p>Add more relevant operators</p></li>
+<li><p>Collect more/better training data</p></li>
+</ul>
+</section>
+<section id="Issue:-Overfitting">
+<h3>Issue: Overfitting<a class="headerlink" href="#Issue:-Overfitting" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Use cross-validation for model selection</p></li>
+<li><p>Reduce <code class="docutils literal notranslate"><span class="pre">max_complexity</span></code></p></li>
+<li><p>Use <code class="docutils literal notranslate"><span class="pre">model_selection='mode'</span></code> instead of <code class="docutils literal notranslate"><span class="pre">'max_likelihood'</span></code></p></li>
+</ul>
+</section>
+<section id="Issue:-Checkpoint-file-corrupted">
+<h3>Issue: Checkpoint file corrupted<a class="headerlink" href="#Issue:-Checkpoint-file-corrupted" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Delete the checkpoint file and start fresh</p></li>
+<li><p>Ensure sufficient disk space</p></li>
+</ul>
+</section>
+</section>
+<section id="Further-Resources">
+<h2>Further Resources<a class="headerlink" href="#Further-Resources" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://github.com/nasa/pysips">GitHub Repository</a></p></li>
+<li><p><a class="reference external" href="https://nasa.github.io/pysips/api/modules.html">API Reference</a></p></li>
+<li><p><a class="reference external" href="https://arxiv.org/abs/2512.10849">Paper: Bayesian Symbolic Regression via Posterior Sampling</a></p></li>
+</ul>
+<p>For more examples, see the <code class="docutils literal notranslate"><span class="pre">demos/</span></code> directory in the repository.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="quickstart.html" class="btn btn-neutral float-left" title="Quickstart Guide" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="api/modules.html" class="btn btn-neutral float-right" title="PySIPS API Documentation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, United States Government as represented by the Administrator of the National Aeronautics and Space Administration.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

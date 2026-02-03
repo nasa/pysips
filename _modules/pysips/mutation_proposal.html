@@ -1,0 +1,399 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pysips.mutation_proposal &mdash; PySIPS 0.1.dev1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=6aee1ebc"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            PySIPS
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart.html">Quickstart Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../quickstart.html#installation">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../quickstart.html#basic-usage">Basic Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../quickstart.html#expected-output">Expected Output</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../quickstart.html#understanding-the-parameters">Understanding the Parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../quickstart.html#accessing-results">Accessing Results</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../quickstart.html#next-steps">Next Steps</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../quickstart.html#common-issues">Common Issues</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial.html">PySIPS Tutorial</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorial.html#Table-of-Contents">Table of Contents</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorial.html#1.-Basic-Symbolic-Regression">1. Basic Symbolic Regression</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorial.html#2.-Multivariate-Regression">2. Multivariate Regression</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorial.html#3.-Customizing-Available-Operators">3. Customizing Available Operators</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../tutorial.html#Available-operators:">Available operators:</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorial.html#4.-Model-Selection-Strategies">4. Model Selection Strategies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorial.html#5.-Checkpointing-for-Long-Runs">5. Checkpointing for Long Runs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorial.html#6.-Hyperparameter-Tuning">6. Hyperparameter Tuning</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorial.html#7.-Analyzing-the-Posterior-Distribution">7. Analyzing the Posterior Distribution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorial.html#Advanced-Topics">Advanced Topics</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../tutorial.html#Mutation-and-Crossover-Control">Mutation and Crossover Control</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../tutorial.html#Expression-Complexity-Control">Expression Complexity Control</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../tutorial.html#SMC-Sampling-Control">SMC Sampling Control</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorial.html#Best-Practices">Best Practices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorial.html#Troubleshooting">Troubleshooting</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../tutorial.html#Issue:-Fitting-is-too-slow">Issue: Fitting is too slow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../tutorial.html#Issue:-Poor-model-quality">Issue: Poor model quality</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../tutorial.html#Issue:-Overfitting">Issue: Overfitting</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../tutorial.html#Issue:-Checkpoint-file-corrupted">Issue: Checkpoint file corrupted</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorial.html#Further-Resources">Further Resources</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api/modules.html">PySIPS API Documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../api/pysips.html">API Reference</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../api/pysips.html#main-components">Main Components</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../api/pysips.html#pysipsregressor">PysipsRegressor</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/pysips.html#core-modules">Core Modules</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../api/pysips.html#module-pysips.sampler">Sampler</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/pysips.html#module-pysips.prior">Prior</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/pysips.html#module-pysips.metropolis">Metropolis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/pysips.html#module-pysips.laplace_nmll">Laplace NMLL</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/pysips.html#proposal-mechanisms">Proposal Mechanisms</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../api/pysips.html#module-pysips.mutation_proposal">Mutation Proposal</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/pysips.html#module-pysips.crossover_proposal">Crossover Proposal</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/pysips.html#module-pysips.random_choice_proposal">Random Choice Proposal</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/modules.html#quick-links">Quick Links</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">PySIPS</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">pysips.mutation_proposal</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for pysips.mutation_proposal</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Mutation-Based Proposal Generator for Symbolic Regression Models.</span>
+
+<span class="sd">This module provides a proposal mechanism for symbolic regression that uses</span>
+<span class="sd">bingo&#39;s AGraph mutation operations to generate new candidate models from existing</span>
+<span class="sd">ones. It is designed to work within Markov Chain Monte Carlo (MCMC) sampling</span>
+<span class="sd">frameworks where new model proposals are needed at each step.</span>
+
+<span class="sd">The module implements a configurable mutation strategy that can perform various</span>
+<span class="sd">types of structural changes to symbolic mathematical expressions, including</span>
+<span class="sd">adding/removing nodes, changing operations, modifying parameters, and pruning</span>
+<span class="sd">or expanding expression trees.</span>
+
+<span class="sd">Key Features</span>
+<span class="sd">------------</span>
+<span class="sd">- Multiple mutation types: command, node, parameter, prune, and fork mutations</span>
+<span class="sd">- Configurable probabilities for each mutation type</span>
+<span class="sd">- Repeat mutation capability for more dramatic changes</span>
+<span class="sd">- Ensures non-identical proposals (prevents proposing the same model)</span>
+<span class="sd">- Seeded random number generation for reproducible results</span>
+<span class="sd">- Integration with bingo&#39;s ComponentGenerator for operator management</span>
+
+<span class="sd">Mutation Types</span>
+<span class="sd">--------------</span>
+<span class="sd">Command Mutation</span>
+<span class="sd">    Changes the operation at a node (e.g., &#39;+&#39; to &#39;*&#39;)</span>
+<span class="sd">Node Mutation</span>
+<span class="sd">    Replaces a node with a new randomly generated subtree</span>
+<span class="sd">Parameter Mutation</span>
+<span class="sd">    Modifies the numeric constants in the expression</span>
+<span class="sd">Prune Mutation</span>
+<span class="sd">    Removes a portion of the expression tree</span>
+<span class="sd">Fork Mutation</span>
+<span class="sd">    Adds a new branch to the expression tree</span>
+<span class="sd">Repeat Mutation</span>
+<span class="sd">    Recursively applies additional mutations with specified probability</span>
+
+<span class="sd">Usage Example</span>
+<span class="sd">-------------</span>
+<span class="sd">&gt;&gt;&gt; # Create a mutation proposal generator</span>
+<span class="sd">&gt;&gt;&gt; proposal = MutationProposal(</span>
+<span class="sd">...     X_dim=3,  # 3 input features</span>
+<span class="sd">...     operators=[&quot;+&quot;, &quot;subtract&quot;, &quot;multiply&quot;, &quot;divide&quot;],</span>
+<span class="sd">...     terminal_probability=0.2,</span>
+<span class="sd">...     command_probability=0.3,</span>
+<span class="sd">...     node_probability=0.2,</span>
+<span class="sd">...     seed=42</span>
+<span class="sd">... )</span>
+<span class="sd">&gt;&gt;&gt;</span>
+<span class="sd">&gt;&gt;&gt; # Use in MCMC sampling (assuming you have a model)</span>
+<span class="sd">&gt;&gt;&gt; # new_model = proposal(current_model)</span>
+
+<span class="sd">Notes</span>
+<span class="sd">-----</span>
+<span class="sd">The proposal generator ensures that new proposals are always different from</span>
+<span class="sd">the input model by repeatedly applying mutations until a change occurs. This</span>
+<span class="sd">prevents MCMC chains from getting stuck with identical consecutive states.</span>
+
+<span class="sd">The update() method is provided for compatibility with adaptive MCMC frameworks</span>
+<span class="sd">but currently performs no operations, as the mutation probabilities are fixed</span>
+<span class="sd">at initialization.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">bingo.symbolic_regression</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">ComponentGenerator</span><span class="p">,</span>
+    <span class="n">AGraphMutation</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<div class="viewcode-block" id="MutationProposal">
+<a class="viewcode-back" href="../../api/pysips.html#pysips.mutation_proposal.MutationProposal">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">MutationProposal</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Proposal functor that performs bingo&#39;s Agraph mutation</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x_dim : int</span>
+<span class="sd">        dimension of input data (number of features in dataset)</span>
+<span class="sd">    operators : list of str</span>
+<span class="sd">        list of equation primatives to allow, e.g. [&quot;+&quot;, &quot;subtraction&quot;, &quot;pow&quot;]</span>
+<span class="sd">    terminal_probability : float, optional</span>
+<span class="sd">        [0.0-1.0] probability that a new node will be a terminal, by default 0.1</span>
+<span class="sd">    constant_probability : float, optional</span>
+<span class="sd">        [0.0-1.0] probability that a new terminal will be a constant, by default</span>
+<span class="sd">        weighted the same as a single feature of the input data</span>
+<span class="sd">    command_probability : float, optional</span>
+<span class="sd">        probability of command mutation, by default 0.2</span>
+<span class="sd">    node_probability : float, optional</span>
+<span class="sd">        probability of node mutation, by default 0.2</span>
+<span class="sd">    parameter_probability : float, optional</span>
+<span class="sd">        probability of parameter mutation, by default 0.2</span>
+<span class="sd">    prune_probability : float, optional</span>
+<span class="sd">        probability of pruning (removing a portion of the equation), by default 0.2</span>
+<span class="sd">    fork_probability : float, optional</span>
+<span class="sd">        probability of forking (adding an additional branch to the equation),</span>
+<span class="sd">        by default 0.2</span>
+<span class="sd">    repeat_mutation_probability : float, optional</span>
+<span class="sd">        probability of a repeated mutation (applied recursively). default 0.0</span>
+<span class="sd">    seed : int, optional</span>
+<span class="sd">        random seed used to control repeatability</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># pylint: disable=R0913,R0917</span>
+<div class="viewcode-block" id="MutationProposal.__init__">
+<a class="viewcode-back" href="../../api/pysips.html#pysips.mutation_proposal.MutationProposal.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">x_dim</span><span class="p">,</span>
+        <span class="n">operators</span><span class="p">,</span>
+        <span class="n">terminal_probability</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+        <span class="n">constant_probability</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">command_probability</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
+        <span class="n">node_probability</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
+        <span class="n">parameter_probability</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
+        <span class="n">prune_probability</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
+        <span class="n">fork_probability</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
+        <span class="n">repeat_mutation_probability</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+        <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+
+        <span class="n">component_generator</span> <span class="o">=</span> <span class="n">ComponentGenerator</span><span class="p">(</span>
+            <span class="n">input_x_dimension</span><span class="o">=</span><span class="n">x_dim</span><span class="p">,</span>
+            <span class="n">terminal_probability</span><span class="o">=</span><span class="n">terminal_probability</span><span class="p">,</span>
+            <span class="n">constant_probability</span><span class="o">=</span><span class="n">constant_probability</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">for</span> <span class="n">comp</span> <span class="ow">in</span> <span class="n">operators</span><span class="p">:</span>
+            <span class="n">component_generator</span><span class="o">.</span><span class="n">add_operator</span><span class="p">(</span><span class="n">comp</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_mutation</span> <span class="o">=</span> <span class="n">AGraphMutation</span><span class="p">(</span>
+            <span class="n">component_generator</span><span class="p">,</span>
+            <span class="n">command_probability</span><span class="p">,</span>
+            <span class="n">node_probability</span><span class="p">,</span>
+            <span class="n">parameter_probability</span><span class="p">,</span>
+            <span class="n">prune_probability</span><span class="p">,</span>
+            <span class="n">fork_probability</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_repeat_mutation_prob</span> <span class="o">=</span> <span class="n">repeat_mutation_probability</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_do_mutation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
+        <span class="n">new_model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mutation</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rng</span><span class="o">.</span><span class="n">random</span><span class="p">()</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_repeat_mutation_prob</span><span class="p">:</span>
+            <span class="n">new_model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mutation</span><span class="p">(</span><span class="n">new_model</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">new_model</span>
+
+<div class="viewcode-block" id="MutationProposal.__call__">
+<a class="viewcode-back" href="../../api/pysips.html#pysips.mutation_proposal.MutationProposal.__call__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Apply mutation to generate a new symbolic expression model.</span>
+
+<span class="sd">        This method takes a symbolic regression model (AGraph) as input and returns</span>
+<span class="sd">        a new model created by applying one or more mutation operations. The method</span>
+<span class="sd">        guarantees that the returned model is different from the input model by</span>
+<span class="sd">        repeating mutations if necessary.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        model : AGraph</span>
+<span class="sd">            The input symbolic regression model to be mutated. This should be a</span>
+<span class="sd">            bingo AGraph instance representing a mathematical expression.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        AGraph</span>
+<span class="sd">            A new symbolic regression model created by applying mutation(s) to</span>
+<span class="sd">            the input model. Guaranteed to be different from the input model.</span>
+
+<span class="sd">        Mutation Process</span>
+<span class="sd">        ---------------</span>
+<span class="sd">        1. **Initial Mutation**: Applies the configured mutation operation to the model</span>
+<span class="sd">        2. **Repeat Mutations**: May apply additional mutations based on repeat_mutation_probability</span>
+<span class="sd">        3. **Difference Check**: Ensures the new model differs from the original one</span>
+<span class="sd">        4. **Repeated Attempts**: If the mutation produces an identical model, tries again</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        - The mutation type applied is selected probabilistically based on the</span>
+<span class="sd">        probabilities specified during initialization (command_probability,</span>
+<span class="sd">        node_probability, etc.)</span>
+<span class="sd">        - The repeat mutation feature allows for more dramatic changes by applying</span>
+<span class="sd">        multiple mutations in sequence with probability repeat_mutation_probability</span>
+<span class="sd">        - This method will always return a different model, never the same as the input</span>
+
+<span class="sd">        See Also</span>
+<span class="sd">        --------</span>
+<span class="sd">        AGraphMutation : Bingo&#39;s mutation implementation used internally</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">new_model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_do_mutation</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="k">while</span> <span class="n">new_model</span> <span class="o">==</span> <span class="n">model</span><span class="p">:</span>
+            <span class="n">new_model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_do_mutation</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">new_model</span></div>
+
+
+<div class="viewcode-block" id="MutationProposal.update">
+<a class="viewcode-back" href="../../api/pysips.html#pysips.mutation_proposal.MutationProposal.update">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Update method for compatibility with adaptive MCMC frameworks.</span>
+
+<span class="sd">        This method is provided to maintain API compatibility with other proposal</span>
+<span class="sd">        mechanisms that support adaptive behavior. In the current implementation,</span>
+<span class="sd">        the method is a no-op as the mutation proposal does not adapt its behavior</span>
+<span class="sd">        based on sampling history.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        *args : tuple</span>
+<span class="sd">            Positional arguments (not used in the current implementation).</span>
+<span class="sd">        **kwargs : dict</span>
+<span class="sd">            Keyword arguments (not used in the current implementation).</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        None</span>
+<span class="sd">            This method does not return any value.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        Future versions might implement adaptive behavior such as:</span>
+<span class="sd">        - Adjusting mutation probabilities based on acceptance rates</span>
+<span class="sd">        - Learning which mutation types are more effective for a given problem</span>
+
+<span class="sd">        In composite proposal mechanisms that combine multiple proposal types</span>
+<span class="sd">        (such as RandomChoiceProposal), this method will be called as part</span>
+<span class="sd">        of the update process, but currently has no effect on this proposal.</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+</div>
+
+        <span class="c1"># pass</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, United States Government as represented by the Administrator of the National Aeronautics and Space Administration.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
