@@ -1,5 +1,7 @@
 sphinx>=7.0
 sphinx-rtd-theme>=2.0
+nbsphinx>=0.9.0
+ipykernel
 numpy
 bingo-nasa
 smcpy>=0.1.11

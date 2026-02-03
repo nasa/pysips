@@ -36,6 +36,7 @@ extensions = [
     'sphinx.ext.viewcode',
     'sphinx.ext.intersphinx',
     'sphinx.ext.mathjax',
+    'nbsphinx',
 ]
 
 templates_path = ['_templates']
@@ -103,3 +104,13 @@ html_theme_options = {
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
 # pixels large.
 # html_favicon = None
+
+# -- nbsphinx configuration --------------------------------------------------
+# Don't execute notebooks during build (they should be pre-executed)
+nbsphinx_execute = 'never'
+
+# Allow errors in notebooks (useful for displaying error examples)
+nbsphinx_allow_errors = False
+
+# Timeout for notebook execution (if enabled)
+nbsphinx_timeout = 180

@@ -10,6 +10,7 @@ Welcome to PySIPS documentation! PySIPS is a robust framework for discovering in
    :caption: User Guide
 
    quickstart
+   tutorial_notebook
    tutorial
 
 .. toctree::
@@ -72,6 +73,9 @@ Quick Example
    # Get the discovered expression
    expression = regressor.get_expression()
    print(f"Discovered expression: {expression}")
+
+.. note::
+   For an interactive tutorial with code you can run and modify, see the :doc:`tutorial_notebook` or download the `tutorial notebook <tutorial_notebook.ipynb>`_ to run locally.
 
 Citation
 --------
