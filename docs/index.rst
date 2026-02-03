@@ -10,7 +10,7 @@ Welcome to PySIPS documentation! PySIPS is a robust framework for discovering in
    :caption: User Guide
 
    quickstart
-   tutorial_notebook
+   tutorial
 
 .. toctree::
    :maxdepth: 2
@@ -74,7 +74,7 @@ Quick Example
    print(f"Discovered expression: {expression}")
 
 .. note::
-   For an interactive tutorial with code you can run and modify, see the :doc:`tutorial_notebook` or download the `tutorial notebook <tutorial_notebook.ipynb>`_ to run locally.
+   For an interactive tutorial with code you can run and modify, see the :doc:`tutorial` or download the `tutorial notebook <https://github.com/nasa/pysips/blob/main/demos/tutorial.ipynb>`_ to run locally.
 
 Citation
 --------

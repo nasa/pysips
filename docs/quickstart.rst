@@ -102,7 +102,7 @@ After fitting, you can access various results:
 Next Steps
 ----------
 
-- Continue to the :doc:`tutorial_notebook` for more advanced usage and examples
+- Continue to the :doc:`tutorial` for more advanced usage and examples
 - Explore the :doc:`api/modules` for detailed API documentation
 - Check out the examples in the ``demos/`` directory of the repository
 
