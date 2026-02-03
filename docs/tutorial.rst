@@ -147,7 +147,7 @@ You can control which mathematical operators are available:
 - Arithmetic: ``'+'``, ``'-'``, ``'*'``, ``'/'``
 - Power: ``'pow'``, ``'sqrt'``
 - Trigonometric: ``'sin'``, ``'cos'``, ``'tan'``
-- Exponential/Logarithmic: ``'exp'``, ``'log'``, ``'log10'``
+- Exponential/Logarithmic: ``'exp'``, ``'log'``
 - Other: ``'abs'``
 
 .. _model-selection-strategies:
@@ -338,7 +338,7 @@ Fine-tune the proposal mechanism probabilities:
        # Mutation probabilities
        command_probability=0.3,    # Probability of changing an operator
        node_probability=0.3,        # Probability of replacing a node
-       parameter_probability=0.2,   # Probability of modifying a constant
+       parameter_probability=0.2,   # Probability of changing edges in an expression graph
        prune_probability=0.1,       # Probability of simplifying
        fork_probability=0.1,        # Probability of expanding
        # Crossover settings
@@ -404,19 +404,17 @@ Troubleshooting
 - Use cross-validation for model selection
 - Reduce ``max_complexity``
 - Use ``model_selection='mode'`` instead of ``'max_likelihood'``
-- Add regularization by penalizing complex expressions
 
 **Issue: Checkpoint file corrupted**
 
 - Delete the checkpoint file and start fresh
 - Ensure sufficient disk space
-- Check file permissions
 
 Further Resources
 -----------------
 
 - `GitHub Repository <https://github.com/nasa/pysips>`_
 - `API Reference <api/modules.html>`_
-- `Paper: Bayesian Symbolic Regression via Posterior Sampling <https://royalsocietypublishing.org/>`_
+- `Paper: Bayesian Symbolic Regression via Posterior Sampling <https://arxiv.org/abs/2512.10849>`_
 
 For more examples, see the ``demos/`` directory in the repository.

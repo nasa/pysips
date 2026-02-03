@@ -26,7 +26,7 @@ PySIPS provides a Bayesian approach to symbolic regression that offers several a
 * **Robustness to noise**: The Bayesian framework naturally handles noisy datasets
 * **Uncertainty quantification**: Provides built-in uncertainty estimates for discovered expressions
 * **Parsimonious expressions**: Discovers simple, interpretable models with improved generalization
-* **Reduced overfitting**: Sequential Monte Carlo sampling prevents overfitting in symbolic regression
+* **Reduced overfitting**: Sequential Monte Carlo sampling mitigates overfitting in symbolic regression
 
 The algorithm uses Sequential Monte Carlo (SMC) sampling to approximate the posterior distribution over symbolic expressions, employing normalized marginal likelihood for model evaluation and combining mutation and crossover operations as proposal mechanisms.
 

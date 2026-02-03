@@ -8,7 +8,7 @@ PySIPS API Documentation
 
    pysips
 
-The PySIPS package provides a complete framework for Bayesian symbolic regression.
+The PySIPS package provides a complete framework for Bayesian symbolic regression using sequential Monte Carlo.
 
 Quick Links
 -----------

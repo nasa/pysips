@@ -1,12 +1,12 @@
 API Reference
 =============
 
-This section contains the complete API documentation for PySIPS, automatically generated from the source code docstrings.
+This section contains the complete API documentation for PySIPS.
 
 Main Components
 ---------------
 
-The primary interface to PySIPS is through the :class:`~pysips.PysipsRegressor` class, which provides a scikit-learn compatible API for symbolic regression.
+The primary interface to PySIPS is through the :class:`~pysips.PysipsRegressor` class, which provides a scikit-learn compatible API for Bayesian symbolic regression.
 
 PysipsRegressor
 ~~~~~~~~~~~~~~~
