@@ -311,7 +311,7 @@ Access the full posterior distribution for uncertainty quantification:
    models, likelihoods = regressor.get_models()
 
    print(f"Total unique models sampled: {len(models)}")
-   print(f"\\nTop 5 models by likelihood:")
+   print(f"\nTop 5 models by likelihood:")
    
    # Sort by likelihood
    sorted_indices = np.argsort(likelihoods)[::-1]
@@ -321,7 +321,7 @@ Access the full posterior distribution for uncertainty quantification:
        print(f"{i+1}. {models[idx]} (likelihood: {likelihoods[idx]:.4f})")
 
    # Count frequency of each model in the posterior
-   print(f"\\nSelected model: {regressor.get_expression()}")
+   print(f"\nSelected model: {regressor.get_expression()}")
    print(f"(This is the most frequently sampled model)")
 
 Advanced Topics
