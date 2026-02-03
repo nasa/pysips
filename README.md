@@ -1,6 +1,10 @@
 # PySIPS: Python package for Symbolic Inference via Posterior Sampling
 
+[![Documentation Status](https://github.com/nasa/pysips/workflows/Documentation/badge.svg)](https://nasa.github.io/pysips/)
+
 PySIPS is an open-source implementation of Bayesian symbolic regression via posterior sampling as described in the paper "Bayesian Symbolic Regression via Posterior Sampling" by G. F. Bomarito and P. E. Leser from NASA Langley Research Center.
+
+**📖 [Documentation](https://nasa.github.io/pysips/)** | **🚀 [Quickstart Guide](https://nasa.github.io/pysips/quickstart.html)** | **📚 [Tutorial](https://nasa.github.io/pysips/tutorial.html)** | **🔍 [API Reference](https://nasa.github.io/pysips/api/modules.html)**
 
 ## Purpose
 

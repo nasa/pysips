@@ -6,3 +6,8 @@
 .pypirc
 dist/*
 *.egg-info/
+
+# Documentation build
+docs/_build/
+docs/.doctrees/
+
