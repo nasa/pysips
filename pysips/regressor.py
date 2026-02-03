@@ -141,9 +141,6 @@ from .crossover_proposal import CrossoverProposal
 from .random_choice_proposal import RandomChoiceProposal
 from .sampler import sample
 
-MAX_FLOAT = np.finfo(np.float64).max
-MIN_FLOAT = np.finfo(np.float64).min
-
 USE_PYTHON = True
 USE_SIMPLIFICATION = True
 DEFAULT_OPERATORS = ["+", "*"]
