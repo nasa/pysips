@@ -40,8 +40,7 @@ make clean
 
 - `index.rst` - Main documentation page
 - `quickstart.rst` - Quick start guide for new users
-- `tutorial.rst` - Comprehensive tutorial with examples (text-based)
-- `tutorial_notebook.ipynb` - Interactive Jupyter notebook tutorial (editable, downloadable)
+- `tutorial_notebook.ipynb` - Interactive Jupyter notebook tutorial (downloadable and editable)
 - `api/` - API reference documentation (auto-generated from docstrings)
 - `conf.py` - Sphinx configuration
 - `requirements.txt` - Documentation build dependencies

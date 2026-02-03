@@ -18,4 +18,4 @@ Quick Links
 * :mod:`pysips.prior` - Prior distribution over symbolic expressions
 * :mod:`pysips.laplace_nmll` - Laplace approximation for model evaluation
 
-For detailed usage examples, see the :doc:`../tutorial`.
+For detailed usage examples, see the :doc:`../tutorial_notebook`.

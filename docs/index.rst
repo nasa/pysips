@@ -11,7 +11,6 @@ Welcome to PySIPS documentation! PySIPS is a robust framework for discovering in
 
    quickstart
    tutorial_notebook
-   tutorial
 
 .. toctree::
    :maxdepth: 2
