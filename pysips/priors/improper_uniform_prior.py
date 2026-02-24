@@ -1,5 +1,5 @@
 """
-Custom Prior Distribution for Unique Random Value Generation.
+Improper Uniform Prior for Unique Random Value Generation.
 
 This module provides a specialized prior distribution class that extends the
 ImproperUniform prior from smcpy to generate unique random values using a
@@ -17,7 +17,7 @@ Example
 >>> def my_generator():
 ...     return np.random.randint(0, 1000)
 >>>
->>> prior = Prior(my_generator)
+>>> prior = ImproperUniformPrior(my_generator)
 >>> samples = prior.rvs(10)  # Generate 10 unique samples
 >>> print(samples.shape)
 (10, 1)
@@ -32,7 +32,7 @@ from smcpy.priors import ImproperUniform
 MAX_REPEATS = 100
 
 
-class Prior(ImproperUniform):
+class ImproperUniformPrior(ImproperUniform):
     """
     A class that extends ImproperUniform to generate unique random values.
 

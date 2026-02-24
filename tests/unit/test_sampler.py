@@ -10,7 +10,7 @@ IMPORTMODULE = sample.__module__
 def sampler_mocks(mocker):
     """Fixture that sets up common mocks for the samplers tests."""
     # Mock all the dependencies
-    mocker.patch(f"{IMPORTMODULE}.Prior")
+    mocker.patch(f"{IMPORTMODULE}.ImproperUniformPrior")
     mocker.patch(f"{IMPORTMODULE}.Metropolis")
     mock_kernel = mocker.patch(f"{IMPORTMODULE}.VectorMCMCKernel")
 
@@ -119,7 +119,9 @@ class TestSampleFunction:
         proposal = object()
         generator = object()
 
-        result = sample(likelihood, proposal, generator, show_progress_bar=False, seed=42)
+        result = sample(
+            likelihood, proposal, generator, show_progress_bar=False, seed=42
+        )
 
         assert result == ("mock_models", "mock_likelihoods")
         mock_run_smc.assert_called_once()
@@ -147,7 +149,7 @@ class TestRunSMC:
 
         mock_prior_instance = mocker.Mock(name="PriorInstance")
         mock_prior = mocker.patch(
-            f"{IMPORTMODULE}.Prior", return_value=mock_prior_instance
+            f"{IMPORTMODULE}.ImproperUniformPrior", return_value=mock_prior_instance
         )
 
         mock_mcmc_instance = mocker.Mock(name="MetropolisInstance")
@@ -198,7 +200,9 @@ class TestRunSMC:
             mock_mcmc_instance, param_order=["f"], rng=mock_rng_instance
         )
 
-        mock_adaptive_sampler.assert_called_once_with(mock_kernel_instance, show_progress_bar=True)
+        mock_adaptive_sampler.assert_called_once_with(
+            mock_kernel_instance, show_progress_bar=True
+        )
 
         mock_sampler_instance.sample.assert_called_once_with(**kwargs)
 
@@ -292,7 +296,9 @@ class TestSampleLimits:
         )
 
         sampler_mocks["max_step_sampler"].assert_called_once_with(
-            sampler_mocks["kernel"].return_value, max_steps=expected_max_steps, show_progress_bar=True
+            sampler_mocks["kernel"].return_value,
+            max_steps=expected_max_steps,
+            show_progress_bar=True,
         )
         sampler_mocks["fixed_time_sampler"].assert_not_called()
         sampler_mocks["adaptive_sampler"].assert_not_called()
@@ -379,7 +385,9 @@ class TestSampleLimits:
         )
 
         sampler_mocks["max_step_sampler"].assert_called_once_with(
-            sampler_mocks["kernel"].return_value, max_steps=expected_max_steps, show_progress_bar=True
+            sampler_mocks["kernel"].return_value,
+            max_steps=expected_max_steps,
+            show_progress_bar=True,
         )
 
     @pytest.mark.parametrize(
@@ -387,7 +395,7 @@ class TestSampleLimits:
         [
             # AdaptiveSampler case
             (None, None, "adaptive_sampler"),
-            # FixedTimeSampler case  
+            # FixedTimeSampler case
             (30.0, None, "fixed_time_sampler"),
             # MaxStepSampler case
             (None, 1000, "max_step_sampler"),
@@ -413,7 +421,10 @@ class TestSampleLimits:
             max_time=max_time,
             max_equation_evals=max_equation_evals,
             multiprocess=False,
-            kwargs={"num_particles": num_particles, "num_mcmc_samples": num_mcmc_samples},
+            kwargs={
+                "num_particles": num_particles,
+                "num_mcmc_samples": num_mcmc_samples,
+            },
             rng=mocker.Mock(),
             checkpoint_file=None,
             show_progress_bar=False,
@@ -430,10 +441,16 @@ class TestSampleLimits:
             )
         elif expected_sampler == "max_step_sampler":
             sampler_mocks[expected_sampler].assert_called_once_with(
-                sampler_mocks["kernel"].return_value, max_steps=expected_max_steps, show_progress_bar=False
+                sampler_mocks["kernel"].return_value,
+                max_steps=expected_max_steps,
+                show_progress_bar=False,
             )
 
         # Verify other samplers were not called
-        for sampler_name in ["adaptive_sampler", "fixed_time_sampler", "max_step_sampler"]:
+        for sampler_name in [
+            "adaptive_sampler",
+            "fixed_time_sampler",
+            "max_step_sampler",
+        ]:
             if sampler_name != expected_sampler:
                 sampler_mocks[sampler_name].assert_not_called()

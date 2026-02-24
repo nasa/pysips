@@ -54,7 +54,7 @@ from smcpy import VectorMCMCKernel, AdaptiveSampler, FixedTimeSampler, MaxStepSa
 from smcpy.utils.storage import PickleStorage
 
 from .metropolis import Metropolis
-from .prior import Prior
+from .priors import ImproperUniformPrior
 
 
 def sample(
@@ -251,10 +251,14 @@ def run_smc(
 
     # Execute sampling with or without checkpointing
     if checkpoint_file is None:
-        steps, phis = _smc_call(max_time, max_equation_evals, kwargs, kernel, show_progress_bar)
+        steps, phis = _smc_call(
+            max_time, max_equation_evals, kwargs, kernel, show_progress_bar
+        )
     else:
         with PickleStorage(checkpoint_file):
-            steps, phis = _smc_call(max_time, max_equation_evals, kwargs, kernel, show_progress_bar)
+            steps, phis = _smc_call(
+                max_time, max_equation_evals, kwargs, kernel, show_progress_bar
+            )
 
     models = steps[-1].params[:, 0].tolist()
     likelihoods = [likelihood(c) for c in models]  # fit final pop of equ
@@ -263,7 +267,7 @@ def run_smc(
 
 
 def _create_mcmc_kernel(likelihood, proposal, generator, multiprocess, rng):
-    prior = Prior(generator)
+    prior = ImproperUniformPrior(generator)
     mcmc = Metropolis(
         likelihood=likelihood,
         proposal=proposal,
@@ -281,7 +285,9 @@ def _smc_call(max_time, max_equation_evals, kwargs, kernel, show_progress_bar):
         max_steps = max_equation_evals // (
             kwargs["num_particles"] * kwargs["num_mcmc_samples"]
         )
-        smc = MaxStepSampler(kernel, max_steps=max_steps, show_progress_bar=show_progress_bar)
+        smc = MaxStepSampler(
+            kernel, max_steps=max_steps, show_progress_bar=show_progress_bar
+        )
     else:
         smc = AdaptiveSampler(kernel, show_progress_bar=show_progress_bar)
 

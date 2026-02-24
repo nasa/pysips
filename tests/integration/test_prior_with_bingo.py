@@ -2,7 +2,7 @@ import pytest
 from bingo.symbolic_regression import ComponentGenerator, AGraphGenerator
 
 
-from pysips.prior import Prior
+from pysips.priors import ImproperUniformPrior as Prior
 
 
 def get_generator(

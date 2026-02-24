@@ -2,9 +2,10 @@ import pytest
 import numpy as np
 
 # Import the class to test
-from pysips.prior import Prior, MAX_REPEATS
+from pysips.priors import ImproperUniformPrior, MAX_REPEATS
 
 
+Prior = ImproperUniformPrior
 IMPORTMODULE = Prior.__module__
 
 
