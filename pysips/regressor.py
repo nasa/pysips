@@ -133,22 +133,16 @@ import numpy as np
 from sklearn.base import BaseEstimator, RegressorMixin
 from sklearn.utils.validation import check_X_y, check_array, check_is_fitted
 
-from bingo.symbolic_regression import ComponentGenerator, AGraphGenerator
-
+from .bingo_proposal_mixin import BingoProposalMixin
 from .laplace_nmll import LaplaceNmll
-from .mutation_proposal import MutationProposal
-from .crossover_proposal import CrossoverProposal
-from .random_choice_proposal import RandomChoiceProposal
 from .sampler import sample
 
-USE_PYTHON = True
-USE_SIMPLIFICATION = True
 DEFAULT_OPERATORS = ["+", "*"]
 DEFALT_PARAMETER_INITIALIZATION_BOUNDS = [-5, 5]
 
 
 # pylint: disable=R0902,R0913,R0917,R0914
-class PysipsRegressor(BaseEstimator, RegressorMixin):
+class PysipsRegressor(BingoProposalMixin, BaseEstimator, RegressorMixin):
     """
     A scikit-learn compatible wrapper for PySIPS symbolic regression.
 
@@ -248,6 +242,9 @@ class PysipsRegressor(BaseEstimator, RegressorMixin):
         tuning or when running multiple fits in parallel.
     """
 
+    # Override mixin default to enable simplification for regression
+    use_simplification: bool = True
+
     def __init__(
         self,
         operators=None,
@@ -283,22 +280,29 @@ class PysipsRegressor(BaseEstimator, RegressorMixin):
                 "Please choose one constraint method."
             )
 
-        self.operators = operators if operators is not None else DEFAULT_OPERATORS
-        self.max_complexity = max_complexity
-        self.terminal_probability = terminal_probability
-        self.constant_probability = constant_probability
-        self.command_probability = command_probability
-        self.node_probability = node_probability
-        self.parameter_probability = parameter_probability
-        self.prune_probability = prune_probability
-        self.fork_probability = fork_probability
-        self.repeat_mutation_probability = repeat_mutation_probability
-        self.crossover_pool_size = (
-            crossover_pool_size if crossover_pool_size is not None else num_particles
+        # Initialize mixin with proposal/generator parameters
+        super().__init__(
+            max_complexity=max_complexity,
+            terminal_probability=terminal_probability,
+            constant_probability=constant_probability,
+            command_probability=command_probability,
+            node_probability=node_probability,
+            parameter_probability=parameter_probability,
+            prune_probability=prune_probability,
+            fork_probability=fork_probability,
+            repeat_mutation_probability=repeat_mutation_probability,
+            crossover_pool_size=(
+                crossover_pool_size
+                if crossover_pool_size is not None
+                else num_particles
+            ),
+            mutation_prob=mutation_prob,
+            crossover_prob=crossover_prob,
+            exclusive=exclusive,
         )
-        self.mutation_prob = mutation_prob
-        self.crossover_prob = crossover_prob
-        self.exclusive = exclusive
+
+        # Regressor-specific attributes
+        self.operators = operators if operators is not None else DEFAULT_OPERATORS
         self.num_particles = num_particles
         self.num_mcmc_samples = num_mcmc_samples
         self.target_ess = target_ess
@@ -322,59 +326,6 @@ class PysipsRegressor(BaseEstimator, RegressorMixin):
         self.phis_ = None
         self.best_model_ = None
         self.best_likelihood_ = None
-
-    def _get_generator(self, x_dim):
-        """Create expression generator."""
-        constant_prob = self.constant_probability
-        if constant_prob is None:
-            constant_prob = 1 / (x_dim + 1)
-
-        component_generator = ComponentGenerator(
-            input_x_dimension=x_dim,
-            terminal_probability=self.terminal_probability,
-            constant_probability=constant_prob,
-        )
-        for comp in self.operators:
-            component_generator.add_operator(comp)
-
-        return AGraphGenerator(
-            self.max_complexity,
-            component_generator,
-            use_python=USE_PYTHON,
-            use_simplification=USE_SIMPLIFICATION,
-        )
-
-    def _get_proposal(self, x_dim, generator):
-        """Create proposal operator."""
-        constant_prob = self.constant_probability
-        if constant_prob is None:
-            constant_prob = 1 / (x_dim + 1)
-
-        mutation = MutationProposal(
-            x_dim,
-            operators=self.operators,
-            terminal_probability=self.terminal_probability,
-            constant_probability=constant_prob,
-            command_probability=self.command_probability,
-            node_probability=self.node_probability,
-            parameter_probability=self.parameter_probability,
-            prune_probability=self.prune_probability,
-            fork_probability=self.fork_probability,
-            repeat_mutation_probability=self.repeat_mutation_probability,
-        )
-
-        # Generate crossover pool
-        pool = set()
-        while len(pool) < self.crossover_pool_size:
-            pool.add(generator())
-        crossover = CrossoverProposal(list(pool))
-
-        # Create combined proposal
-        return RandomChoiceProposal(
-            [mutation, crossover],
-            [self.mutation_prob, self.crossover_prob],
-            self.exclusive,
-        )
 
     def fit(self, X, y):
         """
@@ -400,8 +351,8 @@ class PysipsRegressor(BaseEstimator, RegressorMixin):
         x_dim = X.shape[1]
 
         # Create generator, proposal, and likelihood
-        generator = self._get_generator(x_dim)
-        proposal = self._get_proposal(x_dim, generator)
+        generator = self._get_generator(x_dim, self.operators)
+        proposal = self._get_proposal(x_dim, generator, self.operators)
         likelihood = LaplaceNmll(X, y)
 
         # Run sampling

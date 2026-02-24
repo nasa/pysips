@@ -8,6 +8,7 @@ from pysips.regressor import PysipsRegressor
 
 # Dynamically get the module containing the PysipsRegressor class
 IMPORTMODULE = PysipsRegressor.__module__
+BINGO_MIXIN_MODULE = "pysips.bingo_proposal_mixin"
 
 
 @pytest.fixture
@@ -22,22 +23,24 @@ def sample_data():
 def mock_external_components(mocker: MockerFixture):
     """Mock all external components needed by the regressor."""
     mock_component_gen = mocker.patch(
-        f"{IMPORTMODULE}.ComponentGenerator", autospec=True
+        f"{BINGO_MIXIN_MODULE}.ComponentGenerator", autospec=True
     )
     # needs to provide unique outputs for pool generation
     mock_agraph_gen = mocker.MagicMock(side_effect=lambda: np.random.random())
     mock_agraph_gen_constructor = mocker.patch(
-        f"{IMPORTMODULE}.AGraphGenerator", autospec=True, return_value=mock_agraph_gen
+        f"{BINGO_MIXIN_MODULE}.AGraphGenerator",
+        autospec=True,
+        return_value=mock_agraph_gen,
     )
     mock_laplace_nmll = mocker.patch(f"{IMPORTMODULE}.LaplaceNmll", autospec=True)
     mock_mutation_proposal = mocker.patch(
-        f"{IMPORTMODULE}.MutationProposal", autospec=True
+        f"{BINGO_MIXIN_MODULE}.MutationProposal", autospec=True
     )
     mock_crossover_proposal = mocker.patch(
-        f"{IMPORTMODULE}.CrossoverProposal", autospec=True
+        f"{BINGO_MIXIN_MODULE}.CrossoverProposal", autospec=True
     )
     mock_random_choice_proposal = mocker.patch(
-        f"{IMPORTMODULE}.RandomChoiceProposal", autospec=True
+        f"{BINGO_MIXIN_MODULE}.RandomChoiceProposal", autospec=True
     )
     mock_sample = mocker.patch(f"{IMPORTMODULE}.sample", autospec=True)
 

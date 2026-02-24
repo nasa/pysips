@@ -4,13 +4,14 @@ import pytest
 from pysips.sampler import sample, run_smc
 
 IMPORTMODULE = sample.__module__
+PRIORMODULE = "pysips.priors.improper_uniform_prior"
 
 
 @pytest.fixture
 def sampler_mocks(mocker):
     """Fixture that sets up common mocks for the samplers tests."""
-    # Mock all the dependencies
-    mocker.patch(f"{IMPORTMODULE}.ImproperUniformPrior")
+    # Mock all the dependencies - patch at source to avoid lazy import issues
+    mocker.patch("pysips.priors.improper_uniform_prior.ImproperUniformPrior")
     mocker.patch(f"{IMPORTMODULE}.Metropolis")
     mock_kernel = mocker.patch(f"{IMPORTMODULE}.VectorMCMCKernel")
 
@@ -68,14 +69,15 @@ class TestSampleFunction:
         assert args[0] == likelihood
         assert args[1] == proposal
         assert args[2] == generator
-        assert args[3] is None
-        assert args[4] is None
-        assert args[5] is False
+        assert args[3] is None  # prior
+        assert args[4] is None  # max_time
+        assert args[5] is None  # max_equation_evals
+        assert args[6] is False  # multiprocess
 
-        kwargs_passed = args[6]
-        rng_passed = args[7]
-        checkpoint_file_passed = args[8]
-        show_progress_bar_passed = args[9]
+        kwargs_passed = args[7]
+        rng_passed = args[8]
+        checkpoint_file_passed = args[9]
+        show_progress_bar_passed = args[10]
 
         assert kwargs_passed == {"num_particles": 5000, "num_mcmc_samples": 10}
         assert isinstance(rng_passed, np.random.Generator)
@@ -101,13 +103,14 @@ class TestSampleFunction:
         assert args[0] == likelihood
         assert args[1] == proposal
         assert args[2] == generator
-        assert args[3] is None
-        assert args[4] is None
-        assert args[5] is False
-        assert args[6] == custom_kwargs
-        # args[7] is rng
-        assert args[8] is None  # checkpoint_file
-        assert args[9] is True  # show_progress_bar (default)
+        assert args[3] is None  # prior
+        assert args[4] is None  # max_time
+        assert args[5] is None  # max_equation_evals
+        assert args[6] is False  # multiprocess
+        assert args[7] == custom_kwargs
+        # args[8] is rng
+        assert args[9] is None  # checkpoint_file
+        assert args[10] is True  # show_progress_bar (default)
 
     def test_show_progress_bar_false(self, mocker):
         """Test that show_progress_bar=False gets passed through correctly."""
@@ -130,13 +133,14 @@ class TestSampleFunction:
         assert args[0] == likelihood
         assert args[1] == proposal
         assert args[2] == generator
-        assert args[3] is None
-        assert args[4] is None
-        assert args[5] is False
-        # args[6] is kwargs
-        # args[7] is rng
-        assert args[8] is None  # checkpoint_file
-        assert args[9] is False  # show_progress_bar (explicitly set to False)
+        assert args[3] is None  # prior
+        assert args[4] is None  # max_time
+        assert args[5] is None  # max_equation_evals
+        assert args[6] is False  # multiprocess
+        # args[7] is kwargs
+        # args[8] is rng
+        assert args[9] is None  # checkpoint_file
+        assert args[10] is False  # show_progress_bar (explicitly set to False)
 
 
 class TestRunSMC:
@@ -149,7 +153,7 @@ class TestRunSMC:
 
         mock_prior_instance = mocker.Mock(name="PriorInstance")
         mock_prior = mocker.patch(
-            f"{IMPORTMODULE}.ImproperUniformPrior", return_value=mock_prior_instance
+            "pysips.priors.ImproperUniformPrior", return_value=mock_prior_instance
         )
 
         mock_mcmc_instance = mocker.Mock(name="MetropolisInstance")
@@ -243,8 +247,9 @@ class TestSampleLimits:
 
         mock_run_smc.assert_called_once()
         args, _ = mock_run_smc.call_args
-        assert args[3] == max_time
-        assert args[4] == max_equation_evals
+        assert args[3] is None  # prior
+        assert args[4] == max_time
+        assert args[5] == max_equation_evals
 
     def test_fixed_time_sampler_when_max_time_specified(self, mocker, sampler_mocks):
         """Test that FixedTimeSampler is used when max_time is specified."""
@@ -254,6 +259,7 @@ class TestSampleLimits:
             likelihood=sampler_mocks["likelihood"],
             proposal="proposal",
             generator="generator",
+            prior=None,
             max_time=max_time,
             max_equation_evals=None,
             multiprocess=False,
@@ -283,6 +289,7 @@ class TestSampleLimits:
             likelihood=sampler_mocks["likelihood"],
             proposal="proposal",
             generator="generator",
+            prior=None,
             max_time=None,
             max_equation_evals=max_equation_evals,
             multiprocess=False,
@@ -309,6 +316,7 @@ class TestSampleLimits:
             likelihood=sampler_mocks["likelihood"],
             proposal="proposal",
             generator="generator",
+            prior=None,
             max_time=None,
             max_equation_evals=None,
             multiprocess=False,
@@ -335,6 +343,7 @@ class TestSampleLimits:
             likelihood=sampler_mocks["likelihood"],
             proposal="proposal",
             generator="generator",
+            prior=None,
             max_time=max_time,
             max_equation_evals=max_equation_evals,
             multiprocess=False,
@@ -372,6 +381,7 @@ class TestSampleLimits:
             likelihood=sampler_mocks["likelihood"],
             proposal="proposal",
             generator="generator",
+            prior=None,
             max_time=None,
             max_equation_evals=max_equation_evals,
             multiprocess=False,
@@ -418,6 +428,7 @@ class TestSampleLimits:
             likelihood=sampler_mocks["likelihood"],
             proposal="proposal",
             generator="generator",
+            prior=None,
             max_time=max_time,
             max_equation_evals=max_equation_evals,
             multiprocess=False,

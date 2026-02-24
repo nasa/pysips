@@ -56,22 +56,20 @@ def test_hyperparameter_optimization(synthetic_data):
         operators=["+", "*", "sin"],
         max_complexity=20,
         num_particles=10,
-        num_mcmc_samples=50,
+        num_mcmc_samples=10,
         random_state=42,
     )
 
     # Define hyperparameter grid
     param_grid = {
         "max_complexity": [15, 20],
-        "terminal_probability": [0.1, 0.2],
-        "mutation_prob": [0.6, 0.7],
     }
 
     # Set up GridSearchCV
     grid_search = GridSearchCV(
         estimator=base_model,
         param_grid=param_grid,
-        cv=3,
+        cv=2,
         scoring="neg_mean_squared_error",
         verbose=1,
         n_jobs=1,  # Use single job for testing

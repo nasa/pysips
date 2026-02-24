@@ -8,9 +8,11 @@ Sequential Monte Carlo sampling. Available priors:
   generator function (improper uniform over all valid expressions).
 - ``BMSPrior``: Bayesian Machine Scientist prior that scores expressions
   based on weighted operator frequency counts.
+- ``SamplablePrior``: Abstract base class for priors that support SMC sampling.
 """
 
 from .improper_uniform_prior import ImproperUniformPrior, MAX_REPEATS
+from .samplable_prior import SamplablePrior
 from .bms_prior import BMSPrior
 
-__all__ = ["ImproperUniformPrior", "BMSPrior", "MAX_REPEATS"]
+__all__ = ["ImproperUniformPrior", "BMSPrior", "SamplablePrior", "MAX_REPEATS"]

@@ -1,9 +1,12 @@
 import numpy as np
+import pytest
 from unittest.mock import MagicMock
 
 from pysips.priors import BMSPrior
 from pysips.priors.bms_prior import _get_operator_counts
 
+PRIORMODULE = BMSPrior.__module__
+SAMPLEABLEPRIOR_MODULE = "pysips.priors.samplable_prior"
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -128,7 +131,7 @@ class TestBMSPrior:
     def test_logpdf_returns_correct_shape(self, mocker):
         """logpdf should return shape (N, 1)."""
         mocker.patch(
-            "pysips.priors.bms_prior._get_operator_counts",
+            f"{PRIORMODULE}._get_operator_counts",
             return_value={2: 1},
         )
 
@@ -141,7 +144,7 @@ class TestBMSPrior:
     def test_logpdf_single_element(self, mocker):
         """logpdf should handle a single-element array."""
         mocker.patch(
-            "pysips.priors.bms_prior._get_operator_counts",
+            f"{PRIORMODULE}._get_operator_counts",
             return_value={2: 1},
         )
 
@@ -152,7 +155,7 @@ class TestBMSPrior:
     def test_logpdf_2d_input(self, mocker):
         """logpdf should handle (N, 1) shaped input."""
         mocker.patch(
-            "pysips.priors.bms_prior._get_operator_counts",
+            f"{PRIORMODULE}._get_operator_counts",
             return_value={2: 2},
         )
 
@@ -166,7 +169,7 @@ class TestBMSPrior:
         """Verify the energy computation: -sum(n*w + n^2*w2)."""
         # Expression has 2 additions and 1 multiplication
         mocker.patch(
-            "pysips.priors.bms_prior._get_operator_counts",
+            f"{PRIORMODULE}._get_operator_counts",
             return_value={2: 2, 4: 1},
         )
 
@@ -182,7 +185,7 @@ class TestBMSPrior:
     def test_logpdf_zero_weights_give_zero_logprob(self, mocker):
         """Zero weights should yield log-probability of 0."""
         mocker.patch(
-            "pysips.priors.bms_prior._get_operator_counts",
+            f"{PRIORMODULE}._get_operator_counts",
             return_value={2: 3, 4: 2},
         )
 
@@ -194,7 +197,7 @@ class TestBMSPrior:
         """Each expression should be scored independently."""
         counts_sequence = [{2: 1}, {2: 3}]
         mocker.patch(
-            "pysips.priors.bms_prior._get_operator_counts",
+            f"{PRIORMODULE}._get_operator_counts",
             side_effect=counts_sequence,
         )
 
@@ -207,3 +210,89 @@ class TestBMSPrior:
         # First: -(1*1.0) = -1.0, Second: -(3*1.0) = -3.0
         np.testing.assert_almost_equal(result[0, 0], -1.0)
         np.testing.assert_almost_equal(result[1, 0], -3.0)
+
+
+class TestBMSPriorRvs:
+    """Tests for BMSPrior sampling via rvs()."""
+
+    def test_rvs_raises_without_x_dim(self):
+        """rvs() should raise ValueError if x_dim was not set."""
+        prior = BMSPrior({2: 0.5}, {2: 0.1})  # No x_dim
+
+        with pytest.raises(ValueError, match="Cannot sample without x_dim"):
+            prior.rvs(10)
+
+    def test_rvs_calls_sample_with_correct_params(self, mocker):
+        """rvs should call sample() with correct params and return proper shape."""
+        mock_models = [MagicMock(spec=[]) for _ in range(10)]
+        mock_sample = mocker.patch(
+            f"{SAMPLEABLEPRIOR_MODULE}.sample", return_value=(mock_models, None, None)
+        )
+
+        prior = BMSPrior(
+            weights={2: 0.5, 3: 0.3},
+            squared_weights={2: 0.1, 3: 0.05},
+            x_dim=4,
+            num_mcmc_samples=3,
+            target_ess=0.9,
+        )
+
+        result = prior.rvs(10)
+
+        # Verify sample was called with correct params
+        mock_sample.assert_called_once()
+        call_kwargs = mock_sample.call_args.kwargs
+        assert call_kwargs["kwargs"]["num_particles"] == 10
+        assert call_kwargs["kwargs"]["num_mcmc_samples"] == 3
+        assert call_kwargs["kwargs"]["target_ess"] == 0.9
+        assert result.shape == (10, 1)
+
+    @pytest.mark.parametrize(
+        "instance_seed,call_seed,expected",
+        [
+            (42, None, 42),  # Uses instance random_state
+            (42, 99, 99),  # Call parameter overrides instance
+        ],
+    )
+    def test_rvs_random_state(self, mocker, instance_seed, call_seed, expected):
+        """rvs should use random_state correctly."""
+        mock_sample = mocker.patch(
+            f"{SAMPLEABLEPRIOR_MODULE}.sample",
+            return_value=([MagicMock(spec=[])], None, None),
+        )
+
+        prior = BMSPrior({2: 0.5}, {2: 0.1}, x_dim=3, random_state=instance_seed)
+        prior.rvs(1, random_state=call_seed)
+
+        assert mock_sample.call_args.kwargs["seed"] == expected
+
+    def test_operator_identification_from_weights(self):
+        """BMSPrior should identify operators from weights dict."""
+        prior = BMSPrior({2: 0.5, 4: 0.2}, {2: 0.1, 5: 0.05}, x_dim=5)
+        assert set(prior.operators) == {2, 4, 5}
+
+
+class TestBMSPriorBackwardCompatibility:
+    """Tests ensuring backward compatibility for BMSPrior without x_dim."""
+
+    def test_logpdf_works_without_x_dim(self, mocker):
+        """logpdf should work even if x_dim is not set."""
+        mocker.patch(
+            f"{PRIORMODULE}._get_operator_counts",
+            return_value={2: 1},
+        )
+
+        # Create prior without x_dim (backward compatible)
+        prior = BMSPrior({2: 0.5}, {2: 0.1})
+
+        result = prior.logpdf([MagicMock()])
+        assert result.shape == (1, 1)
+
+    def test_init_with_minimal_args(self):
+        """BMSPrior should accept just weights and squared_weights."""
+        prior = BMSPrior({2: 0.5}, {2: 0.1})
+
+        assert prior.weights == {2: 0.5}
+        assert prior.squared_weights == {2: 0.1}
+        assert prior.x_dim is None
+        assert prior.operators == [2]

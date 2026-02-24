@@ -54,13 +54,13 @@ from smcpy import VectorMCMCKernel, AdaptiveSampler, FixedTimeSampler, MaxStepSa
 from smcpy.utils.storage import PickleStorage
 
 from .metropolis import Metropolis
-from .priors import ImproperUniformPrior
 
 
 def sample(
     likelihood,
     proposal,
     generator,
+    prior=None,
     max_time=None,
     max_equation_evals=None,
     multiprocess=False,
@@ -167,6 +167,7 @@ def sample(
         likelihood,
         proposal,
         generator,
+        prior,
         max_time,
         max_equation_evals,
         multiprocess,
@@ -181,6 +182,7 @@ def run_smc(
     likelihood,
     proposal,
     generator,
+    prior,
     max_time,
     max_equation_evals,
     multiprocess,
@@ -204,6 +206,9 @@ def run_smc(
         Function that proposes new parameter values in MCMC steps.
     generator : callable
         Function that generates unique initial parameter values.
+    prior : Prior, optional
+        Custom prior distribution to use for sampling. If None, an
+        ImproperUniformPrior with the provided generator will be used.
     max_time : float, None
         Maximum compute time limit for the sampling, in seconds. None value indicates
         no time limit.
@@ -247,7 +252,9 @@ def run_smc(
     - If max_equation_evals is specified (and max_time is not), MaxStepSampler is used
     - If neither is specified, AdaptiveSampler is used
     """
-    kernel = _create_mcmc_kernel(likelihood, proposal, generator, multiprocess, rng)
+    kernel = _create_mcmc_kernel(
+        likelihood, proposal, generator, multiprocess, rng, prior
+    )
 
     # Execute sampling with or without checkpointing
     if checkpoint_file is None:
@@ -266,8 +273,11 @@ def run_smc(
     return models, likelihoods, phis
 
 
-def _create_mcmc_kernel(likelihood, proposal, generator, multiprocess, rng):
-    prior = ImproperUniformPrior(generator)
+def _create_mcmc_kernel(likelihood, proposal, generator, multiprocess, rng, prior=None):
+    if prior is None:
+        from .priors import ImproperUniformPrior
+
+        prior = ImproperUniformPrior(generator)
     mcmc = Metropolis(
         likelihood=likelihood,
         proposal=proposal,

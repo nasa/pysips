@@ -2,7 +2,7 @@ import pytest
 import numpy as np
 
 # Import the class to test
-from pysips.priors import ImproperUniformPrior, MAX_REPEATS
+from pysips.priors.improper_uniform_prior import ImproperUniformPrior, MAX_REPEATS
 
 
 Prior = ImproperUniformPrior
