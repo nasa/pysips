@@ -21,7 +21,8 @@ dependencies = [
     "numpy",
     "bingo-nasa",
     "smcpy>=0.1.11",
-    "scikit-learn"
+    "scikit-learn",
+    "sympy",
 ]
 classifiers = [
     "Development Status :: 3 - Alpha",

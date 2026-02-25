@@ -14,5 +14,12 @@ Sequential Monte Carlo sampling. Available priors:
 from .improper_uniform_prior import ImproperUniformPrior, MAX_REPEATS
 from .samplable_prior import SamplablePrior
 from .bms_prior import BMSPrior
+from .data.load_corpus import load_corpus
 
-__all__ = ["ImproperUniformPrior", "BMSPrior", "SamplablePrior", "MAX_REPEATS"]
+__all__ = [
+    "ImproperUniformPrior",
+    "BMSPrior",
+    "SamplablePrior",
+    "MAX_REPEATS",
+    "load_corpus",
+]
