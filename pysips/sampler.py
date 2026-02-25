@@ -60,7 +60,7 @@ def sample(
     likelihood,
     proposal,
     generator,
-    prior=None,
+    prior,
     max_time=None,
     max_equation_evals=None,
     multiprocess=False,
@@ -87,6 +87,9 @@ def sample(
     generator : callable
         Function that generates initial parameter values when called with no
         arguments. Should return hashable values for uniqueness tracking.
+    prior : Prior
+        Custom prior distribution to use for sampling. Must implement the
+        rvs() method for generating samples and logpdf() for computing log-probabilities.
     max_time : float, optional
         Maximum compute time limit for the sampling, in seconds (default no time limit).
     max_equation_evals : int, optional
@@ -128,18 +131,30 @@ def sample(
     >>> def generator_func():
     ...     return np.random.uniform(-10, 10)
     >>>
+    >>> class MyCustomPrior(SamplablePrior):
+    ...     def __init__(self, my_param, **kwargs):
+    ...         x_dim = 1
+    ...         operators = [2, 3, 4]  # Example operator codes
+    ...         super().__init__(x_dim=x_dim, operators=operators, **kwargs)
+    ...         self.my_param = my_param
+    ...
+    ...     def _logpdf_single(self, agraph):
+    ...         # Custom log-probability calculation based on agraph and my_param
+    ...         return -compute_some_metric(agraph, self.my_param)
+    >>>
+    >>> prior = MyCustomPrior(my_param=0.5, num_particles=100)
     >>> # Basic sampling without checkpointing
-    >>> models, likes, phis = sample(likelihood_func, proposal_func, generator_func)
+    >>> models, likes, phis = sample(likelihood_func, proposal_func, generator_func, prior=prior)
     >>> print(f"Sampled {len(models)} models")
     >>>
     >>> # Sampling with checkpointing
     >>> models, likes, phis = sample(likelihood_func, proposal_func, generator_func,
-    ...                              checkpoint_file="progress.pkl")
+    ...                              prior=prior, checkpoint_file="progress.pkl")
     >>> print(f"Checkpointed sampling completed")
     >>>
     >>> # Sampling with max equation evaluations limit
     >>> models, likes, phis = sample(likelihood_func, proposal_func, generator_func,
-    ...                              max_equation_evals=10000)
+    ...                              prior=prior, max_equation_evals=10000)
     >>> print(f"Sampling completed with evaluation limit")
 
     Notes
@@ -253,7 +268,7 @@ def run_smc(
     - If neither is specified, AdaptiveSampler is used
     """
     kernel = _create_mcmc_kernel(
-        likelihood, proposal, generator, multiprocess, rng, prior
+        likelihood, proposal, generator, prior, multiprocess, rng
     )
 
     # Execute sampling with or without checkpointing
@@ -273,11 +288,7 @@ def run_smc(
     return models, likelihoods, phis
 
 
-def _create_mcmc_kernel(likelihood, proposal, generator, multiprocess, rng, prior=None):
-    if prior is None:
-        from .priors import ImproperUniformPrior
-
-        prior = ImproperUniformPrior(generator)
+def _create_mcmc_kernel(likelihood, proposal, generator, prior, multiprocess, rng):
     mcmc = Metropolis(
         likelihood=likelihood,
         proposal=proposal,

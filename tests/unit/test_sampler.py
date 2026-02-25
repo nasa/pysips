@@ -57,9 +57,10 @@ class TestSampleFunction:
         likelihood = lambda x: x
         proposal = object()
         generator = object()
+        prior = object()
         seed = 42
 
-        result = sample(likelihood, proposal, generator, seed=seed)
+        result = sample(likelihood, proposal, generator, prior, seed=seed)
 
         assert result == ("mock_models", "mock_likelihoods")
 
@@ -69,7 +70,7 @@ class TestSampleFunction:
         assert args[0] == likelihood
         assert args[1] == proposal
         assert args[2] == generator
-        assert args[3] is None  # prior
+        assert args[3] == prior
         assert args[4] is None  # max_time
         assert args[5] is None  # max_equation_evals
         assert args[6] is False  # multiprocess
@@ -93,8 +94,11 @@ class TestSampleFunction:
         proposal = object()
         generator = object()
         custom_kwargs = {"num_particles": 100, "num_mcmc_samples": 3}
+        prior = object()
 
-        result = sample(likelihood, proposal, generator, kwargs=custom_kwargs, seed=24)
+        result = sample(
+            likelihood, proposal, generator, prior, kwargs=custom_kwargs, seed=24
+        )
 
         assert result == ("mock_models", "mock_likelihoods")
         mock_run_smc.assert_called_once()
@@ -103,7 +107,7 @@ class TestSampleFunction:
         assert args[0] == likelihood
         assert args[1] == proposal
         assert args[2] == generator
-        assert args[3] is None  # prior
+        assert args[3] == prior
         assert args[4] is None  # max_time
         assert args[5] is None  # max_equation_evals
         assert args[6] is False  # multiprocess
@@ -121,9 +125,10 @@ class TestSampleFunction:
         likelihood = lambda x: x
         proposal = object()
         generator = object()
+        prior = object()
 
         result = sample(
-            likelihood, proposal, generator, show_progress_bar=False, seed=42
+            likelihood, proposal, generator, prior, show_progress_bar=False, seed=42
         )
 
         assert result == ("mock_models", "mock_likelihoods")
@@ -133,7 +138,7 @@ class TestSampleFunction:
         assert args[0] == likelihood
         assert args[1] == proposal
         assert args[2] == generator
-        assert args[3] is None  # prior
+        assert args[3] == prior
         assert args[4] is None  # max_time
         assert args[5] is None  # max_equation_evals
         assert args[6] is False  # multiprocess
@@ -149,11 +154,6 @@ class TestRunSMC:
         mock_rng_instance = mocker.Mock(name="rngInstance")
         mock_rng = mocker.patch(
             f"{IMPORTMODULE}.np.random.default_rng", return_value=mock_rng_instance
-        )
-
-        mock_prior_instance = mocker.Mock(name="PriorInstance")
-        mock_prior = mocker.patch(
-            "pysips.priors.ImproperUniformPrior", return_value=mock_prior_instance
         )
 
         mock_mcmc_instance = mocker.Mock(name="MetropolisInstance")
@@ -180,23 +180,23 @@ class TestRunSMC:
 
         proposal = "proposal"
         generator = "generator"
+        prior = "prior"
         kwargs = {"num_particles": 3, "num_mcmc_samples": 4}
 
         models, likelihoods, phis = sample(
             likelihood,
             proposal,
             generator,
+            prior,
             multiprocess=multiproc,
             kwargs=kwargs,
             seed=0,
         )
 
-        mock_prior.assert_called_once_with(generator)
-
         mock_metropolis.assert_called_once_with(
             likelihood=likelihood,
             proposal=proposal,
-            prior=mock_prior_instance,
+            prior=prior,
             multiprocess=multiproc,
         )
 
@@ -234,6 +234,7 @@ class TestSampleLimits:
         likelihood = lambda x: x
         proposal = object()
         generator = object()
+        prior = object()
         max_time = 30.0
         max_equation_evals = 5000
 
@@ -241,13 +242,13 @@ class TestSampleLimits:
             likelihood,
             proposal,
             generator,
+            prior,
             max_time=max_time,
             max_equation_evals=max_equation_evals,
         )
 
         mock_run_smc.assert_called_once()
         args, _ = mock_run_smc.call_args
-        assert args[3] is None  # prior
         assert args[4] == max_time
         assert args[5] == max_equation_evals
 

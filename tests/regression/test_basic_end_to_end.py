@@ -7,6 +7,7 @@ from pysips.laplace_nmll import LaplaceNmll
 from pysips.mutation_proposal import MutationProposal
 from pysips.crossover_proposal import CrossoverProposal
 from pysips.random_choice_proposal import RandomChoiceProposal
+from pysips.priors import ImproperUniformPrior
 from pysips.sampler import sample
 
 from bingo.symbolic_regression import ComponentGenerator, AGraphGenerator
@@ -117,11 +118,13 @@ def test_basic_end_to_end():
 
     likelihood = LaplaceNmll(X, y)
     generator = get_generator(**config)
+    prior = ImproperUniformPrior(generator)
     proposal = get_proposal(**config)
     models, likelihoods, phis = sample(
         likelihood,
         proposal,
         generator,
+        prior,
         seed=34,
         kwargs={
             "num_particles": config["num_particles"],

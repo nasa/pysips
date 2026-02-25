@@ -134,6 +134,7 @@ from sklearn.base import BaseEstimator, RegressorMixin
 from sklearn.utils.validation import check_X_y, check_array, check_is_fitted
 
 from .bingo_proposal_mixin import BingoProposalMixin
+from .priors import ImproperUniformPrior
 from .laplace_nmll import LaplaceNmll
 from .sampler import sample
 
@@ -352,6 +353,7 @@ class PysipsRegressor(BingoProposalMixin, BaseEstimator, RegressorMixin):
 
         # Create generator, proposal, and likelihood
         generator = self._get_generator(x_dim, self.operators)
+        prior = ImproperUniformPrior(generator)
         proposal = self._get_proposal(x_dim, generator, self.operators)
         likelihood = LaplaceNmll(X, y)
 
@@ -360,6 +362,7 @@ class PysipsRegressor(BingoProposalMixin, BaseEstimator, RegressorMixin):
             likelihood,
             proposal,
             generator,
+            prior,
             max_time=self.max_time,
             max_equation_evals=self.max_equation_evals,
             seed=self.random_state,
