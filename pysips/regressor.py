@@ -142,7 +142,7 @@ DEFAULT_OPERATORS = ["+", "*"]
 DEFALT_PARAMETER_INITIALIZATION_BOUNDS = [-5, 5]
 
 
-# pylint: disable=R0902,R0913,R0917,R0914
+# pylint: disable=too-many-instance-attributes, too-many-arguments, too-many-positional-arguments, too-many-locals
 class PysipsRegressor(BingoProposalMixin, BaseEstimator, RegressorMixin):
     """
     A scikit-learn compatible wrapper for PySIPS symbolic regression.
@@ -361,7 +361,6 @@ class PysipsRegressor(BingoProposalMixin, BaseEstimator, RegressorMixin):
         models, likelihoods, phis = sample(
             likelihood,
             proposal,
-            generator,
             prior,
             max_time=self.max_time,
             max_equation_evals=self.max_equation_evals,

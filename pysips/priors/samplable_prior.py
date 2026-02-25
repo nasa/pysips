@@ -32,10 +32,12 @@ import numpy as np
 
 from bingo.symbolic_regression.agraph.agraph import AGraph
 
+from .improper_uniform_prior import ImproperUniformPrior
 from ..bingo_proposal_mixin import BingoProposalMixin
 from ..sampler import sample
 
 
+# pylint: disable=too-many-instance-attributes, too-many-arguments, too-many-positional-arguments, too-many-locals
 class SamplablePrior(BingoProposalMixin, ABC):
     """
     Abstract base class for priors that support SMC sampling.
@@ -143,7 +145,6 @@ class SamplablePrior(BingoProposalMixin, ABC):
         float
             Log-probability of the expression under this prior.
         """
-        pass
 
     def rvs(self, N: int, random_state: Optional[int] = None) -> np.ndarray:
         """
@@ -185,13 +186,14 @@ class SamplablePrior(BingoProposalMixin, ABC):
 
         # Create generator and proposal
         generator = self._get_generator(self.x_dim, self.operators)
+        prior = ImproperUniformPrior(generator)
         proposal = self._get_proposal(self.x_dim, generator, self.operators)
 
         # Run SMC sampling with this prior's logpdf as the target
         models, _, _ = sample(
             likelihood=self._logpdf_single,
             proposal=proposal,
-            generator=generator,
+            prior=prior,
             max_time=self.max_time,
             max_equation_evals=self.max_equation_evals,
             seed=seed,

@@ -2,12 +2,13 @@ import argparse
 from pathlib import Path
 import numpy as np
 import h5py
+import pytest
 
 from pysips.laplace_nmll import LaplaceNmll
 from pysips.mutation_proposal import MutationProposal
 from pysips.crossover_proposal import CrossoverProposal
 from pysips.random_choice_proposal import RandomChoiceProposal
-from pysips.priors import ImproperUniformPrior
+from pysips.priors import ImproperUniformPrior, BMSPrior
 from pysips.sampler import sample
 
 from bingo.symbolic_regression import ComponentGenerator, AGraphGenerator
@@ -87,13 +88,18 @@ def get_generator(
     return generator
 
 
-def test_basic_end_to_end():
-
+@pytest.fixture
+def test_data():
     n_pts = 21
     X = np.c_[np.linspace(0, 2 * np.pi, n_pts)]
     y = (np.sin(X) * 2 + 4).flatten() + np.random.default_rng(34).normal(0, 0.5, n_pts)
+    return X, y
 
-    config = {
+
+@pytest.fixture
+def config(test_data):
+    X, y = test_data
+    return {
         "X_dim": X.shape[1],
         "constant_probability": 1 / (X.shape[1] + 1),
         "operators": ["+", "*"],
@@ -116,14 +122,50 @@ def test_basic_end_to_end():
         "target_ess": 0.8,
     }
 
-    likelihood = LaplaceNmll(X, y)
-    generator = get_generator(**config)
+
+@pytest.fixture
+def generator(config):
+    return get_generator(**config)
+
+
+@pytest.fixture
+def proposal(config):
+    return get_proposal(**config)
+
+
+@pytest.fixture
+def likelihood(test_data):
+    X, y = test_data
+    return LaplaceNmll(X, y)
+
+
+def test_basic_end_to_end_improper_uniform_prior(
+    generator, likelihood, proposal, config
+):
     prior = ImproperUniformPrior(generator)
-    proposal = get_proposal(**config)
     models, likelihoods, phis = sample(
         likelihood,
         proposal,
-        generator,
+        prior,
+        seed=34,
+        kwargs={
+            "num_particles": config["num_particles"],
+            "num_mcmc_samples": config["num_mcmc_samples"],
+            "target_ess": config["target_ess"],
+        },
+    )
+
+
+def test_basic_end_to_end_bms_prior(likelihood, proposal, test_data, config):
+    X, _ = test_data
+    prior = BMSPrior(
+        weights={2: 1.0, 4: 0.5},
+        squared_weights={2: 1.0, 4: 0.25},
+        x_dim=X.shape[1],
+    )
+    models, likelihoods, phis = sample(
+        likelihood,
+        proposal,
         prior,
         seed=34,
         kwargs={

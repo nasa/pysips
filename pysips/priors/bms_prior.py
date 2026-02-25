@@ -1,3 +1,4 @@
+# pylint: disable=duplicate-code
 """
 Bayesian Machine Scientist (BMS) Prior.
 
@@ -31,9 +32,7 @@ Example
 """
 
 from collections import defaultdict
-from typing import Dict, List, Literal, Optional
-
-import numpy as np
+from typing import Dict, Literal, Optional
 
 from bingo.symbolic_regression.agraph.agraph import AGraph
 from bingo.symbolic_regression.agraph.operator_definitions import (
@@ -76,10 +75,11 @@ def _get_operator_counts(
     dict
         Mapping from operator ID (int) to count.
     """
+    # pylint: disable=protected-access
     operator_counts: Dict[int, int] = defaultdict(int)
 
     agraph._update()
-    command_array = agraph._simplified_command_array
+    command_array = agraph._simplified_command_array  # pylint: disable=protected-access
 
     if tree:
         stack = [command_array[-1]]
@@ -89,12 +89,11 @@ def _get_operator_counts(
             if IS_TERMINAL_MAP[node]:
                 if terminals == "exclude":
                     continue
-                elif terminals == "combine":
+                if terminals == "combine":
                     operator_counts[VARIABLE] += 1
                     continue
-                else:
-                    operator_counts[node] += 1
-                    continue
+                operator_counts[node] += 1
+                continue
 
             operator_counts[node] += 1
             stack.append(command_array[param1])
@@ -105,17 +104,17 @@ def _get_operator_counts(
             if IS_TERMINAL_MAP[node]:
                 if terminals == "exclude":
                     continue
-                elif terminals == "combine":
+                if terminals == "combine":
                     operator_counts[VARIABLE] += 1
                     continue
-                else:
-                    operator_counts[node] += 1
-                    continue
+                operator_counts[node] += 1
+                continue
             operator_counts[node] += 1
 
     return dict(operator_counts)
 
 
+# pylint: disable=too-many-instance-attributes, too-many-arguments, too-many-positional-arguments, too-many-locals
 class BMSPrior(SamplablePrior):
     """
     Bayesian Machine Scientist prior for symbolic expressions.

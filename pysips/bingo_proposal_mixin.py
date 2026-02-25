@@ -36,6 +36,7 @@ from .random_choice_proposal import RandomChoiceProposal
 USE_PYTHON = True
 
 
+# pylint: disable=too-many-instance-attributes, too-many-arguments, too-many-positional-arguments, too-many-locals, too-few-public-methods
 class BingoProposalMixin:
     """
     Mixin providing bingo generator and proposal creation for SMC sampling.

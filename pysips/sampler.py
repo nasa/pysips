@@ -59,7 +59,6 @@ from .metropolis import Metropolis
 def sample(
     likelihood,
     proposal,
-    generator,
     prior,
     max_time=None,
     max_equation_evals=None,
@@ -84,9 +83,6 @@ def sample(
     proposal : callable
         Function that proposes new parameter values given a current value.
         Used in the Metropolis-Hastings MCMC steps.
-    generator : callable
-        Function that generates initial parameter values when called with no
-        arguments. Should return hashable values for uniqueness tracking.
     prior : Prior
         Custom prior distribution to use for sampling. Must implement the
         rvs() method for generating samples and logpdf() for computing log-probabilities.
@@ -128,9 +124,6 @@ def sample(
     >>> def proposal_func(x):
     ...     return x + np.random.normal(0, 0.5)
     >>>
-    >>> def generator_func():
-    ...     return np.random.uniform(-10, 10)
-    >>>
     >>> class MyCustomPrior(SamplablePrior):
     ...     def __init__(self, my_param, **kwargs):
     ...         x_dim = 1
@@ -144,16 +137,16 @@ def sample(
     >>>
     >>> prior = MyCustomPrior(my_param=0.5, num_particles=100)
     >>> # Basic sampling without checkpointing
-    >>> models, likes, phis = sample(likelihood_func, proposal_func, generator_func, prior=prior)
+    >>> models, likes, phis = sample(likelihood_func, proposal_func, prior=prior)
     >>> print(f"Sampled {len(models)} models")
     >>>
     >>> # Sampling with checkpointing
-    >>> models, likes, phis = sample(likelihood_func, proposal_func, generator_func,
+    >>> models, likes, phis = sample(likelihood_func, proposal_func,
     ...                              prior=prior, checkpoint_file="progress.pkl")
     >>> print(f"Checkpointed sampling completed")
     >>>
     >>> # Sampling with max equation evaluations limit
-    >>> models, likes, phis = sample(likelihood_func, proposal_func, generator_func,
+    >>> models, likes, phis = sample(likelihood_func, proposal_func,
     ...                              prior=prior, max_equation_evals=10000)
     >>> print(f"Sampling completed with evaluation limit")
 
@@ -181,7 +174,6 @@ def sample(
     return run_smc(
         likelihood,
         proposal,
-        generator,
         prior,
         max_time,
         max_equation_evals,
@@ -196,7 +188,6 @@ def sample(
 def run_smc(
     likelihood,
     proposal,
-    generator,
     prior,
     max_time,
     max_equation_evals,
@@ -219,8 +210,6 @@ def run_smc(
         Function that computes the likelihood of a given parameter value.
     proposal : callable
         Function that proposes new parameter values in MCMC steps.
-    generator : callable
-        Function that generates unique initial parameter values.
     prior : Prior, optional
         Custom prior distribution to use for sampling. If None, an
         ImproperUniformPrior with the provided generator will be used.
@@ -267,9 +256,7 @@ def run_smc(
     - If max_equation_evals is specified (and max_time is not), MaxStepSampler is used
     - If neither is specified, AdaptiveSampler is used
     """
-    kernel = _create_mcmc_kernel(
-        likelihood, proposal, generator, prior, multiprocess, rng
-    )
+    kernel = _create_mcmc_kernel(likelihood, proposal, prior, multiprocess, rng)
 
     # Execute sampling with or without checkpointing
     if checkpoint_file is None:
@@ -288,7 +275,7 @@ def run_smc(
     return models, likelihoods, phis
 
 
-def _create_mcmc_kernel(likelihood, proposal, generator, prior, multiprocess, rng):
+def _create_mcmc_kernel(likelihood, proposal, prior, multiprocess, rng):
     mcmc = Metropolis(
         likelihood=likelihood,
         proposal=proposal,

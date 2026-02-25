@@ -56,11 +56,10 @@ class TestSampleFunction:
 
         likelihood = lambda x: x
         proposal = object()
-        generator = object()
         prior = object()
         seed = 42
 
-        result = sample(likelihood, proposal, generator, prior, seed=seed)
+        result = sample(likelihood, proposal, prior, seed=seed)
 
         assert result == ("mock_models", "mock_likelihoods")
 
@@ -69,16 +68,15 @@ class TestSampleFunction:
 
         assert args[0] == likelihood
         assert args[1] == proposal
-        assert args[2] == generator
-        assert args[3] == prior
-        assert args[4] is None  # max_time
-        assert args[5] is None  # max_equation_evals
-        assert args[6] is False  # multiprocess
+        assert args[2] == prior
+        assert args[3] is None  # max_time
+        assert args[4] is None  # max_equation_evals
+        assert args[5] is False  # multiprocess
 
-        kwargs_passed = args[7]
-        rng_passed = args[8]
-        checkpoint_file_passed = args[9]
-        show_progress_bar_passed = args[10]
+        kwargs_passed = args[6]
+        rng_passed = args[7]
+        checkpoint_file_passed = args[8]
+        show_progress_bar_passed = args[9]
 
         assert kwargs_passed == {"num_particles": 5000, "num_mcmc_samples": 10}
         assert isinstance(rng_passed, np.random.Generator)
@@ -92,13 +90,10 @@ class TestSampleFunction:
 
         likelihood = lambda x: x
         proposal = object()
-        generator = object()
         custom_kwargs = {"num_particles": 100, "num_mcmc_samples": 3}
         prior = object()
 
-        result = sample(
-            likelihood, proposal, generator, prior, kwargs=custom_kwargs, seed=24
-        )
+        result = sample(likelihood, proposal, prior, kwargs=custom_kwargs, seed=24)
 
         assert result == ("mock_models", "mock_likelihoods")
         mock_run_smc.assert_called_once()
@@ -106,15 +101,14 @@ class TestSampleFunction:
         args, _ = mock_run_smc.call_args
         assert args[0] == likelihood
         assert args[1] == proposal
-        assert args[2] == generator
-        assert args[3] == prior
-        assert args[4] is None  # max_time
-        assert args[5] is None  # max_equation_evals
-        assert args[6] is False  # multiprocess
-        assert args[7] == custom_kwargs
-        # args[8] is rng
-        assert args[9] is None  # checkpoint_file
-        assert args[10] is True  # show_progress_bar (default)
+        assert args[2] == prior
+        assert args[3] is None  # max_time
+        assert args[4] is None  # max_equation_evals
+        assert args[5] is False  # multiprocess
+        assert args[6] == custom_kwargs
+        # args[7] is rng
+        assert args[8] is None  # checkpoint_file
+        assert args[9] is True  # show_progress_bar (default)
 
     def test_show_progress_bar_false(self, mocker):
         """Test that show_progress_bar=False gets passed through correctly."""
@@ -124,12 +118,9 @@ class TestSampleFunction:
 
         likelihood = lambda x: x
         proposal = object()
-        generator = object()
         prior = object()
 
-        result = sample(
-            likelihood, proposal, generator, prior, show_progress_bar=False, seed=42
-        )
+        result = sample(likelihood, proposal, prior, show_progress_bar=False, seed=42)
 
         assert result == ("mock_models", "mock_likelihoods")
         mock_run_smc.assert_called_once()
@@ -137,15 +128,14 @@ class TestSampleFunction:
         args, _ = mock_run_smc.call_args
         assert args[0] == likelihood
         assert args[1] == proposal
-        assert args[2] == generator
-        assert args[3] == prior
-        assert args[4] is None  # max_time
-        assert args[5] is None  # max_equation_evals
-        assert args[6] is False  # multiprocess
-        # args[7] is kwargs
-        # args[8] is rng
-        assert args[9] is None  # checkpoint_file
-        assert args[10] is False  # show_progress_bar (explicitly set to False)
+        assert args[2] == prior
+        assert args[3] is None  # max_time
+        assert args[4] is None  # max_equation_evals
+        assert args[5] is False  # multiprocess
+        # args[6] is kwargs
+        # args[7] is rng
+        assert args[8] is None  # checkpoint_file
+        assert args[9] is False  # show_progress_bar (explicitly set to False)
 
 
 class TestRunSMC:
@@ -179,14 +169,12 @@ class TestRunSMC:
         likelihood = mocker.Mock(side_effect=lambda x: x * 10)
 
         proposal = "proposal"
-        generator = "generator"
         prior = "prior"
         kwargs = {"num_particles": 3, "num_mcmc_samples": 4}
 
         models, likelihoods, phis = sample(
             likelihood,
             proposal,
-            generator,
             prior,
             multiprocess=multiproc,
             kwargs=kwargs,
@@ -233,7 +221,6 @@ class TestSampleLimits:
 
         likelihood = lambda x: x
         proposal = object()
-        generator = object()
         prior = object()
         max_time = 30.0
         max_equation_evals = 5000
@@ -241,7 +228,6 @@ class TestSampleLimits:
         sample(
             likelihood,
             proposal,
-            generator,
             prior,
             max_time=max_time,
             max_equation_evals=max_equation_evals,
@@ -249,8 +235,8 @@ class TestSampleLimits:
 
         mock_run_smc.assert_called_once()
         args, _ = mock_run_smc.call_args
-        assert args[4] == max_time
-        assert args[5] == max_equation_evals
+        assert args[3] == max_time
+        assert args[4] == max_equation_evals
 
     def test_fixed_time_sampler_when_max_time_specified(self, mocker, sampler_mocks):
         """Test that FixedTimeSampler is used when max_time is specified."""
@@ -259,7 +245,6 @@ class TestSampleLimits:
         run_smc(
             likelihood=sampler_mocks["likelihood"],
             proposal="proposal",
-            generator="generator",
             prior=None,
             max_time=max_time,
             max_equation_evals=None,
@@ -289,7 +274,6 @@ class TestSampleLimits:
         run_smc(
             likelihood=sampler_mocks["likelihood"],
             proposal="proposal",
-            generator="generator",
             prior=None,
             max_time=None,
             max_equation_evals=max_equation_evals,
@@ -316,7 +300,6 @@ class TestSampleLimits:
         run_smc(
             likelihood=sampler_mocks["likelihood"],
             proposal="proposal",
-            generator="generator",
             prior=None,
             max_time=None,
             max_equation_evals=None,
@@ -343,7 +326,6 @@ class TestSampleLimits:
         run_smc(
             likelihood=sampler_mocks["likelihood"],
             proposal="proposal",
-            generator="generator",
             prior=None,
             max_time=max_time,
             max_equation_evals=max_equation_evals,
@@ -381,7 +363,6 @@ class TestSampleLimits:
         run_smc(
             likelihood=sampler_mocks["likelihood"],
             proposal="proposal",
-            generator="generator",
             prior=None,
             max_time=None,
             max_equation_evals=max_equation_evals,
@@ -428,7 +409,6 @@ class TestSampleLimits:
         run_smc(
             likelihood=sampler_mocks["likelihood"],
             proposal="proposal",
-            generator="generator",
             prior=None,
             max_time=max_time,
             max_equation_evals=max_equation_evals,
