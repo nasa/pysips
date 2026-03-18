@@ -30,7 +30,7 @@ from typing import List, Optional, Union
 
 import numpy as np
 
-from bingo.symbolic_regression.agraph.agraph import AGraph
+from bingo.expressions.agraph import AGraphExpression
 
 from .improper_uniform_prior import ImproperUniformPrior
 from ..bingo_proposal_mixin import BingoProposalMixin
@@ -131,13 +131,13 @@ class SamplablePrior(BingoProposalMixin, ABC):
         return log_probs.reshape(-1, 1)
 
     @abstractmethod
-    def _logpdf_single(self, agraph: AGraph) -> float:
+    def _logpdf_single(self, agraph: AGraphExpression) -> float:
         """
         Compute log-probability for a single AGraph expression.
 
         Parameters
         ----------
-        agraph : AGraph
+        agraph : AGraphExpression
             The symbolic expression to evaluate.
 
         Returns

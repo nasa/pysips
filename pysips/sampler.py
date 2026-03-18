@@ -51,9 +51,25 @@ last saved state if the checkpoint file exists when sampling begins.
 # pylint: disable=R0913,R0917
 import numpy as np
 from smcpy import VectorMCMCKernel, AdaptiveSampler, FixedTimeSampler, MaxStepSampler
-from smcpy.utils.storage import PickleStorage
+from smcpy.utils.storage import InMemoryStorage, PickleStorage
 
 from .metropolis import Metropolis
+
+
+class _SingleStepStorage(InMemoryStorage):
+    """In-memory storage that only retains the most recent step.
+
+    smcpy's default InMemoryStorage accumulates every intermediate SMC
+    step, each containing num_particles AGraph objects.  For large
+    populations this causes significant memory growth during sampling.
+    Since pysips only needs the final population, this subclass discards
+    earlier steps on each save.
+    """
+
+    def save_step(self, step):
+        self._step_list = [step]
+        self._phi_sequence.append(step.attrs["phi"])
+        self._mut_ratio_sequence.append(step.attrs["mutation_ratio"])
 
 
 def sample(
@@ -111,8 +127,8 @@ def sample(
     -------
     models : list
         List of parameter values from the final SMC population.
-    likelihoods : list
-        List of likelihood values corresponding to each model in the final population.
+    log_likes : list
+        List of log-likelihood values from the final SMC step for each model.
     phis : list
         List of phi values (tempering parameters) from the SMC sequence.
 
@@ -237,9 +253,8 @@ def run_smc(
     -------
     models : list
         Parameter values from the final SMC population, converted to list format.
-    likelihoods : list
-        Likelihood values for each model in the final population, computed
-        fresh to ensure consistency.
+    log_likes : list
+        Log-likelihood values from the final SMC step for each model.
     phis : list
         Phi values (tempering parameters) from the SMC sequence.
 
@@ -258,21 +273,25 @@ def run_smc(
     """
     kernel = _create_mcmc_kernel(likelihood, proposal, prior, multiprocess, rng)
 
-    # Execute sampling with or without checkpointing
+    # Execute sampling with or without checkpointing.
+    # _SingleStepStorage keeps only the latest step in memory, avoiding
+    # unbounded growth from accumulating all intermediate populations.
     if checkpoint_file is None:
-        steps, phis = _smc_call(
-            max_time, max_equation_evals, kwargs, kernel, show_progress_bar
-        )
+        with _SingleStepStorage():
+            final_step, phis = _smc_call(
+                max_time, max_equation_evals, kwargs, kernel, show_progress_bar
+            )
     else:
         with PickleStorage(checkpoint_file):
-            steps, phis = _smc_call(
+            final_step, phis = _smc_call(
                 max_time, max_equation_evals, kwargs, kernel, show_progress_bar
             )
 
-    models = steps[-1].params[:, 0].tolist()
-    likelihoods = [likelihood(c) for c in models]  # fit final pop of equ
+    models = final_step.params[:, 0].tolist()
+    log_likes = final_step.log_likes.ravel().tolist()
+    del final_step
 
-    return models, likelihoods, phis
+    return models, log_likes, phis
 
 
 def _create_mcmc_kernel(likelihood, proposal, prior, multiprocess, rng):
@@ -301,6 +320,6 @@ def _smc_call(max_time, max_equation_evals, kwargs, kernel, show_progress_bar):
 
     # pylint: disable=W0212
     smc._mutator._compute_cov = False  # hack to bypass covariance calc on obj
-    steps, _ = smc.sample(**kwargs)
+    smc.sample(**kwargs)
     phis = smc.phi_sequence
-    return steps, phis
+    return smc.step, phis

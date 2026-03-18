@@ -34,11 +34,32 @@ Example
 from collections import defaultdict
 from typing import Dict, Literal, Optional
 
-from bingo.symbolic_regression.agraph.agraph import AGraph
-from bingo.symbolic_regression.agraph.operator_definitions import (
-    IS_ARITY_2_MAP,
-    IS_TERMINAL_MAP,
+from bingo.expressions.agraph import AGraphExpression
+from bingo.expressions.agraph.evolvable import EvolvableExpression
+from bingo.expressions.agraph.pyagraph import (
     VARIABLE,
+    CONSTANT,
+    ADDITION,
+    SUBTRACTION,
+    MULTIPLICATION,
+    DIVISION,
+    SIN,
+    COS,
+    EXPONENTIAL,
+    LOGARITHM,
+    POWER,
+    ABS,
+    SQRT,
+    SAFE_POWER,
+    SINH,
+    COSH,
+    TAN,
+    ARCSIN,
+    ARCCOS,
+    ARCTAN,
+    TANH,
+    SQUARE,
+    CUBE,
 )
 
 from .samplable_prior import SamplablePrior
@@ -46,72 +67,61 @@ from .samplable_prior import SamplablePrior
 
 TerminalTreatment = Literal["include", "exclude", "combine"]
 
+# Placeholder default weights for the BMS prior. These should be replaced
+# with well-fit values obtained via fit_bms_prior().
+# Keys are bingo operator integer IDs from
+# bingo.expressions.agraph.pyagraph.operators.
+DEFAULT_BMS_WEIGHTS: Dict[int, float] = {
+    VARIABLE: 1.0,
+    CONSTANT: 1.0,
+    ADDITION: 1.0,
+    SUBTRACTION: 1.0,
+    MULTIPLICATION: 1.0,
+    DIVISION: 1.0,
+    SIN: 1.0,
+    COS: 1.0,
+    EXPONENTIAL: 1.0,
+    LOGARITHM: 1.0,
+    POWER: 1.0,
+    ABS: 1.0,
+    SQRT: 1.0,
+    SAFE_POWER: 1.0,
+    SINH: 1.0,
+    COSH: 1.0,
+    TAN: 1.0,
+    ARCSIN: 1.0,
+    ARCCOS: 1.0,
+    ARCTAN: 1.0,
+    TANH: 1.0,
+    SQUARE: 1.0,
+    CUBE: 1.0,
+}
 
-def _get_operator_counts(
-    agraph: AGraph,
-    tree: bool = True,
-    terminals: TerminalTreatment = "include",
-) -> Dict[int, int]:
-    """
-    Count the occurrences of each operator in an AGraph expression.
-
-    Parameters
-    ----------
-    agraph : AGraph
-        The symbolic expression to analyze.
-    tree : bool, optional
-        If True, perform depth-first tree traversal (counts repeated
-        subgraphs multiple times). If False, count unique nodes in the
-        DAG. Default is True.
-    terminals : {"include", "exclude", "combine"}
-        How to handle terminal nodes:
-        - "include": Count each terminal type separately.
-        - "exclude": Don't count terminal nodes.
-        - "combine": Combine all terminals into a single "Variable" category.
-        Default is "include".
-
-    Returns
-    -------
-    dict
-        Mapping from operator ID (int) to count.
-    """
-    # pylint: disable=protected-access
-    operator_counts: Dict[int, int] = defaultdict(int)
-
-    agraph._update()
-    command_array = agraph._simplified_command_array  # pylint: disable=protected-access
-
-    if tree:
-        stack = [command_array[-1]]
-        while stack:
-            node, param1, param2 = stack.pop()
-
-            if IS_TERMINAL_MAP[node]:
-                if terminals == "exclude":
-                    continue
-                if terminals == "combine":
-                    operator_counts[VARIABLE] += 1
-                    continue
-                operator_counts[node] += 1
-                continue
-
-            operator_counts[node] += 1
-            stack.append(command_array[param1])
-            if IS_ARITY_2_MAP[node]:
-                stack.append(command_array[param2])
-    else:
-        for node, _, _ in command_array:
-            if IS_TERMINAL_MAP[node]:
-                if terminals == "exclude":
-                    continue
-                if terminals == "combine":
-                    operator_counts[VARIABLE] += 1
-                    continue
-                operator_counts[node] += 1
-                continue
-            operator_counts[node] += 1
-
-    return dict(operator_counts)
+DEFAULT_BMS_SQUARED_WEIGHTS: Dict[int, float] = {
+    VARIABLE: 0.0,
+    CONSTANT: 0.0,
+    ADDITION: 0.0,
+    SUBTRACTION: 0.0,
+    MULTIPLICATION: 0.0,
+    DIVISION: 0.0,
+    SIN: 0.0,
+    COS: 0.0,
+    EXPONENTIAL: 0.0,
+    LOGARITHM: 0.0,
+    POWER: 0.0,
+    ABS: 0.0,
+    SQRT: 0.0,
+    SAFE_POWER: 0.0,
+    SINH: 0.0,
+    COSH: 0.0,
+    TAN: 0.0,
+    ARCSIN: 0.0,
+    ARCCOS: 0.0,
+    ARCTAN: 0.0,
+    TANH: 0.0,
+    SQUARE: 0.0,
+    CUBE: 0.0,
+}
 
 
 # pylint: disable=too-many-instance-attributes, too-many-arguments, too-many-positional-arguments, too-many-locals
@@ -266,10 +276,12 @@ class BMSPrior(SamplablePrior):
         """Quadratic operator weights."""
         return dict(self._squared_weights)
 
-    def _logpdf_single(self, agraph: AGraph) -> float:
+    def _logpdf_single(self, agraph) -> float:
         """Compute log-probability for a single AGraph expression."""
-        operator_counts = _get_operator_counts(
-            agraph, tree=self.tree, terminals=self.terminals
+        if isinstance(agraph, EvolvableExpression):
+            agraph = agraph.expression
+        operator_counts = agraph.get_operator_counts(
+            tree=self.tree, terminals=self.terminals
         )
 
         energy = 0.0

@@ -283,3 +283,123 @@ def test_score_normal_case_passes_through(sample_data, mocker: MockerFixture):
     score = regressor.score(X, y)
     assert score == 0.85
     mock_super_score.assert_called_once_with(X, y, sample_weight=None)
+
+
+# --- Tests for prior parameter ---
+
+
+def test_init_default_prior():
+    """Test that prior defaults to 'uniform'."""
+    regressor = PysipsRegressor()
+    assert regressor.prior == "uniform"
+
+
+def test_init_prior_uniform():
+    """Test initialization with prior='uniform'."""
+    regressor = PysipsRegressor(prior="uniform")
+    assert regressor.prior == "uniform"
+
+
+def test_init_prior_bms():
+    """Test initialization with prior='bms'."""
+    regressor = PysipsRegressor(prior="bms")
+    assert regressor.prior == "bms"
+
+
+def test_init_prior_custom_object():
+    """Test initialization with a custom prior object."""
+    custom_prior = MagicMock()
+    custom_prior.rvs = MagicMock()
+    custom_prior.logpdf = MagicMock()
+    regressor = PysipsRegressor(prior=custom_prior)
+    assert regressor.prior is custom_prior
+
+
+def test_init_invalid_prior_string():
+    """Test that an invalid prior string raises ValueError."""
+    with pytest.raises(ValueError, match="Unknown prior 'invalid'"):
+        PysipsRegressor(prior="invalid")
+
+
+def test_init_invalid_prior_object_missing_rvs():
+    """Test that a prior object without rvs raises TypeError."""
+    bad_prior = MagicMock(spec=[])
+    bad_prior.logpdf = MagicMock()
+    with pytest.raises(TypeError, match="'rvs' and 'logpdf'"):
+        PysipsRegressor(prior=bad_prior)
+
+
+def test_init_invalid_prior_object_missing_logpdf():
+    """Test that a prior object without logpdf raises TypeError."""
+    bad_prior = MagicMock(spec=[])
+    bad_prior.rvs = MagicMock()
+    with pytest.raises(TypeError, match="'rvs' and 'logpdf'"):
+        PysipsRegressor(prior=bad_prior)
+
+
+def test_fit_with_uniform_prior(sample_data, mock_external_components):
+    """Test that fit with prior='uniform' uses ImproperUniformPrior."""
+    X, y = sample_data
+    mock_sample = mock_external_components["sample"]
+
+    mock_improper = MagicMock()
+    mock_external_components["_improper_uniform"] = mock_improper
+
+    regressor = PysipsRegressor(prior="uniform", random_state=42)
+    regressor.fit(X, y)
+
+    # Verify sample was called and the prior argument is an
+    # ImproperUniformPrior (the default behavior)
+    mock_sample.assert_called_once()
+    call_args = mock_sample.call_args
+    prior_arg = call_args.kwargs.get("prior") or call_args[0][2]
+    # The prior is constructed from ImproperUniformPrior, which is mocked
+    # at module level in mock_external_components; just verify sample ran
+    assert regressor.models_ is not None
+
+
+def test_fit_with_bms_prior(
+    sample_data, mock_external_components, mocker: MockerFixture
+):
+    """Test that fit with prior='bms' constructs BMSPrior."""
+    X, y = sample_data
+    mock_sample = mock_external_components["sample"]
+
+    mock_bms_prior_cls = mocker.patch(f"{IMPORTMODULE}.BMSPrior", autospec=True)
+    mock_bms_instance = MagicMock()
+    mock_bms_prior_cls.return_value = mock_bms_instance
+
+    regressor = PysipsRegressor(prior="bms", random_state=42)
+    regressor.fit(X, y)
+
+    # Verify BMSPrior was constructed
+    mock_bms_prior_cls.assert_called_once()
+    call_kwargs = mock_bms_prior_cls.call_args.kwargs
+    assert call_kwargs["x_dim"] == X.shape[1]
+
+    # Verify the BMSPrior instance was passed to sample
+    mock_sample.assert_called_once()
+    sample_call_kwargs = mock_sample.call_args.kwargs
+    assert (
+        sample_call_kwargs.get("prior") is mock_bms_instance
+        or mock_sample.call_args[0][2] is mock_bms_instance
+    )
+
+
+def test_fit_with_custom_prior_object(sample_data, mock_external_components):
+    """Test that fit with a custom prior object passes it directly to sample."""
+    X, y = sample_data
+    mock_sample = mock_external_components["sample"]
+
+    custom_prior = MagicMock()
+    custom_prior.rvs = MagicMock()
+    custom_prior.logpdf = MagicMock()
+
+    regressor = PysipsRegressor(prior=custom_prior, random_state=42)
+    regressor.fit(X, y)
+
+    # Verify the custom prior was passed directly to sample
+    mock_sample.assert_called_once()
+    sample_call_kwargs = mock_sample.call_args.kwargs
+    prior_used = sample_call_kwargs.get("prior") or mock_sample.call_args[0][2]
+    assert prior_used is custom_prior

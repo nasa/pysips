@@ -27,10 +27,12 @@ def sampler_mocks(mocker):
         mock_adaptive_sampler,
     ]:
         mock_instance = mocker.Mock()
-        mock_instance.sample.return_value = (
-            [mocker.Mock(params=np.array([[1]]))],
-            None,
+        mock_step = mocker.Mock(
+            params=np.array([[1]]),
+            log_likes=np.array([[0.5]]),
         )
+        mock_instance.sample.return_value = (mocker.Mock(), None)
+        mock_instance.step = mock_step
         mock_instance.phi_sequence = [1.0]
         mock_instance._mutator = mocker.Mock()
         sampler_mock.return_value = mock_instance
@@ -162,8 +164,10 @@ class TestRunSMC:
         )
 
         dummy_params = np.array([[1], [2], [3]])
-        dummy_step = mocker.Mock(params=dummy_params)
-        mock_sampler_instance.sample.return_value = ([dummy_step], None)
+        dummy_log_likes = np.array([[10], [20], [30]])
+        dummy_step = mocker.Mock(params=dummy_params, log_likes=dummy_log_likes)
+        mock_sampler_instance.sample.return_value = (mocker.Mock(), None)
+        mock_sampler_instance.step = dummy_step
         mock_sampler_instance.phi_sequence = [0, 0.5, 1]
 
         likelihood = mocker.Mock(side_effect=lambda x: x * 10)
@@ -203,9 +207,8 @@ class TestRunSMC:
         expected_models = dummy_params[:, 0].tolist()
         assert models == expected_models
 
-        expected_likelihoods = [m * 10 for m in expected_models]
+        expected_likelihoods = dummy_log_likes.ravel().tolist()
         assert likelihoods == expected_likelihoods
-        assert likelihood.call_count == len(expected_models)
 
         expected_phis = [0, 0.5, 1]
         assert phis == expected_phis

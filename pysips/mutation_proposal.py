@@ -62,7 +62,7 @@ at initialization.
 """
 
 import numpy as np
-from bingo.symbolic_regression import (
+from bingo.expressions import (
     ComponentGenerator,
     AGraphMutation,
 )

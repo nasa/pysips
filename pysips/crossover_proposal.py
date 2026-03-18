@@ -55,9 +55,7 @@ can be added to influence future proposals.
 """
 
 import numpy as np
-from bingo.symbolic_regression import (
-    AGraphCrossover,
-)
+from bingo.expressions import AGraphCrossover
 
 
 class CrossoverProposal:
@@ -76,10 +74,14 @@ class CrossoverProposal:
     seed : int, optional
         Random seed for the internal random number generator, used to control
         repeatability of operations
+    agraph_size : int
+        Stack size used for crossover bounds (min_size and max_size).
     """
 
-    def __init__(self, gene_pool, seed=None):
-        self._crossover = AGraphCrossover()
+    def __init__(self, gene_pool, seed=None, agraph_size=None):
+        if agraph_size is None:
+            raise ValueError("agraph_size is required")
+        self._crossover = AGraphCrossover(agraph_size, agraph_size)
         self._gene_pool = gene_pool
         self._rng = np.random.default_rng(seed)
 

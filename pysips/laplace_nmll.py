@@ -1,27 +1,19 @@
-"""
-Laplace Approximation for Normalized Marginal Log-Likelihood Estimation.
+"""Laplace Approximation for Normalized Marginal Log-Likelihood Estimation.
 
-This module provides functionality for computing the Normalized Marginal Log-Likelihood
-(NMLL) using the Laplace approximation method. It integrates with the bingo symbolic
-regression library to evaluate the likelihood of symbolic mathematical models given
-observed data.
-
-The Laplace approximation is a method for approximating integrals that appear in
-Bayesian model selection, particularly useful for comparing different symbolic
-regression models. It approximates the marginal likelihood by making a Gaussian
-approximation around the maximum a posteriori (MAP) estimate of the parameters.
+This module provides functionality for computing the Normalized Marginal
+Log-Likelihood (NMLL) using the Laplace approximation method.  It uses
+the ``bingo.expressions`` AGraph interface where constant optimization
+and scoring are built directly into the expression object.
 
 Key Features
 ------------
-- Integration with bingo's symbolic regression framework
+- Built-in ``fit`` / ``score`` via ``AGraphExpression``
 - Multiple optimization restarts to avoid local minima
-- Configurable scipy-based optimization backend
 - Automatic parameter bound initialization for robust optimization
 
 Usage Example
 -------------
 >>> import numpy as np
->>> from bingo.symbolic_regression import AGraph
 >>>
 >>> # Generate sample data
 >>> X = np.random.randn(100, 2)
@@ -30,7 +22,7 @@ Usage Example
 >>> # Create NMLL evaluator
 >>> nmll_evaluator = LaplaceNmll(X, y, opt_restarts=3)
 >>>
->>> # Evaluate a symbolic model (assuming you have an AGraph model)
+>>> # Evaluate a symbolic model (assuming you have an EvolvableExpression)
 >>> # nmll_score = nmll_evaluator(model)
 
 Notes
@@ -40,65 +32,66 @@ local minima in the parameter space, which is especially important for
 complex symbolic expressions.
 """
 
-from bingo.symbolic_regression.explicit_regression import (
-    ExplicitTrainingData,
-    ExplicitRegression,
-)
-from bingo.local_optimizers.scipy_optimizer import ScipyOptimizer
+import numpy as np
 
 
 # pylint: disable=R0903
 class LaplaceNmll:
-    """Normalized Marginal Likelihood using Laplace approximation
+    """Normalized Marginal Likelihood using Laplace approximation.
 
     Parameters
     ----------
-    X : 2d Numpy Array
-        Array of shape [num_datapoints, num_features] representing the input features
-    y : 1d Numpy Array
-        Array of labels of shape [num_datapoints]
+    X : 2d numpy array
+        Array of shape [num_datapoints, num_features].
+    y : 1d numpy array
+        Array of labels of shape [num_datapoints].
     opt_restarts : int, optional
-        number of times to perform gradient based optimization, each with different
-        random initialization, by default 1
-    **optimizer_kwargs :
-        any keyword arguments to be passed to bingo's scipy optimizer
+        Number of optimization restarts (first uses original constants,
+        subsequent restarts randomize). Default 1.
+    param_init_bounds : list of float, optional
+        [low, high] bounds for random constant initialization on restarts.
+        Default [-5, 5].
     """
 
-    def __init__(self, X, y, opt_restarts=1, **optimizer_kwargs):
-        self._neg_nmll = self._init_neg_nmll(X, y)
-        self._deterministic_optimizer = self._init_deterministic_optimizer(
-            self._neg_nmll, **optimizer_kwargs
-        )
+    def __init__(self, X, y, opt_restarts=1, param_init_bounds=None):
+        self._X = np.atleast_2d(np.asarray(X, dtype=float))
+        self._y = np.asarray(y, dtype=float).ravel()
         self._opt_restarts = opt_restarts
-
-    def _init_neg_nmll(self, X, y):
-        training_data = ExplicitTrainingData(X, y)
-        return ExplicitRegression(
-            training_data=training_data, metric="negative nmll laplace"
-        )
-
-    def _init_deterministic_optimizer(self, objective, **optimizer_kwargs):
-        if "param_init_bounds" not in optimizer_kwargs:
-            optimizer_kwargs["param_init_bounds"] = [-5, 5]
-        return ScipyOptimizer(objective, method="lm", **optimizer_kwargs)
+        self._bounds = param_init_bounds if param_init_bounds is not None else [-5, 5]
 
     def __call__(self, model):
-        """calaculates NMLL using the Laplace approximation
+        """Calculate NMLL using the Laplace approximation.
 
         Parameters
         ----------
-        model : AGraph
-            a bingo equation using the AGraph representation
-        """
-        self._deterministic_optimizer(model)
-        nmll = -self._neg_nmll(model)
-        consts = model.get_local_optimization_params()
-        for _ in range(self._opt_restarts - 1):
-            self._deterministic_optimizer(model)
-            trial_nmll = -self._neg_nmll(model)
-            if trial_nmll > nmll:
-                nmll = trial_nmll
-                consts = model.get_local_optimization_params()
-        model.set_local_optimization_params(consts)
+        model : EvolvableExpression
+            A bingo ``EvolvableExpression`` wrapping an ``AGraphExpression``.
 
-        return nmll
+        Returns
+        -------
+        float
+            The normalized marginal log-likelihood (higher is better).
+        """
+        expr = model.expression
+
+        # First attempt: fit with current (original) constants
+        expr.fit(self._X, self._y)
+        best_nmll = expr.score(self._X, self._y, metric="laplace_nmll")
+        best_consts = expr.constants
+
+        # Additional restarts with randomized constants
+        lo, hi = self._bounds
+        for _ in range(self._opt_restarts - 1):
+            n_consts = len(expr.constants)
+            if n_consts > 0:
+                expr.constants = tuple(
+                    np.random.uniform(lo, hi, size=n_consts)
+                )
+            expr.fit(self._X, self._y)
+            trial_nmll = expr.score(self._X, self._y, metric="laplace_nmll")
+            if trial_nmll > best_nmll:
+                best_nmll = trial_nmll
+                best_consts = expr.constants
+
+        expr.constants = best_consts
+        return best_nmll

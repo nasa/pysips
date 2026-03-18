@@ -25,15 +25,11 @@ Example
 
 from typing import List, Optional
 
-from bingo.symbolic_regression import ComponentGenerator, AGraphGenerator
+from bingo.expressions import ComponentGenerator, AGraphGenerator
 
 from .mutation_proposal import MutationProposal
 from .crossover_proposal import CrossoverProposal
 from .random_choice_proposal import RandomChoiceProposal
-
-
-# Configuration constants
-USE_PYTHON = True
 
 
 # pylint: disable=too-many-instance-attributes, too-many-arguments, too-many-positional-arguments, too-many-locals, too-few-public-methods
@@ -74,21 +70,12 @@ class BingoProposalMixin:
     exclusive : bool, optional
         If True, mutation and crossover are exclusive. Default is True.
 
-    Attributes
-    ----------
-    use_simplification : bool
-        Class-level attribute controlling whether AGraph simplification
-        is enabled. Default is False. Subclasses can override this.
-
     Notes
     -----
     This mixin expects `x_dim` and `operators` to be provided when calling
     `_get_generator()` and `_get_proposal()`, allowing flexibility in how
     these values are determined (e.g., from data dimensions, weight keys).
     """
-
-    # Subclasses can override this to enable/disable simplification
-    use_simplification: bool = False
 
     def __init__(
         self,
@@ -124,7 +111,7 @@ class BingoProposalMixin:
         self.crossover_prob = crossover_prob
         self.exclusive = exclusive
 
-    def _get_generator(self, x_dim: int, operators: List[int]) -> AGraphGenerator:
+    def _get_generator(self, x_dim: int, operators: List[int]):
         """
         Create an AGraph expression generator.
 
@@ -154,9 +141,8 @@ class BingoProposalMixin:
 
         return AGraphGenerator(
             self.max_complexity,
+            self.max_complexity,
             component_generator,
-            use_python=USE_PYTHON,
-            use_simplification=self.use_simplification,
         )
 
     def _get_proposal(
@@ -210,7 +196,10 @@ class BingoProposalMixin:
         pool = set()
         while len(pool) < pool_size:
             pool.add(generator())
-        crossover = CrossoverProposal(list(pool))
+        crossover = CrossoverProposal(
+            list(pool),
+            agraph_size=self.max_complexity,
+        )
 
         # Create combined proposal
         return RandomChoiceProposal(

@@ -134,9 +134,16 @@ from sklearn.base import BaseEstimator, RegressorMixin
 from sklearn.utils.validation import check_X_y, check_array, check_is_fitted
 
 from .bingo_proposal_mixin import BingoProposalMixin
-from .priors import ImproperUniformPrior
+from .priors import (
+    ImproperUniformPrior,
+    BMSPrior,
+    DEFAULT_BMS_WEIGHTS,
+    DEFAULT_BMS_SQUARED_WEIGHTS,
+)
 from .laplace_nmll import LaplaceNmll
 from .sampler import sample
+
+_KNOWN_PRIOR_STRINGS = {"uniform", "bms"}
 
 DEFAULT_OPERATORS = ["+", "*"]
 DEFALT_PARAMETER_INITIALIZATION_BOUNDS = [-5, 5]
@@ -237,14 +244,24 @@ class PysipsRegressor(BingoProposalMixin, BaseEstimator, RegressorMixin):
         the sampling will run until completion without time constraints.
         Cannot be used together with max_time.
 
+    prior : str or object, default="uniform"
+        The prior distribution to use for sampling. Can be:
+
+        - ``"uniform"`` : Improper uniform prior (default). Generates
+          random symbolic expressions with equal probability.
+        - ``"bms"`` : Bayesian Machine Scientist prior. Scores
+          expressions based on weighted operator frequency counts
+          using built-in default weights.
+        - A custom prior object with ``rvs(N, random_state=None)``
+          and ``logpdf(x)`` methods. The ``rvs`` method should return
+          an array of shape ``(N, 1)`` and ``logpdf`` should return
+          an array of shape ``(N, 1)``.
+
     show_progress_bar : bool, default=True
         Whether to display a progress bar during fitting. When False, the
         progress bar will be hidden, which is useful for hyperparameter
         tuning or when running multiple fits in parallel.
     """
-
-    # Override mixin default to enable simplification for regression
-    use_simplification: bool = True
 
     def __init__(
         self,
@@ -270,10 +287,22 @@ class PysipsRegressor(BingoProposalMixin, BaseEstimator, RegressorMixin):
         model_selection="mode",
         checkpoint_file=None,
         random_state=None,
+        prior="uniform",
         max_time=None,
         max_equation_evals=None,
         show_progress_bar=True,
     ):
+        # Validate prior parameter
+        if isinstance(prior, str) and prior not in _KNOWN_PRIOR_STRINGS:
+            raise ValueError(
+                f"Unknown prior '{prior}'. Expected one of "
+                f"{sorted(_KNOWN_PRIOR_STRINGS)} or a prior object with "
+                f"'rvs' and 'logpdf' methods."
+            )
+        if not isinstance(prior, str):
+            if not hasattr(prior, "rvs") or not hasattr(prior, "logpdf"):
+                raise TypeError("Custom prior must have 'rvs' and 'logpdf' methods.")
+
         # Validate that max_time and max_equation_evals are not both specified
         if max_time is not None and max_equation_evals is not None:
             raise ValueError(
@@ -316,6 +345,7 @@ class PysipsRegressor(BingoProposalMixin, BaseEstimator, RegressorMixin):
         self.model_selection = model_selection
         self.checkpoint_file = checkpoint_file
         self.random_state = random_state
+        self.prior = prior
         self.max_time = max_time
         self.max_equation_evals = max_equation_evals
         self.show_progress_bar = show_progress_bar
@@ -353,9 +383,14 @@ class PysipsRegressor(BingoProposalMixin, BaseEstimator, RegressorMixin):
 
         # Create generator, proposal, and likelihood
         generator = self._get_generator(x_dim, self.operators)
-        prior = ImproperUniformPrior(generator)
+        prior = self._build_prior(generator, x_dim)
         proposal = self._get_proposal(x_dim, generator, self.operators)
-        likelihood = LaplaceNmll(X, y)
+        likelihood = LaplaceNmll(
+            X,
+            y,
+            opt_restarts=self.opt_restarts,
+            param_init_bounds=self.param_init_bounds,
+        )
 
         # Run sampling
         models, likelihoods, phis = sample(
@@ -397,6 +432,35 @@ class PysipsRegressor(BingoProposalMixin, BaseEstimator, RegressorMixin):
 
         return self
 
+    def _build_prior(self, generator, x_dim):
+        """Resolve the prior configuration into a prior object.
+
+        Parameters
+        ----------
+        generator : callable
+            AGraph generator (used for the "uniform" prior).
+        x_dim : int
+            Number of input features.
+
+        Returns
+        -------
+        prior : object
+            A prior object with ``rvs`` and ``logpdf`` methods.
+        """
+        if isinstance(self.prior, str):
+            if self.prior == "uniform":
+                return ImproperUniformPrior(generator)
+            if self.prior == "bms":
+                return BMSPrior(
+                    DEFAULT_BMS_WEIGHTS,
+                    DEFAULT_BMS_SQUARED_WEIGHTS,
+                    x_dim=x_dim,
+                    # num_mcmc_samples=self.num_mcmc_samples,
+                    # target_ess=self.target_ess,
+                )
+        # Custom prior object — pass through as-is
+        return self.prior
+
     def predict(self, X):
         """
         Predict using the best symbolic regression model.
@@ -422,7 +486,7 @@ class PysipsRegressor(BingoProposalMixin, BaseEstimator, RegressorMixin):
             )
 
         # Use the best model for prediction
-        prediction = self.best_model_.evaluate_equation_at(X).flatten()
+        prediction = self.best_model_.expression.predict(X)
         return prediction
 
     def score(self, X, y, sample_weight=None):

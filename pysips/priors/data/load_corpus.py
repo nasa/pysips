@@ -1,12 +1,13 @@
 from typing import List, Optional
 from pathlib import Path
-from bingo.symbolic_regression import AGraph
+
+from bingo.expressions.agraph import AGraphExpression
 from sympy import sympify
 
 WIKIPEDIA_CORPUS_PATH = Path(__file__).parent / "wikipedia_named_equations.txt"
 
 
-def load_corpus(corpus_name: str, max_samples: Optional[int] = None) -> List[AGraph]:
+def load_corpus(corpus_name: str, max_samples: Optional[int] = None) -> List[AGraphExpression]:
     """
     Load a corpus of equations from a specified dataset.
 
@@ -20,8 +21,14 @@ def load_corpus(corpus_name: str, max_samples: Optional[int] = None) -> List[AGr
 
     Returns
     -------
-    List[AGaph]
-        A list of equations from the specified corpus.
+    List[AGraphExpression]
+        A list of AGraph equations from the specified corpus.
+
+    Examples
+    --------
+    >>> equations = load_corpus("wikipedia", max_samples=100)
+    >>> len(equations)
+    100
     """
     if corpus_name == "wikipedia":
         equations = []
@@ -29,7 +36,13 @@ def load_corpus(corpus_name: str, max_samples: Optional[int] = None) -> List[AGr
             for i, line in enumerate(f):
                 if max_samples is not None and i >= max_samples:
                     break
-                equations.append(sympify(line.strip()))
+                try:
+                    expr = sympify(line.strip())
+                    agraph = AGraphExpression(equation=expr)
+                    equations.append(agraph)
+                except Exception:
+                    # Skip equations that can't be converted
+                    continue
         return equations
     else:
         raise ValueError(f"Unsupported corpus name: {corpus_name}")
