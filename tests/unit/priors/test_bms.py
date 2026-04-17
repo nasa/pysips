@@ -184,3 +184,66 @@ class TestBMSPriorBackwardCompatibility:
         assert prior.squared_weights == {2: 0.1}
         assert prior.x_dim is None
         assert prior.operators == [2]
+
+
+class TestBMSPriorOperators:
+    """Tests for the explicit operators parameter."""
+
+    def test_operators_derived_from_weights_when_none(self):
+        """When operators=None, operators should be derived from weight keys."""
+        prior = BMSPrior(
+            {ADDITION: 0.5, MULTIPLICATION: 0.3},
+            {ADDITION: 0.1, SUBTRACTION: 0.05},
+        )
+        # Should include union of both weight dicts' keys
+        assert set(prior.operators) == {ADDITION, MULTIPLICATION, SUBTRACTION}
+
+    def test_explicit_operators_overrides_weights(self):
+        """Explicit operators parameter should override weight-derived operators."""
+        prior = BMSPrior(
+            {ADDITION: 0.5, MULTIPLICATION: 0.3},
+            {ADDITION: 0.1},
+            operators=[ADDITION],  # Only addition
+        )
+        assert prior.operators == [ADDITION]
+
+    def test_explicit_operators_can_be_subset_of_weights(self):
+        """Operators can be a subset of what's in weights."""
+        weights = {ADDITION: 0.5, MULTIPLICATION: 0.3, SUBTRACTION: 0.2}
+        sq_weights = {ADDITION: 0.1, MULTIPLICATION: 0.05, SUBTRACTION: 0.01}
+        prior = BMSPrior(
+            weights,
+            sq_weights,
+            operators=[ADDITION, MULTIPLICATION],
+        )
+        assert set(prior.operators) == {ADDITION, MULTIPLICATION}
+        # Weights should still be accessible for scoring
+        assert prior.weights[SUBTRACTION] == 0.2
+
+    def test_explicit_operators_can_include_ops_not_in_weights(self):
+        """Operators can include ops not in weights (they get 0 weight)."""
+        prior = BMSPrior(
+            {ADDITION: 0.5},
+            {ADDITION: 0.1},
+            operators=[ADDITION, MULTIPLICATION],  # MULTIPLICATION not in weights
+        )
+        assert set(prior.operators) == {ADDITION, MULTIPLICATION}
+        # MULTIPLICATION should default to 0.0 weight
+        assert prior._weights[MULTIPLICATION] == 0.0
+
+    def test_logpdf_uses_weights_not_operators_for_scoring(self):
+        """logpdf should use weights for scoring, regardless of operators param."""
+        # Create prior with limited operators but full weights
+        prior = BMSPrior(
+            {ADDITION: 1.0, MULTIPLICATION: 2.0},
+            {ADDITION: 0.0, MULTIPLICATION: 0.0},
+            operators=[ADDITION],  # Only addition for generation
+        )
+
+        # Expression that uses both operators (could come from external source)
+        ag = _make_mock_agraph({ADDITION: 1, MULTIPLICATION: 1})
+
+        # Both operators should be scored using their weights
+        # Energy = 1*1.0 + 1*2.0 = 3.0, logpdf = -3.0
+        result = prior.logpdf([ag])
+        np.testing.assert_almost_equal(result[0, 0], -3.0)

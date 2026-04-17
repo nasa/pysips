@@ -18,8 +18,9 @@ expression, :math:`w_{\\text{op}}` is the linear weight, and
 :math:`w2_{\\text{op}}` is the quadratic weight.
 
 The prior supports SMC-based sampling via the inherited ``rvs()`` method.
-Operators are automatically inferred from the keys of the ``weights`` and
-``squared_weights`` dictionaries.
+Operators for generation/sampling can be specified explicitly via the
+``operators`` parameter, or are automatically inferred from the keys of
+the ``weights`` and ``squared_weights`` dictionaries if not provided.
 
 Example
 -------
@@ -32,7 +33,7 @@ Example
 """
 
 from collections import defaultdict
-from typing import Dict, Literal, Optional
+from typing import Dict, List, Literal, Optional
 
 from bingo.expressions.agraph import AGraphExpression
 from bingo.expressions.agraph.evolvable import EvolvableExpression
@@ -74,53 +75,53 @@ TerminalTreatment = Literal["include", "exclude", "combine"]
 DEFAULT_BMS_WEIGHTS: Dict[int, float] = {
     VARIABLE: 1.0,
     CONSTANT: 1.0,
-    ADDITION: 1.0,
-    SUBTRACTION: 1.0,
-    MULTIPLICATION: 1.0,
-    DIVISION: 1.0,
-    SIN: 1.0,
-    COS: 1.0,
-    EXPONENTIAL: 1.0,
-    LOGARITHM: 1.0,
-    POWER: 1.0,
-    ABS: 1.0,
-    SQRT: 1.0,
-    SAFE_POWER: 1.0,
-    SINH: 1.0,
-    COSH: 1.0,
-    TAN: 1.0,
-    ARCSIN: 1.0,
-    ARCCOS: 1.0,
-    ARCTAN: 1.0,
-    TANH: 1.0,
-    SQUARE: 1.0,
-    CUBE: 1.0,
+    ADDITION: -0.5052325756916224,
+    SUBTRACTION: -0.41981393792182564,
+    MULTIPLICATION: -1.4437748595369742,
+    DIVISION: -1.9683108719142648,
+    SIN: 2.437916409174549,
+    COS: 2.282472061253178,
+    EXPONENTIAL: 1.7292134152511867,
+    LOGARITHM: 1.4969452635490017,
+    POWER: 1.0513949212784621,
+    ABS: 3.066381663327651,
+    SQRT: 1.182611634631301,
+    SAFE_POWER: 1.0513949212784621,  # same as power
+    SINH: 3.4873280017038097,
+    COSH: 3.733365825244972,
+    TAN: 3.735088893270878,
+    ARCSIN: 3.4873280017038097,  # same as sinh
+    ARCCOS: 3.733365825244972,  # same as cosh
+    ARCTAN: 3.735088893270878,  # same as tan
+    TANH: 3.3227098233793133,
+    SQUARE: 0.1643846698086607,
+    CUBE: 2.151392272044566,
 }
 
 DEFAULT_BMS_SQUARED_WEIGHTS: Dict[int, float] = {
     VARIABLE: 0.0,
     CONSTANT: 0.0,
-    ADDITION: 0.0,
-    SUBTRACTION: 0.0,
-    MULTIPLICATION: 0.0,
-    DIVISION: 0.0,
-    SIN: 0.0,
-    COS: 0.0,
-    EXPONENTIAL: 0.0,
-    LOGARITHM: 0.0,
-    POWER: 0.0,
-    ABS: 0.0,
-    SQRT: 0.0,
-    SAFE_POWER: 0.0,
-    SINH: 0.0,
-    COSH: 0.0,
-    TAN: 0.0,
-    ARCSIN: 0.0,
-    ARCCOS: 0.0,
-    ARCTAN: 0.0,
-    TANH: 0.0,
-    SQUARE: 0.0,
-    CUBE: 0.0,
+    ADDITION: 0.05727582837315748,
+    SUBTRACTION: 0.25130267934695594,
+    MULTIPLICATION: 0.07133436252310128,
+    DIVISION: 0.3436831421029277,
+    SIN: 0.2541219146830698,
+    COS: -0.047551501276107876,
+    EXPONENTIAL: -0.03602527948439972,
+    LOGARITHM: 0.07506329258939393,
+    POWER: -0.021884761713059465,
+    ABS: -0.004189380590018706,
+    SQRT: -0.021771153712574945,
+    SAFE_POWER: -0.021884761713059465,  # same as power
+    SINH: 1.310401226288916,
+    COSH: 1.2689469280957986,
+    TAN: 1.2811172269782463,
+    ARCSIN: 1.310401226288916,  # same as sinh
+    ARCCOS: 1.2689469280957986,  # same as cosh
+    ARCTAN: 1.2811172269782463,  # same as tan
+    TANH: 1.2530118867078652,
+    SQUARE: -0.0034246806210137645,
+    CUBE: -0.04482067233426179,
 }
 
 
@@ -137,9 +138,14 @@ class BMSPrior(SamplablePrior):
     ----------
     weights : dict
         Linear operator weights mapping operator ID to weight value.
-        Operators are inferred from the keys of this dictionary.
+        Used for scoring expressions via ``logpdf()``.
     squared_weights : dict
         Quadratic operator weights mapping operator ID to weight value.
+        Used for scoring expressions via ``logpdf()``.
+    operators : list of int, optional
+        List of operator IDs to use for generation/sampling. If None,
+        operators are inferred from the keys of ``weights`` and
+        ``squared_weights``. Default is None.
     x_dim : int, optional
         Number of input variables (dimension of X data). Required for
         sampling via ``rvs()``. Default is None.
@@ -207,6 +213,7 @@ class BMSPrior(SamplablePrior):
         self,
         weights: Dict[int, float],
         squared_weights: Dict[int, float],
+        operators: Optional[List[int]] = None,
         x_dim: Optional[int] = None,
         tree: bool = True,
         terminals: TerminalTreatment = "exclude",
@@ -231,10 +238,14 @@ class BMSPrior(SamplablePrior):
         crossover_prob: float = 0.25,
         exclusive: bool = True,
     ):
+        # Derive operators from weights if not explicitly provided
+        if operators is None:
+            operators = list(set(weights.keys()) | set(squared_weights.keys()))
+
         # Initialize parent class with SMC parameters
         super().__init__(
             x_dim=x_dim,
-            operators=list(set(weights.keys()) | set(squared_weights.keys())),
+            operators=operators,
             num_mcmc_samples=num_mcmc_samples,
             target_ess=target_ess,
             max_time=max_time,

@@ -451,10 +451,13 @@ class PysipsRegressor(BingoProposalMixin, BaseEstimator, RegressorMixin):
             if self.prior == "uniform":
                 return ImproperUniformPrior(generator)
             if self.prior == "bms":
+                print("Using BMS prior with default weights.")
                 return BMSPrior(
                     DEFAULT_BMS_WEIGHTS,
                     DEFAULT_BMS_SQUARED_WEIGHTS,
+                    operators=self.operators,
                     x_dim=x_dim,
+                    max_complexity=self.max_complexity,
                     # num_mcmc_samples=self.num_mcmc_samples,
                     # target_ess=self.target_ess,
                 )

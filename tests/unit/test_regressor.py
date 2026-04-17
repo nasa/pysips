@@ -386,6 +386,35 @@ def test_fit_with_bms_prior(
     )
 
 
+def test_fit_with_bms_prior_passes_operators(
+    sample_data, mock_external_components, mocker: MockerFixture
+):
+    """Test that fit with prior='bms' passes user operators to BMSPrior."""
+    X, y = sample_data
+    mock_sample = mock_external_components["sample"]
+
+    mock_bms_prior_cls = mocker.patch(f"{IMPORTMODULE}.BMSPrior", autospec=True)
+    mock_bms_instance = MagicMock()
+    mock_bms_prior_cls.return_value = mock_bms_instance
+
+    # Create regressor with specific operators
+    regressor = PysipsRegressor(
+        prior="bms",
+        operators=["+", "-", "*", "/"],
+        random_state=42,
+    )
+    regressor.fit(X, y)
+
+    # Verify BMSPrior was constructed with operators
+    mock_bms_prior_cls.assert_called_once()
+    call_kwargs = mock_bms_prior_cls.call_args.kwargs
+
+    # Operators should be passed as-is (strings); BMSPrior/SamplablePrior
+    # accepts both strings and ints
+    assert "operators" in call_kwargs
+    assert call_kwargs["operators"] == ["+", "-", "*", "/"]
+
+
 def test_fit_with_custom_prior_object(sample_data, mock_external_components):
     """Test that fit with a custom prior object passes it directly to sample."""
     X, y = sample_data
