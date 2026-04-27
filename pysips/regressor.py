@@ -139,11 +139,13 @@ from .priors import (
     BMSPrior,
     DEFAULT_BMS_WEIGHTS,
     DEFAULT_BMS_SQUARED_WEIGHTS,
+    KatzPrior,
+    load_default_katz_model,
 )
 from .laplace_nmll import LaplaceNmll
 from .sampler import sample
 
-_KNOWN_PRIOR_STRINGS = {"uniform", "bms"}
+_KNOWN_PRIOR_STRINGS = {"uniform", "bms", "katz"}
 
 DEFAULT_OPERATORS = ["+", "*"]
 DEFALT_PARAMETER_INITIALIZATION_BOUNDS = [-5, 5]
@@ -252,6 +254,9 @@ class PysipsRegressor(BingoProposalMixin, BaseEstimator, RegressorMixin):
         - ``"bms"`` : Bayesian Machine Scientist prior. Scores
           expressions based on weighted operator frequency counts
           using built-in default weights.
+        - ``"katz"`` : Katz back-off n-gram prior (n=2, fit to the
+          Wikipedia named-equations corpus). Scores expressions via
+          operator n-gram probabilities.
         - A custom prior object with ``rvs(N, random_state=None)``
           and ``logpdf(x)`` methods. The ``rvs`` method should return
           an array of shape ``(N, 1)`` and ``logpdf`` should return
@@ -458,8 +463,14 @@ class PysipsRegressor(BingoProposalMixin, BaseEstimator, RegressorMixin):
                     operators=self.operators,
                     x_dim=x_dim,
                     max_complexity=self.max_complexity,
-                    # num_mcmc_samples=self.num_mcmc_samples,
-                    # target_ess=self.target_ess,
+                )
+            if self.prior == "katz":
+                print("Using Katz prior (n=2, Wikipedia corpus).")
+                return KatzPrior(
+                    load_default_katz_model(n=2),
+                    operators=self.operators,
+                    x_dim=x_dim,
+                    max_complexity=self.max_complexity,
                 )
         # Custom prior object — pass through as-is
         return self.prior

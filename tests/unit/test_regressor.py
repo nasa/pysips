@@ -432,3 +432,68 @@ def test_fit_with_custom_prior_object(sample_data, mock_external_components):
     sample_call_kwargs = mock_sample.call_args.kwargs
     prior_used = sample_call_kwargs.get("prior") or mock_sample.call_args[0][2]
     assert prior_used is custom_prior
+
+
+def test_init_prior_katz():
+    """Test initialization with prior='katz'."""
+    regressor = PysipsRegressor(prior="katz")
+    assert regressor.prior == "katz"
+
+
+def test_fit_with_katz_prior(
+    sample_data, mock_external_components, mocker: MockerFixture
+):
+    """Test that fit with prior='katz' constructs KatzPrior with default model."""
+    X, y = sample_data
+    mock_sample = mock_external_components["sample"]
+
+    mock_katz_model = MagicMock()
+    mock_load_default = mocker.patch(
+        f"{IMPORTMODULE}.load_default_katz_model", return_value=mock_katz_model
+    )
+    mock_katz_prior_cls = mocker.patch(f"{IMPORTMODULE}.KatzPrior", autospec=True)
+    mock_katz_instance = MagicMock()
+    mock_katz_prior_cls.return_value = mock_katz_instance
+
+    regressor = PysipsRegressor(prior="katz", random_state=42)
+    regressor.fit(X, y)
+
+    # Verify the default model was loaded with n=2
+    mock_load_default.assert_called_once_with(n=2)
+
+    # Verify KatzPrior was constructed with the loaded model
+    mock_katz_prior_cls.assert_called_once()
+    call_args = mock_katz_prior_cls.call_args
+    assert call_args.args[0] is mock_katz_model
+    assert call_args.kwargs["x_dim"] == X.shape[1]
+
+    # Verify the KatzPrior instance was passed to sample
+    mock_sample.assert_called_once()
+    sample_call_kwargs = mock_sample.call_args.kwargs
+    assert (
+        sample_call_kwargs.get("prior") is mock_katz_instance
+        or mock_sample.call_args[0][2] is mock_katz_instance
+    )
+
+
+def test_fit_with_katz_prior_passes_operators(
+    sample_data, mock_external_components, mocker: MockerFixture
+):
+    """Test that fit with prior='katz' passes user operators to KatzPrior."""
+    X, y = sample_data
+
+    mocker.patch(f"{IMPORTMODULE}.load_default_katz_model", return_value=MagicMock())
+    mock_katz_prior_cls = mocker.patch(f"{IMPORTMODULE}.KatzPrior", autospec=True)
+    mock_katz_prior_cls.return_value = MagicMock()
+
+    regressor = PysipsRegressor(
+        prior="katz",
+        operators=["+", "-", "*"],
+        random_state=42,
+    )
+    regressor.fit(X, y)
+
+    mock_katz_prior_cls.assert_called_once()
+    call_kwargs = mock_katz_prior_cls.call_args.kwargs
+    assert "operators" in call_kwargs
+    assert call_kwargs["operators"] == ["+", "-", "*"]

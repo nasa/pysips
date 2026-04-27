@@ -19,6 +19,9 @@ from .improper_uniform_prior import ImproperUniformPrior, MAX_REPEATS
 from .samplable_prior import SamplablePrior
 from .bms_prior import BMSPrior, DEFAULT_BMS_WEIGHTS, DEFAULT_BMS_SQUARED_WEIGHTS
 from .bms_fitting import fit_bms_prior
+from .katz_backoff import KatzBackoffModel, KatzBackoffTreeModel
+from .katz_prior import KatzPrior, load_default_katz_model, save_katz_model
+from .katz_fitting import fit_katz_model, fit_katz_prior
 from .data.load_corpus import load_corpus
 
 __all__ = [
@@ -30,4 +33,11 @@ __all__ = [
     "DEFAULT_BMS_SQUARED_WEIGHTS",
     "load_corpus",
     "fit_bms_prior",
+    "KatzBackoffModel",
+    "KatzBackoffTreeModel",
+    "KatzPrior",
+    "fit_katz_model",
+    "fit_katz_prior",
+    "load_default_katz_model",
+    "save_katz_model",
 ]
