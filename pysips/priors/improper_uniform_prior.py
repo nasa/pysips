@@ -104,3 +104,19 @@ class ImproperUniformPrior(ImproperUniform):
                     already_warned = True
 
         return np.c_[list(pool)]
+
+    def logpdf(self, x: np.ndarray) -> np.ndarray:
+        """
+        Compute log-prior probability for an array of AGraph expressions.
+
+        Parameters
+        ----------
+        x : array-like
+            Array or list of AGraph objects.
+
+        Returns
+        -------
+        ndarray
+            Array of shape ``(N, 1)`` with log-probability values.
+        """
+        return np.ones((x.shape[0], 1))

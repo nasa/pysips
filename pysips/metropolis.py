@@ -101,7 +101,7 @@ class Metropolis(VectorMCMC):
 
         for _ in range(num_samples):
 
-            inputs, log_like, _, _ = self._perform_mcmc_step(
+            inputs, log_like, log_priors, _ = self._perform_mcmc_step(
                 inputs, None, log_like, log_priors
             )
 
@@ -113,7 +113,8 @@ class Metropolis(VectorMCMC):
         return None
 
     def evaluate_log_priors(self, inputs):
-        return np.ones((inputs.shape[0], 1))
+        log_prior = self._priors[0].logpdf(inputs.flatten())
+        return np.c_[log_prior]
 
     def evaluate_log_likelihood(self, inputs):
         if self._is_multiprocess:
