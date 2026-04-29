@@ -31,14 +31,17 @@ from sympy import Float, Symbol, pi as sym_pi, srepr, sympify
 DATA_DIR = Path(__file__).parent
 FEYNMAN_CSV = DATA_DIR / "FeynmanEquations.csv"
 BONUS_CSV = DATA_DIR / "BonusEquations.csv"
+BENCHMARK_CSV = DATA_DIR / "BenchmarkFeynmanEquations.csv"
 FEYNMAN_OUT = DATA_DIR / "feynman_equations.txt"
 BONUS_OUT = DATA_DIR / "bonus_equations.txt"
+BENCHMARK_OUT = DATA_DIR / "benchmark_feynman_equations.txt"
 
 
 # Column layout differs between the two CSVs. The two integers are
 # (formula_column_index, first_variable_name_column_index).
 FEYNMAN_LAYOUT = (3, 5)
 BONUS_LAYOUT = (5, 7)
+BENCHMARK_LAYOUT = (3, 5)
 
 
 def _iter_equations(csv_path, formula_col, var_start_col):
@@ -85,8 +88,18 @@ def build_bonus_corpus():
     return _write_corpus(lines, BONUS_OUT)
 
 
+def build_benchmark_corpus():
+    """Write the benchmark Feynman corpus."""
+    lines = [
+        _convert(f, v) for f, v in _iter_equations(BENCHMARK_CSV, *BENCHMARK_LAYOUT)
+    ]
+    return _write_corpus(lines, BENCHMARK_OUT)
+
+
 if __name__ == "__main__":
     n_feyn = build_feynman_corpus()
     n_bonus = build_bonus_corpus()
+    n_bench = build_benchmark_corpus()
     print(f"Wrote {n_feyn} equations to {FEYNMAN_OUT}")
     print(f"Wrote {n_bonus} equations to {BONUS_OUT}")
+    print(f"Wrote {n_bench} equations to {BENCHMARK_OUT}")

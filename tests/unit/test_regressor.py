@@ -448,8 +448,8 @@ def test_fit_with_katz_prior(
     mock_sample = mock_external_components["sample"]
 
     mock_katz_model = MagicMock()
-    mock_load_default = mocker.patch(
-        f"{IMPORTMODULE}.load_default_katz_model", return_value=mock_katz_model
+    mock_load = mocker.patch(
+        f"{IMPORTMODULE}.load_katz_model", return_value=mock_katz_model
     )
     mock_katz_prior_cls = mocker.patch(f"{IMPORTMODULE}.KatzPrior", autospec=True)
     mock_katz_instance = MagicMock()
@@ -458,8 +458,8 @@ def test_fit_with_katz_prior(
     regressor = PysipsRegressor(prior="katz", random_state=42)
     regressor.fit(X, y)
 
-    # Verify the default model was loaded with n=2
-    mock_load_default.assert_called_once_with(n=2)
+    # Verify the default model was loaded with n=2, corpus=wikipedia
+    mock_load.assert_called_once_with(n=2, corpus="wikipedia")
 
     # Verify KatzPrior was constructed with the loaded model
     mock_katz_prior_cls.assert_called_once()
@@ -482,7 +482,7 @@ def test_fit_with_katz_prior_passes_operators(
     """Test that fit with prior='katz' passes user operators to KatzPrior."""
     X, y = sample_data
 
-    mocker.patch(f"{IMPORTMODULE}.load_default_katz_model", return_value=MagicMock())
+    mocker.patch(f"{IMPORTMODULE}.load_katz_model", return_value=MagicMock())
     mock_katz_prior_cls = mocker.patch(f"{IMPORTMODULE}.KatzPrior", autospec=True)
     mock_katz_prior_cls.return_value = MagicMock()
 
@@ -497,3 +497,89 @@ def test_fit_with_katz_prior_passes_operators(
     call_kwargs = mock_katz_prior_cls.call_args.kwargs
     assert "operators" in call_kwargs
     assert call_kwargs["operators"] == ["+", "-", "*"]
+
+
+# --- Tests for prior_params ---
+
+
+def test_init_default_prior_params():
+    """Test that prior_params defaults to None."""
+    regressor = PysipsRegressor()
+    assert regressor.prior_params is None
+
+
+def test_init_prior_params_stored():
+    """Test that prior_params is stored on the regressor."""
+    params = {"corpus": "feynman", "n": 3}
+    regressor = PysipsRegressor(prior="katz", prior_params=params)
+    assert regressor.prior_params == params
+
+
+def test_fit_katz_with_prior_params(
+    sample_data, mock_external_components, mocker: MockerFixture
+):
+    """Test that katz prior_params are forwarded to load_katz_model."""
+    X, y = sample_data
+
+    mock_katz_model = MagicMock()
+    mock_load = mocker.patch(
+        f"{IMPORTMODULE}.load_katz_model", return_value=mock_katz_model
+    )
+    mock_katz_prior_cls = mocker.patch(f"{IMPORTMODULE}.KatzPrior", autospec=True)
+    mock_katz_prior_cls.return_value = MagicMock()
+
+    regressor = PysipsRegressor(
+        prior="katz",
+        prior_params={"corpus": "benchmark", "n": 3},
+        random_state=42,
+    )
+    regressor.fit(X, y)
+
+    mock_load.assert_called_once_with(n=3, corpus="benchmark")
+
+
+def test_fit_bms_with_unsupported_corpus_raises(sample_data, mock_external_components):
+    """Test that BMS prior with non-wikipedia corpus raises ValueError."""
+    X, y = sample_data
+
+    regressor = PysipsRegressor(
+        prior="bms",
+        prior_params={"corpus": "feynman"},
+        random_state=42,
+    )
+    with pytest.raises(ValueError, match="No pre-fit BMS weights"):
+        regressor.fit(X, y)
+
+
+def test_fit_bms_default_corpus(
+    sample_data, mock_external_components, mocker: MockerFixture
+):
+    """Test that BMS prior with default corpus works."""
+    X, y = sample_data
+
+    mock_bms_prior_cls = mocker.patch(f"{IMPORTMODULE}.BMSPrior", autospec=True)
+    mock_bms_prior_cls.return_value = MagicMock()
+
+    regressor = PysipsRegressor(prior="bms", random_state=42)
+    regressor.fit(X, y)
+
+    mock_bms_prior_cls.assert_called_once()
+
+
+def test_fit_bms_explicit_wikipedia_corpus(
+    sample_data, mock_external_components, mocker: MockerFixture
+):
+    """Test that BMS prior with explicit wikipedia corpus works."""
+    X, y = sample_data
+
+    mock_bms_prior_cls = mocker.patch(f"{IMPORTMODULE}.BMSPrior", autospec=True)
+    mock_bms_prior_cls.return_value = MagicMock()
+
+    regressor = PysipsRegressor(
+        prior="bms",
+        prior_params={"corpus": "wikipedia"},
+        random_state=42,
+    )
+    regressor.fit(X, y)
+
+    mock_bms_prior_cls.assert_called_once()

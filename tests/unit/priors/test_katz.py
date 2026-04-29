@@ -1,4 +1,4 @@
-"""Unit tests for KatzPrior and load_default_katz_model."""
+"""Unit tests for KatzPrior and load_katz_model."""
 
 import json
 import tempfile
@@ -8,7 +8,7 @@ from unittest.mock import MagicMock, patch
 import numpy as np
 import pytest
 
-from pysips.priors import KatzPrior, load_default_katz_model, save_katz_model
+from pysips.priors import KatzPrior, load_katz_model, save_katz_model
 from pysips.priors.katz_backoff import KatzBackoffModel, KatzBackoffTreeModel
 from bingo.expressions.agraph.evolvable import EvolvableExpression
 from bingo.expressions.agraph.pyagraph import (
@@ -251,30 +251,41 @@ class TestKatzPriorRvs:
 
 
 # ---------------------------------------------------------------------------
-# load_default_katz_model
+# load_katz_model
 # ---------------------------------------------------------------------------
 
 
-class TestLoadDefaultKatzModel:
-    def test_loads_n2_successfully(self):
-        model = load_default_katz_model(n=2)
+class TestLoadKatzModel:
+    def test_loads_prefit_wikipedia(self):
+        model = load_katz_model(n=2, corpus="wikipedia")
         assert isinstance(model, KatzBackoffTreeModel)
         assert model.n == 2
 
-    @pytest.mark.parametrize("n", [1, 3])
-    def test_loads_other_valid_n(self, n):
-        model = load_default_katz_model(n=n)
-        assert isinstance(model, KatzBackoffTreeModel)
-        assert model.n == n
+    def test_raises_when_fit_if_missing_false(self):
+        with pytest.raises(FileNotFoundError, match="No pre-fit Katz model"):
+            load_katz_model(n=2, corpus="nonexistent", fit_if_missing=False)
 
-    def test_raises_for_missing_n(self):
-        with pytest.raises(FileNotFoundError, match="No default Katz model for n=99"):
-            load_default_katz_model(n=99)
+    def test_fit_on_the_fly(self, tmp_path, mocker):
+        """Test that load_katz_model fits and saves when prefit is missing."""
+        # Point the data dir to a temp directory
+        mocker.patch("pysips.priors.katz_prior.KATZ_MODEL_DIR", tmp_path)
+        mock_corpus = [MagicMock()]
+        mock_load_corpus = mocker.patch(
+            "pysips.priors.data.load_corpus.load_corpus", return_value=mock_corpus
+        )
+        mock_model = _make_katz_tree_model(n=2)
+        mock_fit = mocker.patch(
+            "pysips.priors.katz_fitting.fit_katz_model", return_value=mock_model
+        )
 
-    def test_default_n_is_2(self):
-        model_default = load_default_katz_model()
-        model_explicit = load_default_katz_model(n=2)
-        assert model_default.n == model_explicit.n
+        result = load_katz_model(n=2, corpus="feynman")
+
+        mock_load_corpus.assert_called_once_with("feynman")
+        mock_fit.assert_called_once_with(mock_corpus, n=2)
+        assert result.n == 2
+        # Verify it was saved
+        saved_path = tmp_path / "default_katz_n2_feynman.json"
+        assert saved_path.exists()
 
 
 # ---------------------------------------------------------------------------
@@ -288,11 +299,8 @@ class TestSaveKatzModel:
         with tempfile.NamedTemporaryFile(suffix=".json", delete=False) as f:
             path = f.name
         save_katz_model(original, path)
-        loaded = (
-            load_default_katz_model.__wrapped__(path)
-            if hasattr(load_default_katz_model, "__wrapped__")
-            else KatzBackoffTreeModel.from_dict(json.load(open(path)))
-        )
+        with open(path) as f:
+            loaded = KatzBackoffTreeModel.from_dict(json.load(f))
         assert loaded.n == original.n
 
     def test_saved_file_is_valid_json(self):

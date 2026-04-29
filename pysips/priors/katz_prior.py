@@ -11,13 +11,13 @@ under either the "left/only" or "right-given-left" Katz back-off model.
 The prior supports SMC sampling via :meth:`rvs` inherited from
 :class:`~pysips.priors.samplable_prior.SamplablePrior`. Fit a prior
 to a corpus via :func:`~pysips.priors.katz_fitting.fit_katz_prior`,
-or use the default model pre-fit to the Wikipedia named-equations
-corpus via :func:`load_default_katz_model`.
+or use :func:`load_katz_model` to load a pre-fit model (or fit
+one on the fly).
 
 Example
 -------
->>> from pysips.priors import KatzPrior, load_default_katz_model
->>> model = load_default_katz_model(n=2)
+>>> from pysips.priors import KatzPrior, load_katz_model
+>>> model = load_katz_model(n=2, corpus="wikipedia")
 >>> prior = KatzPrior(model, x_dim=4)
 >>> log_p = prior.logpdf(agraphs)       # shape (N, 1)
 >>> samples = prior.rvs(100)            # SMC sample 100 expressions
@@ -60,8 +60,7 @@ from .katz_backoff import KatzBackoffTreeModel
 from .ngram_utils import extract_phrases
 from .samplable_prior import SamplablePrior
 
-
-DEFAULT_KATZ_MODEL_DIR = Path(__file__).parent / "data"
+KATZ_MODEL_DIR = Path(__file__).parent / "data"
 
 
 # Operators used when the prior is constructed without explicit operator
@@ -112,7 +111,7 @@ class KatzPrior(SamplablePrior):
     model : KatzBackoffTreeModel
         Fitted pair of Katz models. Use
         :func:`~pysips.priors.katz_fitting.fit_katz_prior` or
-        :func:`load_default_katz_model` to obtain one.
+        :func:`load_katz_model` to obtain one.
     operators : list of int, optional
         Operator IDs to use for generation during SMC sampling. If
         ``None``, derived from the union of both models' vocabularies
@@ -206,38 +205,70 @@ class KatzPrior(SamplablePrior):
         return self.model.log_prob_phrases(left_phrases, right_phrases)
 
 
-def _default_model_path(n: int) -> Path:
-    return DEFAULT_KATZ_MODEL_DIR / f"default_katz_n{n}_wikipedia.json"
+def _model_path(n: int, corpus: str = "wikipedia") -> Path:
+    return KATZ_MODEL_DIR / f"default_katz_n{n}_{corpus}.json"
 
 
-def load_default_katz_model(n: int = 2) -> KatzBackoffTreeModel:
-    """Load the default Katz model pre-fit to the Wikipedia corpus.
+def load_katz_model(
+    n: int = 2, corpus: str = "wikipedia", fit_if_missing: bool = True
+) -> KatzBackoffTreeModel:
+    """Load a Katz model, fitting from corpus if no prefit exists.
+
+    Attempts to load a pre-fit model from
+    ``data/default_katz_n{n}_{corpus}.json``.  When no saved model is
+    found and *fit_if_missing* is ``True``, the corpus is loaded via
+    :func:`~pysips.priors.data.load_corpus.load_corpus`, a new model
+    is fit with :func:`~pysips.priors.katz_fitting.fit_katz_model`,
+    and the result is saved for future reuse.
 
     Parameters
     ----------
     n : int, optional
-        Depth window (1, 2, or 3). Default is 2.
+        N-gram order (phrase length). Default is 2.
+    corpus : str, optional
+        Corpus name recognised by :func:`load_corpus` (e.g.
+        ``"wikipedia"``, ``"feynman"``, ``"benchmark"``).
+        Default is ``"wikipedia"``.
+    fit_if_missing : bool, optional
+        If ``True`` (default), fit and save the model when no prefit
+        file exists. If ``False``, raise :class:`FileNotFoundError`.
 
     Returns
     -------
     KatzBackoffTreeModel
-        Fitted tree model ready to plug into :class:`KatzPrior`.
+        Fitted tree model.
 
     Raises
     ------
     FileNotFoundError
-        If no pre-fit model exists for the requested ``n``.
+        If no pre-fit model exists and *fit_if_missing* is ``False``.
     """
-    path = _default_model_path(n)
-    if not path.exists():
-        available = sorted(DEFAULT_KATZ_MODEL_DIR.glob("default_katz_n*.json"))
+    path = _model_path(n, corpus)
+    if path.exists():
+        with open(path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        return KatzBackoffTreeModel.from_dict(data)
+
+    if not fit_if_missing:
+        available = sorted(KATZ_MODEL_DIR.glob("default_katz_n*.json"))
         raise FileNotFoundError(
-            f"No default Katz model for n={n} at {path}. "
-            f"Available: {[p.name for p in available]}"
+            f"No pre-fit Katz model for n={n}, corpus={corpus!r} at "
+            f"{path}. Available: {[p.name for p in available]}"
         )
-    with open(path, "r", encoding="utf-8") as f:
-        data = json.load(f)
-    return KatzBackoffTreeModel.from_dict(data)
+
+    # Fit on the fly and cache for future use
+    from .data.load_corpus import load_corpus  # pylint: disable=import-outside-toplevel
+    from .katz_fitting import fit_katz_model  # pylint: disable=import-outside-toplevel
+
+    print(
+        f"No pre-fit Katz model for n={n}, corpus={corpus!r}. "
+        f"Fitting from corpus (this may take a moment)..."
+    )
+    agraphs = load_corpus(corpus)
+    model = fit_katz_model(agraphs, n=n)
+    save_katz_model(model, path)
+    print(f"Saved new Katz model to {path}")
+    return model
 
 
 def save_katz_model(model: KatzBackoffTreeModel, path) -> None:

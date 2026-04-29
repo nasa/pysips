@@ -140,7 +140,7 @@ from .priors import (
     DEFAULT_BMS_WEIGHTS,
     DEFAULT_BMS_SQUARED_WEIGHTS,
     KatzPrior,
-    load_default_katz_model,
+    load_katz_model,
 )
 from .laplace_nmll import LaplaceNmll
 from .sampler import sample
@@ -252,15 +252,34 @@ class PysipsRegressor(BingoProposalMixin, BaseEstimator, RegressorMixin):
         - ``"uniform"`` : Improper uniform prior (default). Generates
           random symbolic expressions with equal probability.
         - ``"bms"`` : Bayesian Machine Scientist prior. Scores
-          expressions based on weighted operator frequency counts
-          using built-in default weights.
-        - ``"katz"`` : Katz back-off n-gram prior (n=2, fit to the
-          Wikipedia named-equations corpus). Scores expressions via
-          operator n-gram probabilities.
+          expressions based on weighted operator frequency counts.
+          Only pre-fit weights are supported; raises an error if a
+          pre-fit is not available for the requested corpus.
+        - ``"katz"`` : Katz back-off n-gram prior. Scores expressions
+          via operator n-gram probabilities. Pre-fit models are loaded
+          when available; otherwise the model is fit from corpus on the
+          fly and cached for future use.
         - A custom prior object with ``rvs(N, random_state=None)``
           and ``logpdf(x)`` methods. The ``rvs`` method should return
           an array of shape ``(N, 1)`` and ``logpdf`` should return
           an array of shape ``(N, 1)``.
+
+    prior_params : dict or None, default=None
+        Optional parameters for configuring string-based priors.
+        Ignored when *prior* is a custom object.
+
+        For ``"katz"``:
+
+        - ``"corpus"`` (str): Corpus name for fitting/loading, e.g.
+          ``"wikipedia"``, ``"feynman"``, ``"benchmark"``.
+          Default ``"wikipedia"``.
+        - ``"n"`` (int): N-gram order. Default ``2``.
+
+        For ``"bms"``:
+
+        - ``"corpus"`` (str): Corpus name identifying which pre-fit
+          weights to use. Currently only ``"wikipedia"`` (default) is
+          available.
 
     show_progress_bar : bool, default=True
         Whether to display a progress bar during fitting. When False, the
@@ -293,6 +312,7 @@ class PysipsRegressor(BingoProposalMixin, BaseEstimator, RegressorMixin):
         checkpoint_file=None,
         random_state=None,
         prior="uniform",
+        prior_params=None,
         max_time=None,
         max_equation_evals=None,
         show_progress_bar=True,
@@ -351,6 +371,7 @@ class PysipsRegressor(BingoProposalMixin, BaseEstimator, RegressorMixin):
         self.checkpoint_file = checkpoint_file
         self.random_state = random_state
         self.prior = prior
+        self.prior_params = prior_params
         self.max_time = max_time
         self.max_equation_evals = max_equation_evals
         self.show_progress_bar = show_progress_bar
@@ -453,10 +474,20 @@ class PysipsRegressor(BingoProposalMixin, BaseEstimator, RegressorMixin):
             A prior object with ``rvs`` and ``logpdf`` methods.
         """
         if isinstance(self.prior, str):
+            params = self.prior_params or {}
+
             if self.prior == "uniform":
                 return ImproperUniformPrior(generator)
+
             if self.prior == "bms":
-                print("Using BMS prior with default weights.")
+                corpus = params.get("corpus", "wikipedia")
+                if corpus != "wikipedia":
+                    raise ValueError(
+                        f"No pre-fit BMS weights for corpus {corpus!r}. "
+                        f"Only 'wikipedia' is currently available. "
+                        f"Use fit_bms_prior() to fit custom weights."
+                    )
+                print(f"Using BMS prior (corpus={corpus!r}).")
                 return BMSPrior(
                     DEFAULT_BMS_WEIGHTS,
                     DEFAULT_BMS_SQUARED_WEIGHTS,
@@ -464,14 +495,19 @@ class PysipsRegressor(BingoProposalMixin, BaseEstimator, RegressorMixin):
                     x_dim=x_dim,
                     max_complexity=self.max_complexity,
                 )
+
             if self.prior == "katz":
-                print("Using Katz prior (n=2, Wikipedia corpus).")
+                n = params.get("n", 2)
+                corpus = params.get("corpus", "wikipedia")
+                print(f"Using Katz prior (n={n}, corpus={corpus!r}).")
+                model = load_katz_model(n=n, corpus=corpus)
                 return KatzPrior(
-                    load_default_katz_model(n=2),
+                    model,
                     operators=self.operators,
                     x_dim=x_dim,
                     max_complexity=self.max_complexity,
                 )
+
         # Custom prior object — pass through as-is
         return self.prior
 
