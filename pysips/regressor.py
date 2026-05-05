@@ -274,6 +274,10 @@ class PysipsRegressor(BingoProposalMixin, BaseEstimator, RegressorMixin):
           ``"wikipedia"``, ``"feynman"``, ``"benchmark"``.
           Default ``"wikipedia"``.
         - ``"n"`` (int): N-gram order. Default ``2``.
+        - ``"normalize"`` (bool): If ``True``, divide the total
+          log-probability by the number of phrases, yielding a
+          per-phrase mean log-probability (cross-entropy).
+          Default ``False``.
 
         For ``"bms"``:
 
@@ -499,10 +503,14 @@ class PysipsRegressor(BingoProposalMixin, BaseEstimator, RegressorMixin):
             if self.prior == "katz":
                 n = params.get("n", 2)
                 corpus = params.get("corpus", "wikipedia")
-                print(f"Using Katz prior (n={n}, corpus={corpus!r}).")
+                normalize = params.get("normalize", False)
+                print(
+                    f"Using Katz prior (n={n}, corpus={corpus!r}, normalize={normalize})."
+                )
                 model = load_katz_model(n=n, corpus=corpus)
                 return KatzPrior(
                     model,
+                    normalize=normalize,
                     operators=self.operators,
                     x_dim=x_dim,
                     max_complexity=self.max_complexity,

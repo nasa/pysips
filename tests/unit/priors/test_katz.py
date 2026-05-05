@@ -101,6 +101,16 @@ class TestKatzPriorInit:
         prior = KatzPrior(model, operators=[ADDITION])
         assert prior.n == 3
 
+    def test_normalize_defaults_to_false(self):
+        model = _make_mock_tree_model()
+        prior = KatzPrior(model, operators=[ADDITION])
+        assert prior._normalize is False
+
+    def test_normalize_stored(self):
+        model = _make_mock_tree_model()
+        prior = KatzPrior(model, normalize=True, operators=[ADDITION])
+        assert prior._normalize is True
+
 
 # ---------------------------------------------------------------------------
 # KatzPrior.logpdf
@@ -171,6 +181,63 @@ class TestKatzPriorLogpdf:
         result = prior.logpdf([MagicMock(spec=[]), MagicMock(spec=[])])
         np.testing.assert_almost_equal(result[0, 0], -1.0)
         np.testing.assert_almost_equal(result[1, 0], -3.0)
+
+
+# ---------------------------------------------------------------------------
+# KatzPrior.logpdf (normalized)
+# ---------------------------------------------------------------------------
+
+
+class TestKatzPriorLogpdfNormalized:
+    def test_normalize_divides_by_phrase_count(self, mocker):
+        model = _make_mock_tree_model()
+        model.log_prob_phrases.return_value = -6.0
+        left_phrases = [(ADDITION,), (MULTIPLICATION,)]
+        right_phrases = [(ADDITION,)]
+        mocker.patch(
+            f"{KATZ_PRIOR_MODULE}.extract_phrases",
+            return_value=(left_phrases, right_phrases),
+        )
+        prior = KatzPrior(model, normalize=True, operators=[ADDITION])
+        result = prior.logpdf([MagicMock(spec=[])])
+        # -6.0 / 3 phrases = -2.0
+        np.testing.assert_almost_equal(result[0, 0], -2.0)
+
+    def test_unnormalized_returns_raw_value(self, mocker):
+        model = _make_mock_tree_model()
+        model.log_prob_phrases.return_value = -6.0
+        left_phrases = [(ADDITION,), (MULTIPLICATION,)]
+        right_phrases = [(ADDITION,)]
+        mocker.patch(
+            f"{KATZ_PRIOR_MODULE}.extract_phrases",
+            return_value=(left_phrases, right_phrases),
+        )
+        prior = KatzPrior(model, normalize=False, operators=[ADDITION])
+        result = prior.logpdf([MagicMock(spec=[])])
+        np.testing.assert_almost_equal(result[0, 0], -6.0)
+
+    def test_normalize_zero_phrases_returns_zero(self, mocker):
+        model = _make_mock_tree_model()
+        model.log_prob_phrases.return_value = 0.0
+        mocker.patch(
+            f"{KATZ_PRIOR_MODULE}.extract_phrases",
+            return_value=([], []),
+        )
+        prior = KatzPrior(model, normalize=True, operators=[ADDITION])
+        result = prior.logpdf([MagicMock(spec=[])])
+        np.testing.assert_almost_equal(result[0, 0], 0.0)
+
+    def test_normalize_single_phrase(self, mocker):
+        model = _make_mock_tree_model()
+        model.log_prob_phrases.return_value = -4.0
+        mocker.patch(
+            f"{KATZ_PRIOR_MODULE}.extract_phrases",
+            return_value=([(ADDITION,)], []),
+        )
+        prior = KatzPrior(model, normalize=True, operators=[ADDITION])
+        result = prior.logpdf([MagicMock(spec=[])])
+        # -4.0 / 1 phrase = -4.0
+        np.testing.assert_almost_equal(result[0, 0], -4.0)
 
 
 # ---------------------------------------------------------------------------

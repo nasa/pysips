@@ -112,6 +112,12 @@ class KatzPrior(SamplablePrior):
         Fitted pair of Katz models. Use
         :func:`~pysips.priors.katz_fitting.fit_katz_prior` or
         :func:`load_katz_model` to obtain one.
+    normalize : bool, optional
+        If ``True``, divide the total log-probability by the number
+        of phrases (left + right), yielding a per-phrase mean
+        log-probability (cross-entropy).  This is the standard
+        length normalization for n-gram models and prevents bias
+        toward shorter expressions.  Default is ``False``.
     operators : list of int, optional
         Operator IDs to use for generation during SMC sampling. If
         ``None``, derived from the union of both models' vocabularies
@@ -132,6 +138,7 @@ class KatzPrior(SamplablePrior):
     def __init__(
         self,
         model: KatzBackoffTreeModel,
+        normalize: bool = False,
         operators: Optional[List[int]] = None,
         x_dim: Optional[int] = None,
         num_mcmc_samples: int = 5,
@@ -156,6 +163,7 @@ class KatzPrior(SamplablePrior):
         exclusive: bool = True,
     ):
         self.model = model
+        self._normalize = normalize
 
         if operators is None:
             vocab = list(
@@ -202,7 +210,13 @@ class KatzPrior(SamplablePrior):
         if isinstance(agraph, EvolvableExpression):
             agraph = agraph.expression
         left_phrases, right_phrases = extract_phrases(agraph, self.model.n)
-        return self.model.log_prob_phrases(left_phrases, right_phrases)
+        total = self.model.log_prob_phrases(left_phrases, right_phrases)
+        if self._normalize:
+            n_phrases = len(left_phrases) + len(right_phrases)
+            if n_phrases == 0:
+                return 0.0
+            return total / n_phrases
+        return total
 
 
 def _model_path(n: int, corpus: str = "wikipedia") -> Path:
