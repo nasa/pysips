@@ -28,6 +28,7 @@ from .katz_backoff import KatzBackoffModel, KatzBackoffTreeModel
 from .katz_prior import KatzPrior, load_katz_model, save_katz_model
 from .katz_fitting import fit_katz_model, fit_katz_prior
 from .data.load_corpus import load_corpus
+from .size_calibration_fitting import fit_size_calibrated_prior
 
 __all__ = [
     "ImproperUniformPrior",
@@ -45,4 +46,5 @@ __all__ = [
     "fit_katz_prior",
     "load_katz_model",
     "save_katz_model",
+    "fit_size_calibrated_prior",
 ]
