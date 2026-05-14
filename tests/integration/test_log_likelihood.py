@@ -12,10 +12,12 @@ def test_log_likelihood_relative():
     model = lambda a, b: a * x + b
     data = model(5, 5) + np.random.default_rng(34).normal(0, 0.1, 100)
 
-    models = np.c_[[
-        EvolvableExpression(AGraphExpression(equation="1.0")),
-        EvolvableExpression(AGraphExpression(equation="1.0 + 2.0*X_0")),
-    ]]
+    models = np.c_[
+        [
+            EvolvableExpression(AGraphExpression(equation="1.0")),
+            EvolvableExpression(AGraphExpression(equation="1.0 + 2.0*X_0")),
+        ]
+    ]
     likelihood = LaplaceNmll(np.c_[x], data)
     prior = ImproperUniformPrior(lambda: None)
     mcmc = Metropolis(likelihood=likelihood, proposal=None, prior=prior)

@@ -15,9 +15,7 @@ def metropolis(mocker):
     mock_likelihood = dummy_likelihood
     mock_proposal = mocker.Mock()
     mock_prior = mocker.Mock()
-    mock_prior.logpdf = mocker.Mock(
-        side_effect=lambda inputs: np.ones(len(inputs))
-    )
+    mock_prior.logpdf = mocker.Mock(side_effect=lambda inputs: np.ones(len(inputs)))
     return Metropolis(
         likelihood=mock_likelihood,
         proposal=mock_proposal,

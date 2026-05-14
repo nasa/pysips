@@ -37,7 +37,9 @@ class TestCrossoverProposal:
 
         # Initialize CrossoverProposal
         seed = 42
-        crossover_proposal = CrossoverProposal(mock_gene_pool, seed=seed, agraph_size=24)
+        crossover_proposal = CrossoverProposal(
+            mock_gene_pool, seed=seed, agraph_size=24
+        )
 
         # Assertions
         assert crossover_proposal._gene_pool == mock_gene_pool

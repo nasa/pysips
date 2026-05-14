@@ -430,9 +430,7 @@ def test_fit_with_bms_prior_passes_operators(
     X, y = sample_data
     mock_sample = mock_external_components["sample"]
 
-    mocker.patch(
-        f"{IMPORTMODULE}.load_bms_weights", return_value=({3: 0.5}, {3: 0.1})
-    )
+    mocker.patch(f"{IMPORTMODULE}.load_bms_weights", return_value=({3: 0.5}, {3: 0.1}))
     mock_bms_prior_cls = mocker.patch(f"{IMPORTMODULE}.BMSPrior", autospec=True)
     mock_bms_instance = MagicMock()
     mock_bms_prior_cls.return_value = mock_bms_instance
