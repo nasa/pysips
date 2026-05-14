@@ -154,7 +154,7 @@ class TestBMSPriorRvs:
             return_value=([MagicMock(spec=[])], None, None),
         )
 
-        prior = BMSPrior({2: 0.5}, {2: 0.1}, x_dim=3, random_state=instance_seed)
+        prior = BMSPrior({ADDITION: 0.5}, {ADDITION: 0.1}, x_dim=3, random_state=instance_seed)
         prior.rvs(1, random_state=call_seed)
 
         assert mock_sample.call_args.kwargs["seed"] == expected
