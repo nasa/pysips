@@ -194,8 +194,17 @@ class BingoProposalMixin:
 
         # Generate crossover pool
         pool = set()
+        consecutive_failures = 0
         while len(pool) < pool_size:
+            prev_size = len(pool)
             pool.add(generator())
+            if len(pool) == prev_size:
+                consecutive_failures += 1
+                if consecutive_failures >= 100:
+                    # Generator cannot produce more unique models; use what we have.
+                    break
+            else:
+                consecutive_failures = 0
         crossover = CrossoverProposal(
             list(pool),
             agraph_size=self.max_complexity,

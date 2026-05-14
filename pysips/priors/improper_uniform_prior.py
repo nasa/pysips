@@ -30,6 +30,10 @@ import numpy as np
 from smcpy.priors import ImproperUniform
 
 MAX_REPEATS = 100
+# After warning, give up and allow duplicates if the pool still hasn't grown
+# after this many additional consecutive failures (must be > 2*MAX_REPEATS so
+# that slow-but-not-exhausted generators still get a fair chance).
+_MAX_STAGNATION = 10 * MAX_REPEATS
 
 
 class ImproperUniformPrior(ImproperUniform):
@@ -88,20 +92,27 @@ class ImproperUniformPrior(ImproperUniform):
         while len(pool) < N:
             pool.add(self._generator())
 
-            if not already_warned:
-                if len(pool) == pool_size:
-                    attempts += 1
-                else:
-                    pool_size = len(pool)
-                    attempts = 0
+            if len(pool) == pool_size:
+                attempts += 1
+            else:
+                pool_size = len(pool)
+                attempts = 0
 
-                if attempts >= MAX_REPEATS:
-                    warnings.warn(
-                        f"Generator called {MAX_REPEATS} times in a row without finding a "
-                        "new unique model. This may indicate an issue with the generator "
-                        "or insufficient unique models available."
-                    )
-                    already_warned = True
+            if attempts >= MAX_REPEATS and not already_warned:
+                warnings.warn(
+                    f"Generator called {MAX_REPEATS} times in a row without finding a "
+                    "new unique model. This may indicate an issue with the generator "
+                    "or insufficient unique models available."
+                )
+                already_warned = True
+
+            if attempts >= _MAX_STAGNATION:
+                # Generator appears exhausted; fill remaining slots with
+                # samples drawn (with replacement) from the existing pool.
+                pool_list = list(pool)
+                while len(pool_list) < N:
+                    pool_list.append(pool_list[len(pool_list) % len(pool_list)])
+                return np.c_[pool_list]
 
         return np.c_[list(pool)]
 

@@ -2,7 +2,11 @@ import pytest
 import numpy as np
 
 # Import the class to test
-from pysips.priors.improper_uniform_prior import ImproperUniformPrior, MAX_REPEATS
+from pysips.priors.improper_uniform_prior import (
+    ImproperUniformPrior,
+    MAX_REPEATS,
+    _MAX_STAGNATION,
+)
 
 
 Prior = ImproperUniformPrior
@@ -134,3 +138,52 @@ class TestPrior:
         # Verify we got the 2 unique models
         assert result.shape == (2, 1)
         assert set(result.flatten()) == {"model1", "model2"}
+
+    def test_exhausted_generator_returns_duplicates(self, mocker):
+        """Requesting more models than the generator can produce falls back to
+        duplicates after _MAX_STAGNATION consecutive failures."""
+        # Generator can only ever produce 1 unique model.
+        generator = mocker.MagicMock(return_value="only_model")
+        prior = Prior(generator)
+
+        # Request 3 models from a generator that only produces 1 unique value.
+        with pytest.warns(UserWarning):
+            result = prior.rvs(3)
+
+        # Should return the requested number of slots, filled with duplicates.
+        assert result.shape == (3, 1)
+        assert set(result.flatten()) == {"only_model"}
+        # Generator should have been called at most _MAX_STAGNATION + 1 times
+        # (1 unique model + _MAX_STAGNATION consecutive failures).
+        assert generator.call_count <= _MAX_STAGNATION + 1
+
+    def test_exhausted_generator_warning_issued_before_fallback(self, mocker):
+        """The UserWarning is issued at MAX_REPEATS, not only at _MAX_STAGNATION."""
+        generator = mocker.MagicMock(return_value="only_model")
+        prior = Prior(generator)
+
+        with pytest.warns(
+            UserWarning, match=f"Generator called {MAX_REPEATS} times in a row"
+        ) as record:
+            prior.rvs(2)
+
+        # Exactly one warning (issued at MAX_REPEATS, not again at _MAX_STAGNATION).
+        assert len(record) == 1
+
+    def test_exhausted_generator_does_not_hang(self, mocker):
+        """Regression test: rvs() must terminate even when the generator
+        cannot produce enough unique models (was an infinite loop before fix)."""
+        generator = mocker.MagicMock(side_effect=lambda: "model")
+        prior = Prior(generator)
+
+        import threading
+        result_holder = []
+        def run():
+            with pytest.warns(UserWarning):
+                result_holder.append(prior.rvs(10))
+
+        t = threading.Thread(target=run)
+        t.start()
+        t.join(timeout=5)  # Must finish well within 5 seconds.
+        assert not t.is_alive(), "rvs() did not terminate — infinite loop detected"
+        assert result_holder[0].shape == (10, 1)
