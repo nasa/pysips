@@ -137,8 +137,7 @@ from .bingo_proposal_mixin import BingoProposalMixin
 from .priors import (
     ImproperUniformPrior,
     BMSPrior,
-    DEFAULT_BMS_WEIGHTS,
-    DEFAULT_BMS_SQUARED_WEIGHTS,
+    load_bms_weights,
     KatzPrior,
     load_katz_model,
 )
@@ -484,17 +483,12 @@ class PysipsRegressor(BingoProposalMixin, BaseEstimator, RegressorMixin):
                 return ImproperUniformPrior(generator)
 
             if self.prior == "bms":
-                corpus = params.get("corpus", "wikipedia")
-                if corpus != "wikipedia":
-                    raise ValueError(
-                        f"No pre-fit BMS weights for corpus {corpus!r}. "
-                        f"Only 'wikipedia' is currently available. "
-                        f"Use fit_bms_prior() to fit custom weights."
-                    )
+                corpus = params.get("corpus", "benchmark")
+                weights, squared_weights = load_bms_weights(corpus)
                 print(f"Using BMS prior (corpus={corpus!r}).")
                 return BMSPrior(
-                    DEFAULT_BMS_WEIGHTS,
-                    DEFAULT_BMS_SQUARED_WEIGHTS,
+                    weights,
+                    squared_weights,
                     operators=self.operators,
                     x_dim=x_dim,
                     max_complexity=self.max_complexity,
@@ -502,7 +496,7 @@ class PysipsRegressor(BingoProposalMixin, BaseEstimator, RegressorMixin):
 
             if self.prior == "katz":
                 n = params.get("n", 2)
-                corpus = params.get("corpus", "wikipedia")
+                corpus = params.get("corpus", "benchmark")
                 normalize = params.get("normalize", False)
                 print(
                     f"Using Katz prior (n={n}, corpus={corpus!r}, normalize={normalize})."

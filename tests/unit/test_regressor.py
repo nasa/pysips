@@ -365,6 +365,10 @@ def test_fit_with_bms_prior(
     X, y = sample_data
     mock_sample = mock_external_components["sample"]
 
+    mock_weights = ({3: 0.5}, {3: 0.1})
+    mock_load = mocker.patch(
+        f"{IMPORTMODULE}.load_bms_weights", return_value=mock_weights
+    )
     mock_bms_prior_cls = mocker.patch(f"{IMPORTMODULE}.BMSPrior", autospec=True)
     mock_bms_instance = MagicMock()
     mock_bms_prior_cls.return_value = mock_bms_instance
@@ -372,8 +376,14 @@ def test_fit_with_bms_prior(
     regressor = PysipsRegressor(prior="bms", random_state=42)
     regressor.fit(X, y)
 
-    # Verify BMSPrior was constructed
+    # Verify weights were loaded with default corpus
+    mock_load.assert_called_once_with("benchmark")
+
+    # Verify BMSPrior was constructed with loaded weights
     mock_bms_prior_cls.assert_called_once()
+    call_args = mock_bms_prior_cls.call_args
+    assert call_args.args[0] == {3: 0.5}
+    assert call_args.args[1] == {3: 0.1}
     call_kwargs = mock_bms_prior_cls.call_args.kwargs
     assert call_kwargs["x_dim"] == X.shape[1]
 
@@ -386,6 +396,27 @@ def test_fit_with_bms_prior(
     )
 
 
+def test_fit_with_bms_prior_corpus_param(
+    sample_data, mock_external_components, mocker: MockerFixture
+):
+    """Test that fit with prior='bms' passes corpus param to load_bms_weights."""
+    X, y = sample_data
+
+    mock_load = mocker.patch(
+        f"{IMPORTMODULE}.load_bms_weights", return_value=({3: 0.5}, {3: 0.1})
+    )
+    mocker.patch(f"{IMPORTMODULE}.BMSPrior", autospec=True)
+
+    regressor = PysipsRegressor(
+        prior="bms",
+        prior_params={"corpus": "wikipedia"},
+        random_state=42,
+    )
+    regressor.fit(X, y)
+
+    mock_load.assert_called_once_with("wikipedia")
+
+
 def test_fit_with_bms_prior_passes_operators(
     sample_data, mock_external_components, mocker: MockerFixture
 ):
@@ -393,6 +424,9 @@ def test_fit_with_bms_prior_passes_operators(
     X, y = sample_data
     mock_sample = mock_external_components["sample"]
 
+    mocker.patch(
+        f"{IMPORTMODULE}.load_bms_weights", return_value=({3: 0.5}, {3: 0.1})
+    )
     mock_bms_prior_cls = mocker.patch(f"{IMPORTMODULE}.BMSPrior", autospec=True)
     mock_bms_instance = MagicMock()
     mock_bms_prior_cls.return_value = mock_bms_instance
@@ -458,8 +492,8 @@ def test_fit_with_katz_prior(
     regressor = PysipsRegressor(prior="katz", random_state=42)
     regressor.fit(X, y)
 
-    # Verify the default model was loaded with n=2, corpus=wikipedia
-    mock_load.assert_called_once_with(n=2, corpus="wikipedia")
+    # Verify the default model was loaded with n=2, corpus=benchmark
+    mock_load.assert_called_once_with(n=2, corpus="benchmark")
 
     # Verify KatzPrior was constructed with the loaded model
     mock_katz_prior_cls.assert_called_once()
@@ -539,7 +573,7 @@ def test_fit_katz_with_prior_params(
 
 
 def test_fit_bms_with_unsupported_corpus_raises(sample_data, mock_external_components):
-    """Test that BMS prior with non-wikipedia corpus raises ValueError."""
+    """Test that BMS prior with unavailable corpus raises FileNotFoundError."""
     X, y = sample_data
 
     regressor = PysipsRegressor(
@@ -547,7 +581,7 @@ def test_fit_bms_with_unsupported_corpus_raises(sample_data, mock_external_compo
         prior_params={"corpus": "feynman"},
         random_state=42,
     )
-    with pytest.raises(ValueError, match="No pre-fit BMS weights"):
+    with pytest.raises(FileNotFoundError, match="No pre-fit BMS weights"):
         regressor.fit(X, y)
 
 

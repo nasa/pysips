@@ -17,7 +17,7 @@ one on the fly).
 Example
 -------
 >>> from pysips.priors import KatzPrior, load_katz_model
->>> model = load_katz_model(n=2, corpus="wikipedia")
+>>> model = load_katz_model(n=2, corpus="benchmark")
 >>> prior = KatzPrior(model, x_dim=4)
 >>> log_p = prior.logpdf(agraphs)       # shape (N, 1)
 >>> samples = prior.rvs(100)            # SMC sample 100 expressions
@@ -219,12 +219,12 @@ class KatzPrior(SamplablePrior):
         return total
 
 
-def _model_path(n: int, corpus: str = "wikipedia") -> Path:
+def _model_path(n: int, corpus: str = "benchmark") -> Path:
     return KATZ_MODEL_DIR / f"default_katz_n{n}_{corpus}.json"
 
 
 def load_katz_model(
-    n: int = 2, corpus: str = "wikipedia", fit_if_missing: bool = True
+    n: int = 2, corpus: str = "benchmark", fit_if_missing: bool = True
 ) -> KatzBackoffTreeModel:
     """Load a Katz model, fitting from corpus if no prefit exists.
 

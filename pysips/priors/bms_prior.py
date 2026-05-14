@@ -22,107 +22,76 @@ Operators for generation/sampling can be specified explicitly via the
 ``operators`` parameter, or are automatically inferred from the keys of
 the ``weights`` and ``squared_weights`` dictionaries if not provided.
 
+Pre-fit weights for different corpora are stored as JSON files in
+``pysips/priors/data/`` and loaded via :func:`load_bms_weights`.
+
 Example
 -------
->>> from pysips.priors import BMSPrior
->>> weights = {2: 0.5, 3: 0.3}        # addition, multiplication
->>> sq_weights = {2: 0.1, 3: 0.05}
+>>> from pysips.priors import BMSPrior, load_bms_weights
+>>> weights, sq_weights = load_bms_weights("benchmark")
 >>> prior = BMSPrior(weights, sq_weights, x_dim=4)
 >>> log_p = prior.logpdf(agraphs)      # shape (N, 1)
 >>> samples = prior.rvs(100)           # sample 100 expressions
 """
 
+import json
 from collections import defaultdict
-from typing import Dict, List, Literal, Optional
+from pathlib import Path
+from typing import Dict, List, Literal, Optional, Tuple
 
-from bingo.expressions.agraph import AGraphExpression
 from bingo.expressions.agraph.evolvable import EvolvableExpression
-from bingo.expressions.agraph.pyagraph import (
-    VARIABLE,
-    CONSTANT,
-    ADDITION,
-    SUBTRACTION,
-    MULTIPLICATION,
-    DIVISION,
-    SIN,
-    COS,
-    EXPONENTIAL,
-    LOGARITHM,
-    POWER,
-    ABS,
-    SQRT,
-    SAFE_POWER,
-    SINH,
-    COSH,
-    TAN,
-    ARCSIN,
-    ARCCOS,
-    ARCTAN,
-    TANH,
-    SQUARE,
-    CUBE,
-)
 
 from .samplable_prior import SamplablePrior
 
 
 TerminalTreatment = Literal["include", "exclude", "combine"]
 
-# Placeholder default weights for the BMS prior. These should be replaced
-# with well-fit values obtained via fit_bms_prior().
-# Keys are bingo operator integer IDs from
-# bingo.expressions.agraph.pyagraph.operators.
-DEFAULT_BMS_WEIGHTS: Dict[int, float] = {
-    VARIABLE: 1.0,
-    CONSTANT: 1.0,
-    ADDITION: -0.5052325756916224,
-    SUBTRACTION: -0.41981393792182564,
-    MULTIPLICATION: -1.4437748595369742,
-    DIVISION: -1.9683108719142648,
-    SIN: 2.437916409174549,
-    COS: 2.282472061253178,
-    EXPONENTIAL: 1.7292134152511867,
-    LOGARITHM: 1.4969452635490017,
-    POWER: 1.0513949212784621,
-    ABS: 3.066381663327651,
-    SQRT: 1.182611634631301,
-    SAFE_POWER: 1.0513949212784621,  # same as power
-    SINH: 3.4873280017038097,
-    COSH: 3.733365825244972,
-    TAN: 3.735088893270878,
-    ARCSIN: 3.4873280017038097,  # same as sinh
-    ARCCOS: 3.733365825244972,  # same as cosh
-    ARCTAN: 3.735088893270878,  # same as tan
-    TANH: 3.3227098233793133,
-    SQUARE: 0.1643846698086607,
-    CUBE: 2.151392272044566,
-}
+BMS_WEIGHTS_DIR = Path(__file__).parent / "data"
 
-DEFAULT_BMS_SQUARED_WEIGHTS: Dict[int, float] = {
-    VARIABLE: 0.0,
-    CONSTANT: 0.0,
-    ADDITION: 0.05727582837315748,
-    SUBTRACTION: 0.25130267934695594,
-    MULTIPLICATION: 0.07133436252310128,
-    DIVISION: 0.3436831421029277,
-    SIN: 0.2541219146830698,
-    COS: -0.047551501276107876,
-    EXPONENTIAL: -0.03602527948439972,
-    LOGARITHM: 0.07506329258939393,
-    POWER: -0.021884761713059465,
-    ABS: -0.004189380590018706,
-    SQRT: -0.021771153712574945,
-    SAFE_POWER: -0.021884761713059465,  # same as power
-    SINH: 1.310401226288916,
-    COSH: 1.2689469280957986,
-    TAN: 1.2811172269782463,
-    ARCSIN: 1.310401226288916,  # same as sinh
-    ARCCOS: 1.2689469280957986,  # same as cosh
-    ARCTAN: 1.2811172269782463,  # same as tan
-    TANH: 1.2530118867078652,
-    SQUARE: -0.0034246806210137645,
-    CUBE: -0.04482067233426179,
-}
+
+def _bms_weights_path(corpus: str = "benchmark") -> Path:
+    return BMS_WEIGHTS_DIR / f"default_bms_{corpus}.json"
+
+
+def load_bms_weights(
+    corpus: str = "benchmark",
+) -> Tuple[Dict[int, float], Dict[int, float]]:
+    """Load pre-fit BMS weights for a given corpus.
+
+    Loads linear and quadratic operator weights from a JSON file in
+    ``pysips/priors/data/default_bms_{corpus}.json``.
+
+    Parameters
+    ----------
+    corpus : str, optional
+        Corpus name (e.g. ``"wikipedia"``, ``"benchmark"``).
+        Default is ``"benchmark"``.
+
+    Returns
+    -------
+    weights : dict
+        Linear operator weights mapping operator ID (int) to weight.
+    squared_weights : dict
+        Quadratic operator weights mapping operator ID (int) to weight.
+
+    Raises
+    ------
+    FileNotFoundError
+        If no pre-fit weights file exists for the given corpus.
+    """
+    path = _bms_weights_path(corpus)
+    if not path.exists():
+        available = sorted(BMS_WEIGHTS_DIR.glob("default_bms_*.json"))
+        raise FileNotFoundError(
+            f"No pre-fit BMS weights for corpus {corpus!r} at {path}. "
+            f"Available: {[p.name for p in available]}. "
+            f"Use fit_bms_prior() to fit custom weights."
+        )
+    with open(path, "r", encoding="utf-8") as f:
+        data = json.load(f)
+    weights = {int(k): v for k, v in data["weights"].items()}
+    squared_weights = {int(k): v for k, v in data["squared_weights"].items()}
+    return weights, squared_weights
 
 
 # pylint: disable=too-many-instance-attributes, too-many-arguments, too-many-positional-arguments, too-many-locals

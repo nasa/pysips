@@ -3,6 +3,7 @@ import pytest
 from unittest.mock import MagicMock
 
 from pysips.priors import BMSPrior
+from pysips.priors.bms_prior import load_bms_weights
 
 SAMPLEABLEPRIOR_MODULE = "pysips.priors.samplable_prior"
 
@@ -247,3 +248,37 @@ class TestBMSPriorOperators:
         # Energy = 1*1.0 + 1*2.0 = 3.0, logpdf = -3.0
         result = prior.logpdf([ag])
         np.testing.assert_almost_equal(result[0, 0], -3.0)
+
+
+class TestLoadBmsWeights:
+    """Tests for the load_bms_weights function."""
+
+    def test_load_benchmark_corpus(self):
+        weights, sq_weights = load_bms_weights("benchmark")
+        assert isinstance(weights, dict)
+        assert isinstance(sq_weights, dict)
+        assert len(weights) > 0
+        assert len(sq_weights) > 0
+        assert all(isinstance(k, int) for k in weights)
+        assert all(isinstance(v, float) for v in weights.values())
+
+    def test_load_wikipedia_corpus(self):
+        weights, sq_weights = load_bms_weights("wikipedia")
+        assert isinstance(weights, dict)
+        assert isinstance(sq_weights, dict)
+        assert len(weights) > 0
+
+    def test_default_corpus_is_benchmark(self):
+        default_w, default_sq = load_bms_weights()
+        bench_w, bench_sq = load_bms_weights("benchmark")
+        assert default_w == bench_w
+        assert default_sq == bench_sq
+
+    def test_unknown_corpus_raises_file_not_found(self):
+        with pytest.raises(FileNotFoundError, match="No pre-fit BMS weights"):
+            load_bms_weights("nonexistent_corpus")
+
+    def test_wikipedia_and_benchmark_differ(self):
+        wiki_w, _ = load_bms_weights("wikipedia")
+        bench_w, _ = load_bms_weights("benchmark")
+        assert wiki_w != bench_w
