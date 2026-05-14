@@ -37,7 +37,7 @@ class TestCrossoverProposal:
 
         # Initialize CrossoverProposal
         seed = 42
-        crossover_proposal = CrossoverProposal(mock_gene_pool, seed=seed)
+        crossover_proposal = CrossoverProposal(mock_gene_pool, seed=seed, agraph_size=24)
 
         # Assertions
         assert crossover_proposal._gene_pool == mock_gene_pool
@@ -60,7 +60,7 @@ class TestCrossoverProposal:
         mock_rng.random.return_value = 0.4  # Will select first child
 
         # Initialize CrossoverProposal with mocked RNG
-        crossover_proposal = CrossoverProposal(mock_gene_pool)
+        crossover_proposal = CrossoverProposal(mock_gene_pool, agraph_size=24)
         crossover_proposal._rng = mock_rng
 
         # Call the method
@@ -101,7 +101,7 @@ class TestCrossoverProposal:
         mock_rng.random.return_value = random_value
 
         # Initialize and call
-        crossover_proposal = CrossoverProposal(mock_gene_pool)
+        crossover_proposal = CrossoverProposal(mock_gene_pool, agraph_size=24)
         crossover_proposal._rng = mock_rng
         result = crossover_proposal(mock_model)
 
@@ -115,7 +115,7 @@ class TestCrossoverProposal:
         mocker.patch(f"{IMPORTMODULE}.AGraphCrossover")
 
         # Initialize
-        crossover_proposal = CrossoverProposal(mock_gene_pool)
+        crossover_proposal = CrossoverProposal(mock_gene_pool, agraph_size=24)
 
         # Create new gene pool
         new_model1 = mocker.MagicMock(name="new_model1")
@@ -149,7 +149,7 @@ class TestCrossoverProposal:
         mocker.patch(f"{IMPORTMODULE}.AGraphCrossover")
 
         # Initialize with empty pool
-        crossover_proposal = CrossoverProposal([])
+        crossover_proposal = CrossoverProposal([], agraph_size=24)
 
         # Call should raise exception due to empty pool
         with pytest.raises(ValueError) as excinfo:

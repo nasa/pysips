@@ -11,7 +11,7 @@ from pysips.random_choice_proposal import RandomChoiceProposal
 from pysips.priors import ImproperUniformPrior, BMSPrior
 from pysips.sampler import sample
 
-from bingo.symbolic_regression import ComponentGenerator, AGraphGenerator
+from bingo.expressions import ComponentGenerator, AGraphGenerator
 
 
 def get_proposal(
@@ -52,7 +52,7 @@ def get_proposal(
     pool = set()
     while len(pool) < crossover_pool_size:
         pool.add(generator())
-    crossover = CrossoverProposal(list(pool))
+    crossover = CrossoverProposal(list(pool), agraph_size=max_complexity)
 
     proposal = RandomChoiceProposal(
         [mutation, crossover], [mutation_prob, crossover_prob], exclusuive
@@ -69,8 +69,6 @@ def get_generator(
     max_complexity=48,
     **kwargs,
 ):
-    USE_PYTHON = True
-    USE_SIMPLIFICATION = True
     component_generator = ComponentGenerator(
         input_x_dimension=X_dim,
         terminal_probability=terminal_probability,
@@ -80,9 +78,8 @@ def get_generator(
         component_generator.add_operator(comp)
     generator = AGraphGenerator(
         max_complexity,
+        max_complexity,
         component_generator,
-        use_python=USE_PYTHON,
-        use_simplification=USE_SIMPLIFICATION,
     )
 
     return generator

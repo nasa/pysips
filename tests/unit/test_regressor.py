@@ -114,10 +114,13 @@ def test_predict(sample_data, mocker: MockerFixture):
     """Test the predict method."""
     X, _ = sample_data
 
-    # Create a mock model with evaluate_equation_at method
-    mock_model = MagicMock()
+    # Create a mock model with expression.predict method
+    mock_expr = MagicMock()
     mock_predictions = np.array([2.0, 4.0, 6.0, 8.0, 10.0])
-    mock_model.evaluate_equation_at.return_value = mock_predictions
+    mock_expr.predict.return_value = mock_predictions
+
+    mock_model = MagicMock()
+    mock_model.expression = mock_expr
 
     # Mock check_is_fitted to avoid NotFittedError
     mocker.patch(f"{IMPORTMODULE}.check_is_fitted")
@@ -132,8 +135,8 @@ def test_predict(sample_data, mocker: MockerFixture):
 
     predictions = regressor.predict(X)
 
-    # Verify that evaluate_equation_at was called with X
-    mock_model.evaluate_equation_at.assert_called_once_with(X)
+    # Verify that expression.predict was called with X
+    mock_expr.predict.assert_called_once_with(X)
     assert np.array_equal(predictions, mock_predictions)
 
 
@@ -241,10 +244,13 @@ def test_score_handles_invalid_predictions(
     mocker.patch(f"{IMPORTMODULE}.check_is_fitted")
     mocker.patch(f"{IMPORTMODULE}.check_array", return_value=X)
 
-    mock_model = MagicMock()
+    mock_expr = MagicMock()
     predictions = np.array([2.0, 4.0, 6.0, 8.0, 10.0])
     predictions[0] = invalid_value  # Set first prediction to the invalid value
-    mock_model.evaluate_equation_at.return_value = predictions
+    mock_expr.predict.return_value = predictions
+
+    mock_model = MagicMock()
+    mock_model.expression = mock_expr
 
     regressor = PysipsRegressor()
     regressor.best_model_ = mock_model
