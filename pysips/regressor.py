@@ -140,11 +140,20 @@ from .priors import (
     load_bms_weights,
     KatzPrior,
     load_katz_model,
+    SizeCalibratedPrior,
 )
+from .priors.prebuilt_loader import load_prebuilt_size_calibrated
 from .laplace_nmll import LaplaceNmll
 from .sampler import sample
 
-_KNOWN_PRIOR_STRINGS = {"uniform", "bms", "katz"}
+_KNOWN_PRIOR_STRINGS = {
+    "uniform",
+    "bms",
+    "katz",
+    "size_calibrated_uniform",
+    "size_calibrated_katz",
+    "size_calibrated_bms",
+}
 
 DEFAULT_OPERATORS = ["+", "*"]
 DEFALT_PARAMETER_INITIALIZATION_BOUNDS = [-5, 5]
@@ -258,6 +267,16 @@ class PysipsRegressor(BingoProposalMixin, BaseEstimator, RegressorMixin):
           via operator n-gram probabilities. Pre-fit models are loaded
           when available; otherwise the model is fit from corpus on the
           fly and cached for future use.
+        - ``"size_calibrated_uniform"`` : Uniform base prior with
+          corpus-calibrated size distribution. Requires the standard
+          operator set ``[+,-,*,/,sin,cos,exp,log]`` and ``x_dim=1``.
+        - ``"size_calibrated_katz"`` : Katz base prior with
+          corpus-calibrated size distribution. Same operator/x_dim
+          requirements as ``"size_calibrated_uniform"``.
+        - ``"size_calibrated_bms"`` : BMS base prior with
+          corpus-calibrated size distribution. Currently raises
+          ``NotImplementedError``; use ``fit_size_calibrated_prior()``
+          for BMS-based calibration.
         - A custom prior object with ``rvs(N, random_state=None)``
           and ``logpdf(x)`` methods. The ``rvs`` method should return
           an array of shape ``(N, 1)`` and ``logpdf`` should return
@@ -283,6 +302,12 @@ class PysipsRegressor(BingoProposalMixin, BaseEstimator, RegressorMixin):
         - ``"corpus"`` (str): Corpus name identifying which pre-fit
           weights to use. Currently only ``"wikipedia"`` (default) is
           available.
+
+        For ``"size_calibrated_uniform"`` / ``"size_calibrated_katz"``:
+
+        - ``"floor_log_prob"`` (float): Log-probability assigned to
+          expression sizes not covered by the corpus histogram.
+          Default ``-inf``.
 
     show_progress_bar : bool, default=True
         Whether to display a progress bar during fitting. When False, the
@@ -510,8 +535,75 @@ class PysipsRegressor(BingoProposalMixin, BaseEstimator, RegressorMixin):
                     max_complexity=self.max_complexity,
                 )
 
+            if self.prior in (
+                "size_calibrated_uniform",
+                "size_calibrated_katz",
+                "size_calibrated_bms",
+            ):
+                return self._build_size_calibrated_prior(x_dim, params)
+
         # Custom prior object — pass through as-is
         return self.prior
+
+    def _build_size_calibrated_prior(self, x_dim, params):
+        """Build a size-calibrated prior from pre-built data.
+
+        Parameters
+        ----------
+        x_dim : int
+            Number of input features.
+        params : dict
+            Prior parameters (from ``prior_params``).
+
+        Returns
+        -------
+        SizeCalibratedPrior
+        """
+        from math import inf
+
+        # Determine base prior key from the prior string
+        # "size_calibrated_uniform" -> "uniform", etc.
+        base_key = self.prior.replace("size_calibrated_", "")
+
+        if base_key == "bms":
+            raise NotImplementedError(
+                "Pre-built size-calibrated BMS prior is not yet available. "
+                "Use fit_size_calibrated_prior() to build one manually."
+            )
+
+        floor_log_prob = params.get("floor_log_prob", -inf)
+
+        # Load pre-built data (validates operators and x_dim)
+        corpus_log_hist, log_z_k = load_prebuilt_size_calibrated(
+            base_key, self.operators, x_dim
+        )
+
+        # Construct the base prior
+        if base_key == "uniform":
+            base_prior = None
+        elif base_key == "katz":
+            n = params.get("n", 2)
+            corpus = params.get("corpus", "benchmark")
+            model = load_katz_model(n=n, corpus=corpus)
+            base_prior = KatzPrior(
+                model,
+                operators=self.operators,
+                x_dim=x_dim,
+                max_complexity=self.max_complexity,
+            )
+        else:
+            raise ValueError(f"Unsupported base prior: {base_key!r}")
+
+        print(f"Using size-calibrated {base_key} prior.")
+        return SizeCalibratedPrior(
+            base_prior=base_prior,
+            log_z_k=log_z_k,
+            corpus_log_hist=corpus_log_hist,
+            floor_log_prob=floor_log_prob,
+            operators=self.operators,
+            x_dim=x_dim,
+            max_complexity=self.max_complexity,
+        )
 
     def predict(self, X):
         """
