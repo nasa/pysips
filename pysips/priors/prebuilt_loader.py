@@ -15,13 +15,7 @@ _DATA_DIR = Path(__file__).parent / "data"
 # Standard pre-built config
 STANDARD_OPERATORS = [3, 4, 5, 6, 15, 16, 13, 14]
 STANDARD_X_DIM = 1
-
-# File names for the standard config
-_HISTOGRAM_FILE = "corpus_histogram_benchmark_x1_ops8.json"
-_Z_K_FILES = {
-    "uniform": "z_k_uniform_benchmark_x1_ops8.json",
-    "katz": "z_k_katz_benchmark_x1_ops8.json",
-}
+STANDARD_CORPUS = "benchmark"
 
 
 def _resolve_operator_ids(operators: list) -> List[int]:
@@ -46,44 +40,86 @@ def _resolve_operator_ids(operators: list) -> List[int]:
     return sorted(ids)
 
 
-def _validate_config(
-    loaded_operators: List[int],
-    loaded_x_dim: int,
-    user_operators: List[int],
-    user_x_dim: int,
-) -> None:
-    """Raise ``ValueError`` if user config doesn't match pre-built data."""
-    if sorted(user_operators) != sorted(loaded_operators):
-        raise ValueError(
-            f"Operator mismatch: pre-built data uses operators "
-            f"{sorted(loaded_operators)} but the regressor has "
-            f"{sorted(user_operators)}. Use "
-            f"fit_size_calibrated_prior() for custom operator sets."
+def _operator_filename_tag(operator_ids: List[int]) -> str:
+    """Build an operator-specific filename tag."""
+    return "ops" + "-".join(str(op_id) for op_id in sorted(operator_ids))
+
+
+def _prebuilt_filename(
+    kind: str,
+    corpus: str,
+    x_dim: int | None = None,
+    operator_ids: List[int] | None = None,
+    *,
+    base_prior_key: str | None = None,
+) -> str:
+    """Build the expected prebuilt file name.
+
+    Histograms describe the corpus's size distribution and are keyed by
+    ``corpus`` alone. Z_k filenames depend on ``corpus``, ``x_dim`` and
+    ``operator_ids``.
+    """
+    if kind == "histogram":
+        return f"corpus_histogram_{corpus}.json"
+    if kind == "z_k":
+        if base_prior_key is None:
+            raise ValueError("base_prior_key is required for z_k filenames")
+        if x_dim is None or operator_ids is None:
+            raise ValueError(
+                "x_dim and operator_ids are required for z_k filenames"
+            )
+        operator_tag = _operator_filename_tag(operator_ids)
+        return f"z_k_{base_prior_key}_{corpus}_x{x_dim}_{operator_tag}.json"
+    raise ValueError(f"Unknown prebuilt kind: {kind!r}")
+
+
+def _load_prebuilt_json(
+    kind: str,
+    corpus: str,
+    x_dim: int | None = None,
+    operator_ids: List[int] | None = None,
+    *,
+    base_prior_key: str | None = None,
+) -> Dict:
+    """Load the prebuilt JSON for the requested config."""
+    filename = _prebuilt_filename(
+        kind,
+        corpus,
+        x_dim,
+        operator_ids,
+        base_prior_key=base_prior_key,
+    )
+    path = _DATA_DIR / filename
+    if not path.exists():
+        if kind == "histogram":
+            raise FileNotFoundError(
+                f"No pre-built histogram for corpus={corpus!r}. "
+                f"Expected: {filename}."
+            )
+        raise FileNotFoundError(
+            f"No pre-built {kind} data for corpus={corpus!r}, "
+            f"x_dim={x_dim}, operators={sorted(operator_ids or [])}. "
+            f"Expected: {filename}."
         )
-    if user_x_dim != loaded_x_dim:
-        raise ValueError(
-            f"x_dim mismatch: pre-built data uses x_dim="
-            f"{loaded_x_dim} but the regressor has x_dim="
-            f"{user_x_dim}. Use fit_size_calibrated_prior() "
-            f"for custom x_dim values."
-        )
+    with open(path, "r", encoding="utf-8") as file_handle:
+        return json.load(file_handle)
 
 
 def load_corpus_histogram(
-    user_operators: list,
-    user_x_dim: int,
     histogram_type: str = "empirical",
+    corpus: str = STANDARD_CORPUS,
 ) -> Dict[int, float]:
     """Load a pre-built corpus histogram.
 
+    The corpus size histogram is purely a property of the corpus — it
+    does not depend on the user's operator set or ``x_dim``.
+
     Parameters
     ----------
-    user_operators : list
-        Operator names or IDs from the regressor.
-    user_x_dim : int
-        Number of input features.
     histogram_type : str
         ``"empirical"`` or ``"parametric"``.
+    corpus : str
+        Corpus name.
 
     Returns
     -------
@@ -92,16 +128,20 @@ def load_corpus_histogram(
 
     Raises
     ------
+    FileNotFoundError
+        If no histogram file is available for the requested corpus.
     ValueError
-        If the user's config does not match the pre-built data.
+        If the loaded file's metadata reports a different corpus.
     """
-    path = _DATA_DIR / _HISTOGRAM_FILE
-    with open(path, "r", encoding="utf-8") as f:
-        data = json.load(f)
+    data = _load_prebuilt_json("histogram", corpus)
 
-    meta = data["metadata"]
-    user_ids = _resolve_operator_ids(user_operators)
-    _validate_config(meta["operators"], meta["x_dim"], user_ids, user_x_dim)
+    loaded_corpus = data.get("metadata", {}).get("corpus", corpus)
+    if loaded_corpus != corpus:
+        raise ValueError(
+            f"Corpus mismatch: pre-built histogram is for corpus="
+            f"{loaded_corpus!r} but the regressor requested "
+            f"corpus={corpus!r}."
+        )
 
     if histogram_type == "parametric":
         raw = data["parametric"]["evaluated"]
@@ -115,6 +155,7 @@ def load_z_k(
     base_prior_key: str,
     user_operators: list,
     user_x_dim: int,
+    corpus: str = STANDARD_CORPUS,
 ) -> Dict[int, float]:
     """Load a pre-built Z_k table.
 
@@ -139,19 +180,45 @@ def load_z_k(
     KeyError
         If *base_prior_key* is not recognised.
     """
-    if base_prior_key not in _Z_K_FILES:
+    if base_prior_key not in {"uniform", "katz"}:
         raise KeyError(
             f"No pre-built Z_k for base prior {base_prior_key!r}. "
-            f"Available: {sorted(_Z_K_FILES)}."
+            f"Available: {['katz', 'uniform']}."
         )
 
-    path = _DATA_DIR / _Z_K_FILES[base_prior_key]
-    with open(path, "r", encoding="utf-8") as f:
-        data = json.load(f)
+    user_ids = _resolve_operator_ids(user_operators)
+    data = _load_prebuilt_json(
+        "z_k",
+        corpus,
+        user_x_dim,
+        user_ids,
+        base_prior_key=base_prior_key,
+    )
 
     meta = data["metadata"]
-    user_ids = _resolve_operator_ids(user_operators)
-    _validate_config(meta["operators"], meta["x_dim"], user_ids, user_x_dim)
+    loaded_operators = sorted(meta["operators"])
+    loaded_x_dim = int(meta["x_dim"])
+    loaded_corpus = meta["corpus"]
+
+    if loaded_corpus != corpus:
+        raise ValueError(
+            f"Corpus mismatch: pre-built data uses corpus={loaded_corpus!r} "
+            f"but the regressor requested corpus={corpus!r}."
+        )
+    if user_ids != loaded_operators:
+        raise ValueError(
+            f"Operator mismatch: pre-built data uses operators "
+            f"{loaded_operators} but the regressor has "
+            f"{user_ids}. Use "
+            f"fit_size_calibrated_prior() for custom operator sets."
+        )
+    if user_x_dim != loaded_x_dim:
+        raise ValueError(
+            f"x_dim mismatch: pre-built data uses x_dim="
+            f"{loaded_x_dim} but the regressor has x_dim="
+            f"{user_x_dim}. Use fit_size_calibrated_prior() "
+            f"for custom x_dim values."
+        )
 
     return {int(k): v for k, v in data["log_z_k"].items()}
 
@@ -161,6 +228,7 @@ def load_prebuilt_size_calibrated(
     user_operators: list,
     user_x_dim: int,
     histogram_type: str = "empirical",
+    corpus: str = STANDARD_CORPUS,
 ) -> Tuple[Dict[int, float], Dict[int, float]]:
     """Load both corpus histogram and Z_k for a size-calibrated prior.
 
@@ -169,9 +237,9 @@ def load_prebuilt_size_calibrated(
     base_prior_key : str
         ``"uniform"`` or ``"katz"``.
     user_operators : list
-        Operator names or IDs from the regressor.
+        Operator names or IDs from the regressor (used for Z_k).
     user_x_dim : int
-        Number of input features.
+        Number of input features (used for Z_k).
     histogram_type : str
         ``"empirical"`` or ``"parametric"``.
 
@@ -180,6 +248,6 @@ def load_prebuilt_size_calibrated(
     corpus_log_hist : dict of {int: float}
     log_z_k : dict of {int: float}
     """
-    corpus_log_hist = load_corpus_histogram(user_operators, user_x_dim, histogram_type)
-    log_z_k = load_z_k(base_prior_key, user_operators, user_x_dim)
+    corpus_log_hist = load_corpus_histogram(histogram_type, corpus)
+    log_z_k = load_z_k(base_prior_key, user_operators, user_x_dim, corpus)
     return corpus_log_hist, log_z_k

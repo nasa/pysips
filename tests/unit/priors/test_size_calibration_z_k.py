@@ -8,6 +8,7 @@ import pytest
 
 from pysips.priors.size_calibration_z_k import (
     ShapeNode,
+    bootstrap_log_z_k_variance,
     compute_labeled_tree_counts,
     compute_shape_counts,
     enumerate_shapes,
@@ -293,6 +294,46 @@ class TestEstimateLogZkKatz:
         assert "shape_counts" in result
         assert "n_shapes_sampled" in result
 
+    def test_returns_per_shape_log_m_for_mc_sizes(self):
+        """MC-estimated sizes expose cached per-shape log-marginals."""
+        vocab = [VARIABLE, CONSTANT, ADDITION, SIN]
+        model = self._make_uniform_katz(vocab)
+
+        result = estimate_log_z_k_katz(
+            model,
+            operators=[ADDITION, SIN],
+            x_dim=1,
+            max_size=7,
+            n_shapes_per_size=2,
+            random_state=42,
+        )
+
+        per_shape = result["per_shape_log_m"]
+        assert per_shape
+        assert all(values.shape == (2,) for values in per_shape.values())
+
+
+class TestBootstrapLogZkVariance:
+    """Tests for bootstrap_log_z_k_variance."""
+
+    def test_returns_finite_nonnegative_std(self):
+        """Bootstrap helper returns finite, nonnegative std devs."""
+        per_shape_log_m = {
+            5: np.array([-2.0, -1.5, -1.7, -1.9]),
+            7: np.array([-3.2, -3.0, -2.8, -3.1]),
+        }
+        shape_counts = {5: 10, 7: 25}
+
+        stds = bootstrap_log_z_k_variance(
+            per_shape_log_m,
+            shape_counts,
+            n_bootstrap=200,
+            random_state=42,
+        )
+
+        assert set(stds) == {5, 7}
+        assert all(np.isfinite(value) and value >= 0.0 for value in stds.values())
+
 
 # ===================================================================
 # MC fallback: estimate_log_z_k_mc
@@ -345,6 +386,21 @@ class TestEstimateLogZkMC:
 
         for k, v in result["log_z_k"].items():
             assert np.isfinite(v), f"Non-finite log Z_k at size {k}"
+
+    def test_returns_per_shape_log_m(self):
+        """MC fallback returns cached per-shape log-values."""
+        result = estimate_log_z_k_mc(
+            base_prior=None,
+            x_dim=1,
+            operators=[ADDITION, SIN],
+            max_size=5,
+            n_shapes_per_size=7,
+            random_state=42,
+        )
+
+        per_shape = result["per_shape_log_m"]
+        assert per_shape
+        assert all(values.shape == (7,) for values in per_shape.values())
 
 
 # ===================================================================

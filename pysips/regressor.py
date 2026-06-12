@@ -268,11 +268,13 @@ class PysipsRegressor(BingoProposalMixin, BaseEstimator, RegressorMixin):
           when available; otherwise the model is fit from corpus on the
           fly and cached for future use.
         - ``"size_calibrated_uniform"`` : Uniform base prior with
-          corpus-calibrated size distribution. Requires the standard
-          operator set ``[+,-,*,/,sin,cos,exp,log]`` and ``x_dim=1``.
+                    corpus-calibrated size distribution. Requires a matching
+                    pre-built artifact for the requested ``operators``, ``x_dim``,
+                    and ``prior_params["corpus"]`` (default ``"benchmark"``).
         - ``"size_calibrated_katz"`` : Katz base prior with
-          corpus-calibrated size distribution. Same operator/x_dim
-          requirements as ``"size_calibrated_uniform"``.
+                    corpus-calibrated size distribution. Requires a matching
+                    pre-built artifact for the requested ``operators``, ``x_dim``,
+                    and ``prior_params["corpus"]`` (default ``"benchmark"``).
         - ``"size_calibrated_bms"`` : BMS base prior with
           corpus-calibrated size distribution. Currently raises
           ``NotImplementedError``; use ``fit_size_calibrated_prior()``
@@ -305,6 +307,8 @@ class PysipsRegressor(BingoProposalMixin, BaseEstimator, RegressorMixin):
 
         For ``"size_calibrated_uniform"`` / ``"size_calibrated_katz"``:
 
+                - ``"corpus"`` (str): Corpus name identifying which pre-built
+                    histogram and ``Z_k`` artifact to load. Default ``"benchmark"``.
         - ``"floor_log_prob"`` (float): Log-probability assigned to
           expression sizes not covered by the corpus histogram.
           Default ``-inf``.
@@ -571,11 +575,12 @@ class PysipsRegressor(BingoProposalMixin, BaseEstimator, RegressorMixin):
                 "Use fit_size_calibrated_prior() to build one manually."
             )
 
+        corpus = params.get("corpus", "benchmark")
         floor_log_prob = params.get("floor_log_prob", -inf)
 
         # Load pre-built data (validates operators and x_dim)
         corpus_log_hist, log_z_k = load_prebuilt_size_calibrated(
-            base_key, self.operators, x_dim
+            base_key, self.operators, x_dim, corpus=corpus
         )
 
         # Construct the base prior
@@ -583,7 +588,6 @@ class PysipsRegressor(BingoProposalMixin, BaseEstimator, RegressorMixin):
             base_prior = None
         elif base_key == "katz":
             n = params.get("n", 2)
-            corpus = params.get("corpus", "benchmark")
             model = load_katz_model(n=n, corpus=corpus)
             base_prior = KatzPrior(
                 model,
@@ -594,7 +598,7 @@ class PysipsRegressor(BingoProposalMixin, BaseEstimator, RegressorMixin):
         else:
             raise ValueError(f"Unsupported base prior: {base_key!r}")
 
-        print(f"Using size-calibrated {base_key} prior.")
+        print(f"Using size-calibrated {base_key} prior (corpus={corpus!r}).")
         return SizeCalibratedPrior(
             base_prior=base_prior,
             log_z_k=log_z_k,

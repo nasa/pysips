@@ -26,7 +26,6 @@ from bingo.expressions.agraph.pyagraph import (
     VARIABLE,
 )
 
-
 # ------------------------------------------------------------------ #
 # Internal operator classification                                    #
 # ------------------------------------------------------------------ #
@@ -35,8 +34,7 @@ from bingo.expressions.agraph.pyagraph import (
 def _classify_operators(operators, x_dim):
     """Classify operators by arity (internal helper)."""
     unary_ids = [
-        op for op in operators
-        if not IS_ARITY_2_ARRAY[op] and not IS_TERMINAL_ARRAY[op]
+        op for op in operators if not IS_ARITY_2_ARRAY[op] and not IS_TERMINAL_ARRAY[op]
     ]
     binary_ids = [op for op in operators if IS_ARITY_2_ARRAY[op]]
     n_t = x_dim + 1
@@ -266,17 +264,15 @@ def enumerate_shapes(
 
     result: List[ShapeNode] = []
     if has_unary and shape_counts.get(k - 1, 0) > 0:
-        for child in enumerate_shapes(k - 1, shape_counts, has_unary,
-                                      has_binary):
+        for child in enumerate_shapes(k - 1, shape_counts, has_unary, has_binary):
             result.append(ShapeNode("unary", (child,)))
     if has_binary:
         for i in range(1, k - 1):
-            if (shape_counts.get(i, 0) > 0
-                    and shape_counts.get(k - 1 - i, 0) > 0):
-                for left in enumerate_shapes(i, shape_counts, has_unary,
-                                             has_binary):
-                    for right in enumerate_shapes(k - 1 - i, shape_counts,
-                                                  has_unary, has_binary):
+            if shape_counts.get(i, 0) > 0 and shape_counts.get(k - 1 - i, 0) > 0:
+                for left in enumerate_shapes(i, shape_counts, has_unary, has_binary):
+                    for right in enumerate_shapes(
+                        k - 1 - i, shape_counts, has_unary, has_binary
+                    ):
                         result.append(ShapeNode("binary", (left, right)))
     return result
 
@@ -303,9 +299,16 @@ class _KatzDPContext:
     """
 
     __slots__ = (
-        "all_ops", "n_ops", "op_to_idx",
-        "leaf_idx", "unary_idx", "binary_idx",
-        "leaf_log_m", "log_left", "log_right", "log_root",
+        "all_ops",
+        "n_ops",
+        "op_to_idx",
+        "leaf_idx",
+        "unary_idx",
+        "binary_idx",
+        "leaf_log_m",
+        "log_left",
+        "log_right",
+        "log_root",
     )
 
     def __init__(self, katz_model, x_dim, unary_ops, binary_ops):
@@ -314,15 +317,9 @@ class _KatzDPContext:
         self.n_ops = len(all_ops)
         self.op_to_idx = {op: i for i, op in enumerate(all_ops)}
 
-        self.leaf_idx = np.array(
-            [self.op_to_idx[VARIABLE], self.op_to_idx[CONSTANT]]
-        )
-        self.unary_idx = np.array(
-            [self.op_to_idx[op] for op in unary_ops]
-        )
-        self.binary_idx = np.array(
-            [self.op_to_idx[op] for op in binary_ops]
-        )
+        self.leaf_idx = np.array([self.op_to_idx[VARIABLE], self.op_to_idx[CONSTANT]])
+        self.unary_idx = np.array([self.op_to_idx[op] for op in unary_ops])
+        self.binary_idx = np.array([self.op_to_idx[op] for op in binary_ops])
 
         self.leaf_log_m = np.full(self.n_ops, float("-inf"))
         self.leaf_log_m[self.op_to_idx[VARIABLE]] = (
@@ -449,6 +446,9 @@ def estimate_log_z_k_katz(
             *n_shapes_per_size* if total shapes < requested).
         ``"low_ess_sizes"`` : list of int
             Sizes where fewer than 30 shapes were sampled.
+        ``"per_shape_log_m"`` : dict of {int: numpy.ndarray}
+            Cached per-shape log-marginals for sizes estimated via MC.
+            Sizes computed by exhaustive enumeration are omitted.
     """
     info = _classify_operators(operators, x_dim)
     unary_ops = info["unary_ids"]
@@ -465,6 +465,7 @@ def estimate_log_z_k_katz(
     n_sampled: Dict[int, int] = {}
     low_ess: List[int] = []
     dp_cache: Dict = {}
+    per_shape_log_m: Dict[int, np.ndarray] = {}
 
     for k in range(1, max_size + 1):
         n_shapes_k = shape_cts.get(k, 0)
@@ -472,12 +473,10 @@ def estimate_log_z_k_katz(
             continue
 
         if n_shapes_k <= n_shapes_per_size:
-            all_shapes = enumerate_shapes(k, shape_cts, has_unary,
-                                          has_binary)
+            all_shapes = enumerate_shapes(k, shape_cts, has_unary, has_binary)
             n_sampled[k] = n_shapes_k
             log_m_values = np.array(
-                [_shape_log_marginal_fast(s, ctx, dp_cache)
-                 for s in all_shapes]
+                [_shape_log_marginal_fast(s, ctx, dp_cache) for s in all_shapes]
             )
             log_z_k[k] = float(logsumexp(log_m_values))
         else:
@@ -489,19 +488,15 @@ def estimate_log_z_k_katz(
 
             log_m_values = np.full(m, float("-inf"))
             for i in range(m):
-                shape = sample_shape(k, shape_cts, has_unary, has_binary,
-                                     rng)
-                log_m_values[i] = _shape_log_marginal_fast(shape, ctx,
-                                                           dp_cache)
+                shape = sample_shape(k, shape_cts, has_unary, has_binary, rng)
+                log_m_values[i] = _shape_log_marginal_fast(shape, ctx, dp_cache)
 
-            log_z_k[k] = (log(n_shapes_k)
-                          + float(logsumexp(log_m_values))
-                          - log(m))
+            log_z_k[k] = log(n_shapes_k) + float(logsumexp(log_m_values)) - log(m)
+            per_shape_log_m[k] = log_m_values
 
     if low_ess:
         warnings.warn(
-            f"Sizes with fewer than 30 sampled shapes (low ESS): "
-            f"{low_ess}",
+            f"Sizes with fewer than 30 sampled shapes (low ESS): " f"{low_ess}",
             stacklevel=2,
         )
 
@@ -511,7 +506,61 @@ def estimate_log_z_k_katz(
         "n_shapes_sampled": n_sampled,
         "low_ess_sizes": low_ess,
         "dp_cache_size": len(dp_cache),
+        "per_shape_log_m": per_shape_log_m,
     }
+
+
+def bootstrap_log_z_k_variance(
+    per_shape_log_m: Dict[int, np.ndarray],
+    shape_counts: Dict[int, int],
+    n_bootstrap: int = 1000,
+    random_state: Optional[int] = None,
+) -> Dict[int, float]:
+    """Estimate bootstrap std dev of log Z_k for MC-estimated sizes.
+
+    For each size *k* estimated by Monte Carlo, this resamples the
+    cached per-shape log-marginal values with replacement and recomputes
+    the log Z_k estimator. The standard deviation across bootstrap
+    replicates estimates the Monte Carlo uncertainty.
+
+    Parameters
+    ----------
+    per_shape_log_m : dict of {int: numpy.ndarray}
+        Cached per-shape log-marginal values from an estimation run.
+        Each array should be one-dimensional with length equal to the
+        number of sampled shapes for that size.
+    shape_counts : dict of {int: int}
+        Total number of tree shapes per size.
+    n_bootstrap : int, optional
+        Number of bootstrap replicates. Default 1000.
+    random_state : int or None, optional
+        Random seed.
+
+    Returns
+    -------
+    dict of {int: float}
+        Bootstrap standard deviation of log Z_k per size. Sizes with
+        fewer than two cached samples are omitted.
+    """
+    rng = np.random.default_rng(random_state)
+    std_devs: Dict[int, float] = {}
+
+    for k, log_m_values in per_shape_log_m.items():
+        samples = np.asarray(log_m_values, dtype=float)
+        if samples.ndim != 1 or samples.size <= 1:
+            continue
+
+        n_shapes_k = shape_counts.get(k)
+        if not n_shapes_k:
+            continue
+
+        m = samples.size
+        indices = rng.integers(0, m, size=(n_bootstrap, m))
+        boot_samples = samples[indices]
+        boot_log_z = log(n_shapes_k) + logsumexp(boot_samples, axis=1) - log(m)
+        std_devs[k] = float(np.std(boot_log_z, ddof=1))
+
+    return std_devs
 
 
 # ------------------------------------------------------------------ #
@@ -661,6 +710,7 @@ def estimate_log_z_k_mc(
         ``"shape_counts"`` : dict of {int: int}
         ``"n_shapes_sampled"`` : dict of {int: int}
         ``"low_ess_sizes"`` : list of int
+        ``"per_shape_log_m"`` : dict of {int: numpy.ndarray}
     """
     info = _classify_operators(operators, x_dim)
     terminal_ops = [VARIABLE] * x_dim + [CONSTANT]
@@ -675,6 +725,7 @@ def estimate_log_z_k_mc(
     log_z_k: Dict[int, float] = {}
     n_sampled: Dict[int, int] = {}
     low_ess: List[int] = []
+    per_shape_log_m: Dict[int, np.ndarray] = {}
 
     for k in range(1, max_size + 1):
         n_shapes_k = shape_cts.get(k, 0)
@@ -698,14 +749,12 @@ def estimate_log_z_k_mc(
                 log_p_base = 0.0
             log_values[i] = log_n_lab + log_p_base
 
-        log_z_k[k] = (log(n_shapes_k)
-                       + float(logsumexp(log_values))
-                       - log(m))
+        log_z_k[k] = log(n_shapes_k) + float(logsumexp(log_values)) - log(m)
+        per_shape_log_m[k] = log_values
 
     if low_ess:
         warnings.warn(
-            f"Sizes with fewer than 30 sampled shapes (low ESS): "
-            f"{sorted(low_ess)}",
+            f"Sizes with fewer than 30 sampled shapes (low ESS): " f"{sorted(low_ess)}",
             stacklevel=2,
         )
 
@@ -714,4 +763,5 @@ def estimate_log_z_k_mc(
         "shape_counts": shape_cts,
         "n_shapes_sampled": n_sampled,
         "low_ess_sizes": low_ess,
+        "per_shape_log_m": per_shape_log_m,
     }

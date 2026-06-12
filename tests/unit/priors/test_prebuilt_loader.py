@@ -3,6 +3,8 @@
 import pytest
 
 from pysips.priors.prebuilt_loader import (
+    _operator_filename_tag,
+    _prebuilt_filename,
     _resolve_operator_ids,
     load_corpus_histogram,
     load_prebuilt_size_calibrated,
@@ -27,26 +29,54 @@ class TestResolveOperatorIds:
         assert result == sorted([3, 4, 5, 6])
 
 
+class TestPrebuiltFileNaming:
+    def test_operator_filename_tag_is_operator_specific(self):
+        assert _operator_filename_tag(STANDARD_OPS_INT) == "ops3-4-5-6-13-14-15-16"
+
+    def test_z_k_filename_uses_operator_ids(self):
+        assert (
+            _prebuilt_filename(
+                "z_k",
+                "benchmark",
+                1,
+                STANDARD_OPS_INT,
+                base_prior_key="katz",
+            )
+            == "z_k_katz_benchmark_x1_ops3-4-5-6-13-14-15-16.json"
+        )
+
+    def test_histogram_filename_is_corpus_only(self):
+        # Corpus histograms describe the corpus's size distribution and
+        # do not depend on x_dim or the operator set.
+        assert _prebuilt_filename("histogram", "benchmark") == (
+            "corpus_histogram_benchmark.json"
+        )
+
+    def test_z_k_requires_x_dim_and_operators(self):
+        with pytest.raises(ValueError, match="x_dim and operator_ids"):
+            _prebuilt_filename("z_k", "benchmark", base_prior_key="katz")
+
+    def test_z_k_requires_base_prior_key(self):
+        with pytest.raises(ValueError, match="base_prior_key"):
+            _prebuilt_filename("z_k", "benchmark", 1, STANDARD_OPS_INT)
+
+
 class TestLoadCorpusHistogram:
     def test_loads_empirical(self):
-        hist = load_corpus_histogram(STANDARD_OPS_STR, 1, "empirical")
+        hist = load_corpus_histogram("empirical")
         assert isinstance(hist, dict)
         assert all(isinstance(k, int) for k in hist)
         assert all(isinstance(v, float) for v in hist.values())
         assert len(hist) > 0
 
     def test_loads_parametric(self):
-        hist = load_corpus_histogram(STANDARD_OPS_STR, 1, "parametric")
+        hist = load_corpus_histogram("parametric")
         assert isinstance(hist, dict)
         assert len(hist) > 0
 
-    def test_operator_mismatch(self):
-        with pytest.raises(ValueError, match="Operator mismatch"):
-            load_corpus_histogram(["+", "*"], 1)
-
-    def test_x_dim_mismatch(self):
-        with pytest.raises(ValueError, match="x_dim mismatch"):
-            load_corpus_histogram(STANDARD_OPS_STR, 2)
+    def test_unknown_corpus_raises(self):
+        with pytest.raises(FileNotFoundError):
+            load_corpus_histogram(corpus="does_not_exist")
 
 
 class TestLoadZK:
@@ -64,6 +94,16 @@ class TestLoadZK:
     def test_unknown_base_prior(self):
         with pytest.raises(KeyError, match="No pre-built Z_k"):
             load_z_k("unknown", STANDARD_OPS_STR, 1)
+
+    def test_operator_mismatch(self):
+        with pytest.raises(FileNotFoundError):
+            # No prebuilt Z_k for this operator subset.
+            load_z_k("katz", ["+", "*"], 1)
+
+    def test_x_dim_mismatch(self):
+        with pytest.raises(FileNotFoundError):
+            # No prebuilt Z_k for x_dim=2 with the standard operator set.
+            load_z_k("katz", STANDARD_OPS_STR, 2)
 
 
 class TestLoadPrebuiltSizeCalibrated:
