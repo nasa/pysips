@@ -10,6 +10,7 @@ import pytest
 from pysips.regressor import PysipsRegressor
 
 PREBUILT_OPERATORS = ["+", "-", "*", "/", "sin", "cos"]
+SHORTCUT_TEST_MAX_EQUATION_EVALS = 25
 
 
 @pytest.fixture
@@ -30,7 +31,7 @@ class TestSizeCalibratedUniform:
             prior="size_calibrated_uniform",
             operators=PREBUILT_OPERATORS,
             num_particles=5,
-            max_time=5,
+            max_equation_evals=SHORTCUT_TEST_MAX_EQUATION_EVALS,
             random_state=0,
             show_progress_bar=False,
         )
@@ -69,7 +70,7 @@ class TestSizeCalibratedKatz:
             prior="size_calibrated_katz",
             operators=PREBUILT_OPERATORS,
             num_particles=5,
-            max_time=5,
+            max_equation_evals=SHORTCUT_TEST_MAX_EQUATION_EVALS,
             random_state=0,
             show_progress_bar=False,
         )
@@ -86,7 +87,7 @@ class TestSizeCalibratedBMS:
             prior="size_calibrated_bms",
             operators=PREBUILT_OPERATORS,
             num_particles=5,
-            max_time=5,
+            max_equation_evals=SHORTCUT_TEST_MAX_EQUATION_EVALS,
             random_state=0,
             show_progress_bar=False,
         )
@@ -104,7 +105,7 @@ class TestFloorLogProbOverride:
             operators=PREBUILT_OPERATORS,
             prior_params={"floor_log_prob": -100.0},
             num_particles=5,
-            max_time=5,
+            max_equation_evals=SHORTCUT_TEST_MAX_EQUATION_EVALS,
             random_state=0,
             show_progress_bar=False,
         )

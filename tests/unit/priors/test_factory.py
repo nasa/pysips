@@ -52,6 +52,10 @@ def test_build_prior_bms_uses_benchmark_default(mocker):
         operators=["+", "-"],
         x_dim=3,
         bingo_config=_bingo_config(max_complexity=30),
+        num_mcmc_samples=7,
+        target_ess=0.5,
+        max_equation_evals=12,
+        random_state=99,
     )
 
     assert prior is mock_bms_prior
@@ -60,6 +64,10 @@ def test_build_prior_bms_uses_benchmark_default(mocker):
     assert mock_bms_cls.call_args.kwargs["operators"] == ["+", "-"]
     assert mock_bms_cls.call_args.kwargs["x_dim"] == 3
     assert mock_bms_cls.call_args.kwargs["max_complexity"] == 30
+    assert mock_bms_cls.call_args.kwargs["num_mcmc_samples"] == 7
+    assert mock_bms_cls.call_args.kwargs["target_ess"] == 0.5
+    assert mock_bms_cls.call_args.kwargs["max_equation_evals"] == 12
+    assert mock_bms_cls.call_args.kwargs["random_state"] == 99
 
 
 def test_build_prior_plain_katz_defaults_to_strict_prebuilt(mocker):
@@ -115,12 +123,20 @@ def test_build_prior_size_calibrated_uniform_uses_canonical_ids(mocker):
         operators=["*", "+"],
         x_dim=3,
         bingo_config=_bingo_config(),
+        num_mcmc_samples=9,
+        target_ess=0.4,
+        max_time=5.0,
+        random_state=123,
     )
 
     assert prior is mock_size_calibrated
     mock_load_z_k.assert_called_once_with("uniform", [3, 5], 3, corpus="benchmark")
     assert mock_size_cls.call_args.kwargs["base_prior"] is None
     assert mock_size_cls.call_args.kwargs["floor_log_prob"] == -100.0
+    assert mock_size_cls.call_args.kwargs["num_mcmc_samples"] == 9
+    assert mock_size_cls.call_args.kwargs["target_ess"] == 0.4
+    assert mock_size_cls.call_args.kwargs["max_time"] == 5.0
+    assert mock_size_cls.call_args.kwargs["random_state"] == 123
 
 
 def test_build_prior_size_calibrated_katz_forces_strict_prebuilt(mocker):

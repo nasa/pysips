@@ -4,6 +4,8 @@ from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.metrics import mean_squared_error
 from pysips.regressor import PysipsRegressor
 
+REGRESSOR_TEST_MAX_EQUATION_EVALS = 100
+
 
 @pytest.fixture
 def synthetic_data():
@@ -29,7 +31,9 @@ def base_regressor():
         operators=["+", "*", "sin"],
         max_complexity=24,
         num_particles=20,
+        max_equation_evals=REGRESSOR_TEST_MAX_EQUATION_EVALS,
         random_state=42,
+        show_progress_bar=False,
     )
 
 
@@ -57,7 +61,9 @@ def test_hyperparameter_optimization(synthetic_data):
         max_complexity=20,
         num_particles=10,
         num_mcmc_samples=10,
+        max_equation_evals=REGRESSOR_TEST_MAX_EQUATION_EVALS,
         random_state=42,
+        show_progress_bar=False,
     )
 
     # Define hyperparameter grid
@@ -71,7 +77,7 @@ def test_hyperparameter_optimization(synthetic_data):
         param_grid=param_grid,
         cv=2,
         scoring="neg_mean_squared_error",
-        verbose=1,
+        verbose=0,
         n_jobs=1,  # Use single job for testing
     )
 

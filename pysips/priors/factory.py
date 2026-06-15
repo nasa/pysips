@@ -48,6 +48,11 @@ class ResolutionContext:
     canonical_operator_ids: tuple[int, ...]
     x_dim: int
     bingo_config: BingoConstructionConfig
+    num_mcmc_samples: int
+    target_ess: float
+    max_time: Optional[float]
+    max_equation_evals: Optional[int]
+    random_state: Optional[int]
 
 
 def build_prior(
@@ -57,6 +62,11 @@ def build_prior(
     operators: Sequence[Any],
     x_dim: int,
     bingo_config: BingoConstructionConfig,
+    num_mcmc_samples: int = 5,
+    target_ess: float = 0.8,
+    max_time: Optional[float] = None,
+    max_equation_evals: Optional[int] = None,
+    random_state: Optional[int] = None,
 ):
     """Resolve a user-facing prior configuration into a concrete Prior."""
     params = _normalize_prior_params(prior_params)
@@ -65,6 +75,11 @@ def build_prior(
         canonical_operator_ids=tuple(_canonicalize_operator_ids(operators)),
         x_dim=x_dim,
         bingo_config=bingo_config,
+        num_mcmc_samples=num_mcmc_samples,
+        target_ess=target_ess,
+        max_time=max_time,
+        max_equation_evals=max_equation_evals,
+        random_state=random_state,
     )
     try:
         if isinstance(prior, str):
@@ -219,6 +234,7 @@ def _build_bms_prior(spec: PriorSpec, context: ResolutionContext):
         squared_weights,
         operators=list(context.original_operators),
         x_dim=context.x_dim,
+        **_samplable_prior_kwargs(context),
         **_bingo_prior_kwargs(context),
     )
 
@@ -236,6 +252,7 @@ def _build_katz_prior(spec: PriorSpec, context: ResolutionContext, *, fit_if_mis
         normalize=bool(spec.normalize),
         operators=list(context.original_operators),
         x_dim=context.x_dim,
+        **_samplable_prior_kwargs(context),
         **_bingo_prior_kwargs(context),
     )
 
@@ -264,8 +281,23 @@ def _build_size_calibrated_prior(spec: PriorSpec, context: ResolutionContext):
         floor_log_prob=spec.floor_log_prob if spec.floor_log_prob is not None else -inf,
         operators=list(context.original_operators),
         x_dim=context.x_dim,
+        **_samplable_prior_kwargs(context),
         **_bingo_prior_kwargs(context),
     )
+
+
+def _samplable_prior_kwargs(context: ResolutionContext) -> dict[str, Any]:
+    kwargs = {
+        "num_mcmc_samples": context.num_mcmc_samples,
+        "target_ess": context.target_ess,
+    }
+    if context.max_time is not None:
+        kwargs["max_time"] = context.max_time
+    if context.max_equation_evals is not None:
+        kwargs["max_equation_evals"] = context.max_equation_evals
+    if context.random_state is not None:
+        kwargs["random_state"] = context.random_state
+    return kwargs
 
 
 def _bingo_prior_kwargs(context: ResolutionContext) -> dict[str, Any]:

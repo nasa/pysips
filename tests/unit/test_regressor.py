@@ -355,6 +355,9 @@ def test_fit_delegates_prior_resolution_to_factory(
         prior="katz",
         prior_params={"corpus": "benchmark", "n": 3},
         operators=["+", "-", "*"],
+        num_mcmc_samples=7,
+        target_ess=0.6,
+        max_time=5,
         random_state=42,
     )
     regressor.fit(X, y)
@@ -365,6 +368,10 @@ def test_fit_delegates_prior_resolution_to_factory(
     assert call_args.kwargs["operators"] == ["+", "-", "*"]
     assert call_args.kwargs["x_dim"] == X.shape[1]
     assert isinstance(call_args.kwargs["bingo_config"], BingoConstructionConfig)
+    assert call_args.kwargs["num_mcmc_samples"] == 7
+    assert call_args.kwargs["target_ess"] == 0.6
+    assert call_args.kwargs["max_time"] == 5
+    assert call_args.kwargs["random_state"] == 42
 
 
 # --- Tests for prior_params ---

@@ -434,6 +434,11 @@ class PysipsRegressor(BaseEstimator, RegressorMixin):
             operators=self.operators,
             x_dim=x_dim,
             bingo_config=bingo_config,
+            num_mcmc_samples=self.num_mcmc_samples,
+            target_ess=self.target_ess,
+            max_time=self.max_time,
+            max_equation_evals=self.max_equation_evals,
+            random_state=self.random_state,
         )
         proposal = build_agraph_proposal(
             x_dim,
