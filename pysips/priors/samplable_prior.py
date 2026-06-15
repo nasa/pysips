@@ -33,18 +33,22 @@ import numpy as np
 from bingo.expressions.agraph import AGraphExpression
 
 from .improper_uniform_prior import ImproperUniformPrior
-from ..bingo_proposal_mixin import BingoProposalMixin
+from ..bingo_construction import (
+    BingoConstructionConfig,
+    build_agraph_generator,
+    build_agraph_proposal,
+)
 from ..sampler import sample
 
 
 # pylint: disable=too-many-instance-attributes, too-many-arguments, too-many-positional-arguments, too-many-locals
-class SamplablePrior(BingoProposalMixin, ABC):
+class SamplablePrior(ABC):
     """
     Abstract base class for priors that support SMC sampling.
 
-    This class combines the `BingoProposalMixin` for generator/proposal
-    creation with SMC sampling parameters to provide a complete `rvs()`
-    implementation. Subclasses only need to implement:
+    This class combines shared bingo generator/proposal construction with SMC
+    sampling parameters to provide a complete `rvs()` implementation.
+    Subclasses only need to implement:
 
     - `_logpdf_single(agraph)`: Compute log-probability for single expression
 
@@ -71,7 +75,7 @@ class SamplablePrior(BingoProposalMixin, ABC):
     multiprocess : bool, optional
         If True, use multiprocessing. Default is False.
     **kwargs
-        Additional arguments passed to BingoProposalMixin.
+        Additional bingo construction settings.
 
     Notes
     -----
@@ -101,7 +105,24 @@ class SamplablePrior(BingoProposalMixin, ABC):
                 "Please choose one constraint method."
             )
 
-        super().__init__(**kwargs)
+        self.max_complexity = kwargs.pop("max_complexity", 24)
+        self.terminal_probability = kwargs.pop("terminal_probability", 0.1)
+        self.constant_probability = kwargs.pop("constant_probability", None)
+        self.command_probability = kwargs.pop("command_probability", 0.2)
+        self.node_probability = kwargs.pop("node_probability", 0.2)
+        self.parameter_probability = kwargs.pop("parameter_probability", 0.2)
+        self.prune_probability = kwargs.pop("prune_probability", 0.2)
+        self.fork_probability = kwargs.pop("fork_probability", 0.2)
+        self.repeat_mutation_probability = kwargs.pop(
+            "repeat_mutation_probability", 0.05
+        )
+        self.crossover_pool_size = kwargs.pop("crossover_pool_size", None)
+        self.mutation_prob = kwargs.pop("mutation_prob", 0.75)
+        self.crossover_prob = kwargs.pop("crossover_prob", 0.25)
+        self.exclusive = kwargs.pop("exclusive", True)
+        if kwargs:
+            unexpected = ", ".join(sorted(kwargs))
+            raise TypeError(f"Unexpected bingo construction settings: {unexpected}")
 
         self.x_dim = x_dim
         self.operators = operators
@@ -183,11 +204,31 @@ class SamplablePrior(BingoProposalMixin, ABC):
             )
 
         seed = random_state if random_state is not None else self.random_state
+        bingo_config = BingoConstructionConfig(
+            max_complexity=self.max_complexity,
+            terminal_probability=self.terminal_probability,
+            constant_probability=self.constant_probability,
+            command_probability=self.command_probability,
+            node_probability=self.node_probability,
+            parameter_probability=self.parameter_probability,
+            prune_probability=self.prune_probability,
+            fork_probability=self.fork_probability,
+            repeat_mutation_probability=self.repeat_mutation_probability,
+            crossover_pool_size=self.crossover_pool_size,
+            mutation_prob=self.mutation_prob,
+            crossover_prob=self.crossover_prob,
+            exclusive=self.exclusive,
+        )
 
         # Create generator and proposal
-        generator = self._get_generator(self.x_dim, self.operators)
+        generator = build_agraph_generator(self.x_dim, self.operators, bingo_config)
         prior = ImproperUniformPrior(generator)
-        proposal = self._get_proposal(self.x_dim, generator, self.operators)
+        proposal = build_agraph_proposal(
+            self.x_dim,
+            self.operators,
+            generator,
+            bingo_config,
+        )
 
         # Run SMC sampling with this prior's logpdf as the target
         models, _, _ = sample(

@@ -5,44 +5,35 @@ import pytest
 from pysips.priors.prebuilt_loader import (
     _operator_filename_tag,
     _prebuilt_filename,
-    _resolve_operator_ids,
+    katz_model_path,
     load_corpus_histogram,
     load_prebuilt_size_calibrated,
     load_z_k,
 )
 
-STANDARD_OPS_STR = ["+", "-", "*", "/", "sin", "cos", "exp", "log"]
-STANDARD_OPS_INT = [3, 4, 5, 6, 13, 14, 15, 16]
+STANDARD_OPS_INT = [3, 4, 5, 6]
+EXTENDED_OPS_INT = [3, 4, 5, 6, 15, 16]
 
 
-class TestResolveOperatorIds:
-    def test_string_operators(self):
-        result = _resolve_operator_ids(["+", "-", "*", "/"])
-        assert result == sorted([3, 4, 5, 6])
-
-    def test_int_operators(self):
-        result = _resolve_operator_ids([3, 4, 5, 6])
-        assert result == [3, 4, 5, 6]
-
-    def test_mixed(self):
-        result = _resolve_operator_ids(["+", 4, "*", 6])
-        assert result == sorted([3, 4, 5, 6])
+class TestKatzModelPath:
+    def test_uses_benchmark_default(self):
+        assert katz_model_path(2).name == "default_katz_n2_benchmark.json"
 
 
 class TestPrebuiltFileNaming:
     def test_operator_filename_tag_is_operator_specific(self):
-        assert _operator_filename_tag(STANDARD_OPS_INT) == "ops3-4-5-6-13-14-15-16"
+        assert _operator_filename_tag(STANDARD_OPS_INT) == "ops3-4-5-6"
 
     def test_z_k_filename_uses_operator_ids(self):
         assert (
             _prebuilt_filename(
                 "z_k",
                 "benchmark",
-                1,
+                3,
                 STANDARD_OPS_INT,
                 base_prior_key="katz",
             )
-            == "z_k_katz_benchmark_x1_ops3-4-5-6-13-14-15-16.json"
+            == "z_k_katz_benchmark_x3_ops3-4-5-6.json"
         )
 
     def test_histogram_filename_is_corpus_only(self):
@@ -81,34 +72,43 @@ class TestLoadCorpusHistogram:
 
 class TestLoadZK:
     def test_loads_uniform(self):
-        z_k = load_z_k("uniform", STANDARD_OPS_STR, 1)
+        z_k = load_z_k("uniform", STANDARD_OPS_INT, 3)
         assert isinstance(z_k, dict)
         assert all(isinstance(k, int) for k in z_k)
         assert len(z_k) > 0
 
     def test_loads_katz(self):
-        z_k = load_z_k("katz", STANDARD_OPS_STR, 1)
+        z_k = load_z_k("katz", STANDARD_OPS_INT, 3)
+        assert isinstance(z_k, dict)
+        assert len(z_k) > 0
+
+    def test_loads_bms(self):
+        z_k = load_z_k("bms", EXTENDED_OPS_INT, 3)
         assert isinstance(z_k, dict)
         assert len(z_k) > 0
 
     def test_unknown_base_prior(self):
         with pytest.raises(KeyError, match="No pre-built Z_k"):
-            load_z_k("unknown", STANDARD_OPS_STR, 1)
+            load_z_k("unknown", STANDARD_OPS_INT, 3)
+
+    def test_non_canonical_operator_ids_rejected(self):
+        with pytest.raises(TypeError, match="canonical_operator_ids"):
+            load_z_k("katz", ["+", "*"], 3)
 
     def test_operator_mismatch(self):
         with pytest.raises(FileNotFoundError):
             # No prebuilt Z_k for this operator subset.
-            load_z_k("katz", ["+", "*"], 1)
+            load_z_k("katz", [3, 5], 3)
 
     def test_x_dim_mismatch(self):
         with pytest.raises(FileNotFoundError):
             # No prebuilt Z_k for x_dim=2 with the standard operator set.
-            load_z_k("katz", STANDARD_OPS_STR, 2)
+            load_z_k("katz", STANDARD_OPS_INT, 2)
 
 
 class TestLoadPrebuiltSizeCalibrated:
     def test_loads_both(self):
-        hist, z_k = load_prebuilt_size_calibrated("uniform", STANDARD_OPS_STR, 1)
+        hist, z_k = load_prebuilt_size_calibrated("uniform", STANDARD_OPS_INT, 3)
         assert isinstance(hist, dict)
         assert isinstance(z_k, dict)
         assert len(hist) > 0

@@ -17,7 +17,7 @@ Fitting & loading utilities:
 - ``fit_bms_prior``: Fit BMS prior weights to match a target corpus.
 - ``load_bms_weights``: Load pre-fit BMS weights for a given corpus.
 - ``fit_katz_model`` / ``fit_katz_prior``: Fit a Katz model from a corpus.
-- ``load_katz_model``: Load a pre-fit Katz model (or fit on the fly).
+- ``load_katz_model``: Load a pre-fit Katz model (or fit on demand).
 - ``load_corpus``: Load a named corpus of symbolic equations.
 """
 

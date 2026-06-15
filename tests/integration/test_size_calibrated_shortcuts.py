@@ -1,8 +1,7 @@
 """Integration tests for size-calibrated prior string shortcuts.
 
-Tests that ``PysipsRegressor(prior="size_calibrated_katz")`` and
-``prior="size_calibrated_uniform"`` work end-to-end, and that config
-mismatches raise ``ValueError``.
+Tests that the built-in size-calibrated prior strings resolve end-to-end,
+and that unsupported artifact combinations fail cleanly.
 """
 
 import numpy as np
@@ -10,15 +9,15 @@ import pytest
 
 from pysips.regressor import PysipsRegressor
 
-STANDARD_OPERATORS = ["+", "-", "*", "/", "sin", "cos", "exp", "log"]
+PREBUILT_OPERATORS = ["+", "-", "*", "/", "sin", "cos"]
 
 
 @pytest.fixture
 def toy_data():
-    """Simple 1-d toy dataset: y = 2*x."""
+    """Simple 3-d toy dataset matching shipped size-calibration artifacts."""
     rng = np.random.default_rng(42)
-    X = rng.uniform(-1, 1, size=(20, 1))
-    y = 2 * X[:, 0]
+    X = rng.uniform(-1, 1, size=(20, 3))
+    y = 2 * X[:, 0] - X[:, 1] + 0.5 * X[:, 2]
     return X, y
 
 
@@ -29,7 +28,7 @@ class TestSizeCalibratedUniform:
         X, y = toy_data
         reg = PysipsRegressor(
             prior="size_calibrated_uniform",
-            operators=STANDARD_OPERATORS,
+            operators=PREBUILT_OPERATORS,
             num_particles=5,
             max_time=5,
             random_state=0,
@@ -45,7 +44,7 @@ class TestSizeCalibratedUniform:
             operators=["+", "*"],
             random_state=0,
         )
-        with pytest.raises(ValueError, match="Operator mismatch"):
+        with pytest.raises(FileNotFoundError, match="No pre-built z_k data"):
             reg.fit(X, y)
 
     def test_x_dim_mismatch_raises(self):
@@ -54,10 +53,10 @@ class TestSizeCalibratedUniform:
         y = X[:, 0] + X[:, 1]
         reg = PysipsRegressor(
             prior="size_calibrated_uniform",
-            operators=STANDARD_OPERATORS,
+            operators=PREBUILT_OPERATORS,
             random_state=0,
         )
-        with pytest.raises(ValueError, match="x_dim mismatch"):
+        with pytest.raises(FileNotFoundError, match="No pre-built z_k data"):
             reg.fit(X, y)
 
 
@@ -68,7 +67,7 @@ class TestSizeCalibratedKatz:
         X, y = toy_data
         reg = PysipsRegressor(
             prior="size_calibrated_katz",
-            operators=STANDARD_OPERATORS,
+            operators=PREBUILT_OPERATORS,
             num_particles=5,
             max_time=5,
             random_state=0,
@@ -81,15 +80,18 @@ class TestSizeCalibratedKatz:
 class TestSizeCalibratedBMS:
     """Tests for prior='size_calibrated_bms'."""
 
-    def test_raises_not_implemented(self, toy_data):
+    def test_end_to_end_fit(self, toy_data):
         X, y = toy_data
         reg = PysipsRegressor(
             prior="size_calibrated_bms",
-            operators=STANDARD_OPERATORS,
+            operators=PREBUILT_OPERATORS,
+            num_particles=5,
+            max_time=5,
             random_state=0,
+            show_progress_bar=False,
         )
-        with pytest.raises(NotImplementedError, match="fit_size_calibrated_prior"):
-            reg.fit(X, y)
+        reg.fit(X, y)
+        assert reg.best_model_ is not None
 
 
 class TestFloorLogProbOverride:
@@ -99,7 +101,7 @@ class TestFloorLogProbOverride:
         X, y = toy_data
         reg = PysipsRegressor(
             prior="size_calibrated_uniform",
-            operators=STANDARD_OPERATORS,
+            operators=PREBUILT_OPERATORS,
             prior_params={"floor_log_prob": -100.0},
             num_particles=5,
             max_time=5,

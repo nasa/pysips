@@ -21,7 +21,7 @@ from bingo.expressions.agraph.pyagraph import (
 
 SAMPLEABLEPRIOR_MODULE = "pysips.priors.samplable_prior"
 KATZ_PRIOR_MODULE = "pysips.priors.katz_prior"
-BINGO_MIXIN_MODULE = "pysips.bingo_proposal_mixin"
+BINGO_CONSTRUCTION_MODULE = "pysips.bingo_construction"
 
 
 # ---------------------------------------------------------------------------
@@ -259,16 +259,16 @@ class TestKatzPriorRvs:
             return_value=(mock_models, None, None),
         )
         # Prevent the real generator/proposal from running (avoids pool loop)
-        mocker.patch(f"{BINGO_MIXIN_MODULE}.ComponentGenerator", autospec=True)
+        mocker.patch(f"{BINGO_CONSTRUCTION_MODULE}.ComponentGenerator", autospec=True)
         mock_agraph_gen = MagicMock(side_effect=lambda: MagicMock(spec=[]))
         mocker.patch(
-            f"{BINGO_MIXIN_MODULE}.AGraphGenerator",
+            f"{BINGO_CONSTRUCTION_MODULE}.AGraphGenerator",
             autospec=True,
             return_value=mock_agraph_gen,
         )
-        mocker.patch(f"{BINGO_MIXIN_MODULE}.MutationProposal", autospec=True)
-        mocker.patch(f"{BINGO_MIXIN_MODULE}.CrossoverProposal", autospec=True)
-        mocker.patch(f"{BINGO_MIXIN_MODULE}.RandomChoiceProposal", autospec=True)
+        mocker.patch(f"{BINGO_CONSTRUCTION_MODULE}.MutationProposal", autospec=True)
+        mocker.patch(f"{BINGO_CONSTRUCTION_MODULE}.CrossoverProposal", autospec=True)
+        mocker.patch(f"{BINGO_CONSTRUCTION_MODULE}.RandomChoiceProposal", autospec=True)
 
         model = _make_mock_tree_model()
         prior = KatzPrior(
@@ -298,16 +298,16 @@ class TestKatzPriorRvs:
             f"{SAMPLEABLEPRIOR_MODULE}.sample",
             return_value=([MagicMock(spec=[])], None, None),
         )
-        mocker.patch(f"{BINGO_MIXIN_MODULE}.ComponentGenerator", autospec=True)
+        mocker.patch(f"{BINGO_CONSTRUCTION_MODULE}.ComponentGenerator", autospec=True)
         mock_agraph_gen = MagicMock(side_effect=lambda: MagicMock(spec=[]))
         mocker.patch(
-            f"{BINGO_MIXIN_MODULE}.AGraphGenerator",
+            f"{BINGO_CONSTRUCTION_MODULE}.AGraphGenerator",
             autospec=True,
             return_value=mock_agraph_gen,
         )
-        mocker.patch(f"{BINGO_MIXIN_MODULE}.MutationProposal", autospec=True)
-        mocker.patch(f"{BINGO_MIXIN_MODULE}.CrossoverProposal", autospec=True)
-        mocker.patch(f"{BINGO_MIXIN_MODULE}.RandomChoiceProposal", autospec=True)
+        mocker.patch(f"{BINGO_CONSTRUCTION_MODULE}.MutationProposal", autospec=True)
+        mocker.patch(f"{BINGO_CONSTRUCTION_MODULE}.CrossoverProposal", autospec=True)
+        mocker.patch(f"{BINGO_CONSTRUCTION_MODULE}.RandomChoiceProposal", autospec=True)
 
         model = _make_mock_tree_model()
         prior = KatzPrior(

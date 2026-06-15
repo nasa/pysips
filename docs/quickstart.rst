@@ -82,6 +82,22 @@ Understanding the Parameters
 
 - ``model_selection``: Choose ``'mode'`` (most frequent) or ``'max_likelihood'`` (best scoring)
 
+Built-in Priors
+---------------
+
+Use ``prior`` and ``prior_params`` to select shipped Prior Resolution paths:
+
+- ``"uniform"``: improper uniform prior over generated expressions
+- ``"bms"``: pre-fit BMS prior, default corpus ``"benchmark"``
+- ``"katz"``: pre-fit Katz prior, default corpus ``"benchmark"``
+- ``"size_calibrated_uniform"``, ``"size_calibrated_katz"``,
+  ``"size_calibrated_bms"``: size-calibrated variants backed by shipped
+  pre-built artifacts
+
+For plain ``"katz"``, set ``prior_params={"fit_if_missing": True}`` to fit a
+missing Katz model from the requested corpus. Size-calibrated Katz remains
+strict-prebuilt only.
+
 Accessing Results
 -----------------
 

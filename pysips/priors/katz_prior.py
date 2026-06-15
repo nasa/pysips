@@ -11,8 +11,8 @@ under either the "left/only" or "right-given-left" Katz back-off model.
 The prior supports SMC sampling via :meth:`rvs` inherited from
 :class:`~pysips.priors.samplable_prior.SamplablePrior`. Fit a prior
 to a corpus via :func:`~pysips.priors.katz_fitting.fit_katz_prior`,
-or use :func:`load_katz_model` to load a pre-fit model (or fit
-one on the fly).
+ or use :func:`load_katz_model` to load a pre-fit model (or fit
+ one on demand).
 
 Example
 -------
@@ -24,6 +24,7 @@ Example
 """
 
 import json
+import logging
 from pathlib import Path
 from typing import List, Optional
 
@@ -58,9 +59,11 @@ from bingo.expressions.agraph.pyagraph import (
 
 from .katz_backoff import KatzBackoffTreeModel
 from .ngram_utils import extract_phrases
+from .prebuilt_loader import katz_model_path
 from .samplable_prior import SamplablePrior
 
 KATZ_MODEL_DIR = Path(__file__).parent / "data"
+_LOGGER = logging.getLogger("pysips.priors.katz")
 
 
 # Operators used when the prior is constructed without explicit operator
@@ -130,9 +133,8 @@ class KatzPrior(SamplablePrior):
     node_probability, parameter_probability, prune_probability,
     fork_probability, repeat_mutation_probability, crossover_pool_size,
     mutation_prob, crossover_prob, exclusive
-        See :class:`~pysips.priors.bms_prior.BMSPrior` /
-        :class:`~pysips.bingo_proposal_mixin.BingoProposalMixin` for
-        details; forwarded to the parent class.
+        See :class:`~pysips.priors.bms_prior.BMSPrior` for details;
+        forwarded to the parent class.
     """
 
     def __init__(
@@ -217,12 +219,6 @@ class KatzPrior(SamplablePrior):
                 return 0.0
             return total / n_phrases
         return total
-
-
-def _model_path(n: int, corpus: str = "benchmark") -> Path:
-    return KATZ_MODEL_DIR / f"default_katz_n{n}_{corpus}.json"
-
-
 def load_katz_model(
     n: int = 2, corpus: str = "benchmark", fit_if_missing: bool = True
 ) -> KatzBackoffTreeModel:
@@ -242,10 +238,12 @@ def load_katz_model(
     corpus : str, optional
         Corpus name recognised by :func:`load_corpus` (e.g.
         ``"wikipedia"``, ``"feynman"``, ``"benchmark"``).
-        Default is ``"wikipedia"``.
+        Default is ``"benchmark"``.
     fit_if_missing : bool, optional
-        If ``True`` (default), fit and save the model when no prefit
-        file exists. If ``False``, raise :class:`FileNotFoundError`.
+        If ``True``, fit and save the model when no prefit file exists.
+        If ``False``, raise :class:`FileNotFoundError`. Default is
+        ``True`` at this loader layer; Prior Resolution opts into the
+        stricter package policy for built-in Katz requests.
 
     Returns
     -------
@@ -257,7 +255,7 @@ def load_katz_model(
     FileNotFoundError
         If no pre-fit model exists and *fit_if_missing* is ``False``.
     """
-    path = _model_path(n, corpus)
+    path = KATZ_MODEL_DIR / katz_model_path(n, corpus).name
     if path.exists():
         with open(path, "r", encoding="utf-8") as f:
             data = json.load(f)
@@ -274,14 +272,17 @@ def load_katz_model(
     from .data.load_corpus import load_corpus  # pylint: disable=import-outside-toplevel
     from .katz_fitting import fit_katz_model  # pylint: disable=import-outside-toplevel
 
-    print(
-        f"No pre-fit Katz model for n={n}, corpus={corpus!r}. "
-        f"Fitting from corpus (this may take a moment)..."
+    _LOGGER.info(
+        "fitting_missing_katz_model",
+        extra={"n": n, "corpus": corpus, "path": str(path)},
     )
     agraphs = load_corpus(corpus)
     model = fit_katz_model(agraphs, n=n)
     save_katz_model(model, path)
-    print(f"Saved new Katz model to {path}")
+    _LOGGER.info(
+        "saved_katz_model",
+        extra={"n": n, "corpus": corpus, "path": str(path)},
+    )
     return model
 
 

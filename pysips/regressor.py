@@ -133,34 +133,21 @@ import numpy as np
 from sklearn.base import BaseEstimator, RegressorMixin
 from sklearn.utils.validation import check_X_y, check_array, check_is_fitted
 
-from .bingo_proposal_mixin import BingoProposalMixin
-from .priors import (
-    ImproperUniformPrior,
-    BMSPrior,
-    load_bms_weights,
-    KatzPrior,
-    load_katz_model,
-    SizeCalibratedPrior,
+from .bingo_construction import (
+    BingoConstructionConfig,
+    build_agraph_generator,
+    build_agraph_proposal,
 )
-from .priors.prebuilt_loader import load_prebuilt_size_calibrated
+from .priors.factory import build_prior
 from .laplace_nmll import LaplaceNmll
 from .sampler import sample
-
-_KNOWN_PRIOR_STRINGS = {
-    "uniform",
-    "bms",
-    "katz",
-    "size_calibrated_uniform",
-    "size_calibrated_katz",
-    "size_calibrated_bms",
-}
 
 DEFAULT_OPERATORS = ["+", "*"]
 DEFALT_PARAMETER_INITIALIZATION_BOUNDS = [-5, 5]
 
 
 # pylint: disable=too-many-instance-attributes, too-many-arguments, too-many-positional-arguments, too-many-locals
-class PysipsRegressor(BingoProposalMixin, BaseEstimator, RegressorMixin):
+class PysipsRegressor(BaseEstimator, RegressorMixin):
     """
     A scikit-learn compatible wrapper for PySIPS symbolic regression.
 
@@ -265,20 +252,19 @@ class PysipsRegressor(BingoProposalMixin, BaseEstimator, RegressorMixin):
           pre-fit is not available for the requested corpus.
         - ``"katz"`` : Katz back-off n-gram prior. Scores expressions
           via operator n-gram probabilities. Pre-fit models are loaded
-          when available; otherwise the model is fit from corpus on the
-          fly and cached for future use.
-        - ``"size_calibrated_uniform"`` : Uniform base prior with
+          by default; set ``prior_params["fit_if_missing"] = True`` to
+          fit from corpus on demand when no pre-fit is available.
+                - ``"size_calibrated_uniform"`` : Uniform base prior with
                     corpus-calibrated size distribution. Requires a matching
                     pre-built artifact for the requested ``operators``, ``x_dim``,
                     and ``prior_params["corpus"]`` (default ``"benchmark"``).
-        - ``"size_calibrated_katz"`` : Katz base prior with
+                - ``"size_calibrated_katz"`` : Katz base prior with
                     corpus-calibrated size distribution. Requires a matching
                     pre-built artifact for the requested ``operators``, ``x_dim``,
                     and ``prior_params["corpus"]`` (default ``"benchmark"``).
         - ``"size_calibrated_bms"`` : BMS base prior with
-          corpus-calibrated size distribution. Currently raises
-          ``NotImplementedError``; use ``fit_size_calibrated_prior()``
-          for BMS-based calibration.
+          corpus-calibrated size distribution backed by shipped
+          pre-built artifacts.
         - A custom prior object with ``rvs(N, random_state=None)``
           and ``logpdf(x)`` methods. The ``rvs`` method should return
           an array of shape ``(N, 1)`` and ``logpdf`` should return
@@ -292,20 +278,23 @@ class PysipsRegressor(BingoProposalMixin, BaseEstimator, RegressorMixin):
 
         - ``"corpus"`` (str): Corpus name for fitting/loading, e.g.
           ``"wikipedia"``, ``"feynman"``, ``"benchmark"``.
-          Default ``"wikipedia"``.
+          Default ``"benchmark"``.
         - ``"n"`` (int): N-gram order. Default ``2``.
         - ``"normalize"`` (bool): If ``True``, divide the total
           log-probability by the number of phrases, yielding a
           per-phrase mean log-probability (cross-entropy).
           Default ``False``.
+        - ``"fit_if_missing"`` (bool): If ``True``, fit a Katz model
+          from the requested corpus when no pre-fit is available.
+          Default ``False``.
 
         For ``"bms"``:
 
         - ``"corpus"`` (str): Corpus name identifying which pre-fit
-          weights to use. Currently only ``"wikipedia"`` (default) is
-          available.
+          weights to use. Default ``"benchmark"``.
 
-        For ``"size_calibrated_uniform"`` / ``"size_calibrated_katz"``:
+                For ``"size_calibrated_uniform"`` / ``"size_calibrated_katz"`` /
+                ``"size_calibrated_bms"``:
 
                 - ``"corpus"`` (str): Corpus name identifying which pre-built
                     histogram and ``Z_k`` artifact to load. Default ``"benchmark"``.
@@ -349,17 +338,6 @@ class PysipsRegressor(BingoProposalMixin, BaseEstimator, RegressorMixin):
         max_equation_evals=None,
         show_progress_bar=True,
     ):
-        # Validate prior parameter
-        if isinstance(prior, str) and prior not in _KNOWN_PRIOR_STRINGS:
-            raise ValueError(
-                f"Unknown prior '{prior}'. Expected one of "
-                f"{sorted(_KNOWN_PRIOR_STRINGS)} or a prior object with "
-                f"'rvs' and 'logpdf' methods."
-            )
-        if not isinstance(prior, str):
-            if not hasattr(prior, "rvs") or not hasattr(prior, "logpdf"):
-                raise TypeError("Custom prior must have 'rvs' and 'logpdf' methods.")
-
         # Validate that max_time and max_equation_evals are not both specified
         if max_time is not None and max_equation_evals is not None:
             raise ValueError(
@@ -367,28 +345,22 @@ class PysipsRegressor(BingoProposalMixin, BaseEstimator, RegressorMixin):
                 "Please choose one constraint method."
             )
 
-        # Initialize mixin with proposal/generator parameters
-        super().__init__(
-            max_complexity=max_complexity,
-            terminal_probability=terminal_probability,
-            constant_probability=constant_probability,
-            command_probability=command_probability,
-            node_probability=node_probability,
-            parameter_probability=parameter_probability,
-            prune_probability=prune_probability,
-            fork_probability=fork_probability,
-            repeat_mutation_probability=repeat_mutation_probability,
-            crossover_pool_size=(
-                crossover_pool_size
-                if crossover_pool_size is not None
-                else num_particles
-            ),
-            mutation_prob=mutation_prob,
-            crossover_prob=crossover_prob,
-            exclusive=exclusive,
+        self.max_complexity = max_complexity
+        self.terminal_probability = terminal_probability
+        self.constant_probability = constant_probability
+        self.command_probability = command_probability
+        self.node_probability = node_probability
+        self.parameter_probability = parameter_probability
+        self.prune_probability = prune_probability
+        self.fork_probability = fork_probability
+        self.repeat_mutation_probability = repeat_mutation_probability
+        self.crossover_pool_size = (
+            crossover_pool_size if crossover_pool_size is not None else num_particles
         )
+        self.mutation_prob = mutation_prob
+        self.crossover_prob = crossover_prob
+        self.exclusive = exclusive
 
-        # Regressor-specific attributes
         self.operators = operators if operators is not None else DEFAULT_OPERATORS
         self.num_particles = num_particles
         self.num_mcmc_samples = num_mcmc_samples
@@ -438,11 +410,38 @@ class PysipsRegressor(BingoProposalMixin, BaseEstimator, RegressorMixin):
 
         # Set up the sampling config
         x_dim = X.shape[1]
+        bingo_config = BingoConstructionConfig(
+            max_complexity=self.max_complexity,
+            terminal_probability=self.terminal_probability,
+            constant_probability=self.constant_probability,
+            command_probability=self.command_probability,
+            node_probability=self.node_probability,
+            parameter_probability=self.parameter_probability,
+            prune_probability=self.prune_probability,
+            fork_probability=self.fork_probability,
+            repeat_mutation_probability=self.repeat_mutation_probability,
+            crossover_pool_size=self.crossover_pool_size,
+            mutation_prob=self.mutation_prob,
+            crossover_prob=self.crossover_prob,
+            exclusive=self.exclusive,
+        )
 
         # Create generator, proposal, and likelihood
-        generator = self._get_generator(x_dim, self.operators)
-        prior = self._build_prior(generator, x_dim)
-        proposal = self._get_proposal(x_dim, generator, self.operators)
+        generator = build_agraph_generator(x_dim, self.operators, bingo_config)
+        prior = build_prior(
+            self.prior,
+            self.prior_params,
+            operators=self.operators,
+            x_dim=x_dim,
+            bingo_config=bingo_config,
+        )
+        proposal = build_agraph_proposal(
+            x_dim,
+            self.operators,
+            generator,
+            bingo_config,
+            default_crossover_pool_size=self.num_particles,
+        )
         likelihood = LaplaceNmll(
             X,
             y,
@@ -489,125 +488,6 @@ class PysipsRegressor(BingoProposalMixin, BaseEstimator, RegressorMixin):
         self.best_likelihood_ = likelihoods[best_idx]
 
         return self
-
-    def _build_prior(self, generator, x_dim):
-        """Resolve the prior configuration into a prior object.
-
-        Parameters
-        ----------
-        generator : callable
-            AGraph generator (used for the "uniform" prior).
-        x_dim : int
-            Number of input features.
-
-        Returns
-        -------
-        prior : object
-            A prior object with ``rvs`` and ``logpdf`` methods.
-        """
-        if isinstance(self.prior, str):
-            params = self.prior_params or {}
-
-            if self.prior == "uniform":
-                return ImproperUniformPrior(generator)
-
-            if self.prior == "bms":
-                corpus = params.get("corpus", "benchmark")
-                weights, squared_weights = load_bms_weights(corpus)
-                print(f"Using BMS prior (corpus={corpus!r}).")
-                return BMSPrior(
-                    weights,
-                    squared_weights,
-                    operators=self.operators,
-                    x_dim=x_dim,
-                    max_complexity=self.max_complexity,
-                )
-
-            if self.prior == "katz":
-                n = params.get("n", 2)
-                corpus = params.get("corpus", "benchmark")
-                normalize = params.get("normalize", False)
-                print(
-                    f"Using Katz prior (n={n}, corpus={corpus!r}, normalize={normalize})."
-                )
-                model = load_katz_model(n=n, corpus=corpus)
-                return KatzPrior(
-                    model,
-                    normalize=normalize,
-                    operators=self.operators,
-                    x_dim=x_dim,
-                    max_complexity=self.max_complexity,
-                )
-
-            if self.prior in (
-                "size_calibrated_uniform",
-                "size_calibrated_katz",
-                "size_calibrated_bms",
-            ):
-                return self._build_size_calibrated_prior(x_dim, params)
-
-        # Custom prior object — pass through as-is
-        return self.prior
-
-    def _build_size_calibrated_prior(self, x_dim, params):
-        """Build a size-calibrated prior from pre-built data.
-
-        Parameters
-        ----------
-        x_dim : int
-            Number of input features.
-        params : dict
-            Prior parameters (from ``prior_params``).
-
-        Returns
-        -------
-        SizeCalibratedPrior
-        """
-        from math import inf
-
-        # Determine base prior key from the prior string
-        # "size_calibrated_uniform" -> "uniform", etc.
-        base_key = self.prior.replace("size_calibrated_", "")
-
-        if base_key == "bms":
-            raise NotImplementedError(
-                "Pre-built size-calibrated BMS prior is not yet available. "
-                "Use fit_size_calibrated_prior() to build one manually."
-            )
-
-        corpus = params.get("corpus", "benchmark")
-        floor_log_prob = params.get("floor_log_prob", -inf)
-
-        # Load pre-built data (validates operators and x_dim)
-        corpus_log_hist, log_z_k = load_prebuilt_size_calibrated(
-            base_key, self.operators, x_dim, corpus=corpus
-        )
-
-        # Construct the base prior
-        if base_key == "uniform":
-            base_prior = None
-        elif base_key == "katz":
-            n = params.get("n", 2)
-            model = load_katz_model(n=n, corpus=corpus)
-            base_prior = KatzPrior(
-                model,
-                operators=self.operators,
-                x_dim=x_dim,
-                max_complexity=self.max_complexity,
-            )
-        else:
-            raise ValueError(f"Unsupported base prior: {base_key!r}")
-
-        print(f"Using size-calibrated {base_key} prior (corpus={corpus!r}).")
-        return SizeCalibratedPrior(
-            base_prior=base_prior,
-            log_z_k=log_z_k,
-            corpus_log_hist=corpus_log_hist,
-            floor_log_prob=floor_log_prob,
-            operators=self.operators,
-            x_dim=x_dim,
-            max_complexity=self.max_complexity,
-        )
 
     def predict(self, X):
         """

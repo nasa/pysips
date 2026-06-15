@@ -87,6 +87,27 @@ Number of unique models sampled: 32
 - Compatible with scikit-learn's API for easy integration into ML pipelines
 - Uncertainty quantification for symbolic regression results
 
+## Built-in Priors
+
+`PysipsRegressor` supports built-in prior strings through the `prior` and
+`prior_params` interface.
+
+- `uniform`: improper uniform prior over generated expressions
+- `bms`: pre-fit BMS prior, default corpus `benchmark`
+- `katz`: pre-fit Katz prior, default corpus `benchmark`; set
+  `prior_params={"fit_if_missing": True}` to fit on demand when no
+  pre-fit model is available
+- `size_calibrated_uniform`, `size_calibrated_katz`, `size_calibrated_bms`:
+  size-calibrated variants backed by shipped pre-built artifacts
+
+Common built-in defaults:
+
+- `prior_params["corpus"]` defaults to `benchmark`
+- `prior_params["n"]` defaults to `2` for Katz
+- `prior_params["normalize"]` defaults to `False` for Katz
+- `prior_params["fit_if_missing"]` defaults to `False` for plain Katz only
+- `prior_params["floor_log_prob"]` defaults to `-inf` for size-calibrated priors
+
 ## Citation
 
 If you use PySIPS, please cite the following paper:

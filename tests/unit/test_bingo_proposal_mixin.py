@@ -1,34 +1,49 @@
 import pytest
 
-from pysips.bingo_proposal_mixin import BingoProposalMixin
+from pysips.bingo_construction import (
+    BingoConstructionConfig,
+    build_agraph_generator,
+    build_agraph_proposal,
+)
 from pysips.random_choice_proposal import RandomChoiceProposal
 
 
-class _ConcreteMixin(BingoProposalMixin):
-    """Minimal concrete subclass so we can instantiate BingoProposalMixin."""
+class TestBingoConstruction:
+    def test_build_agraph_generator_uses_default_constant_probability(self, mocker):
+        mock_component_generator = mocker.patch(
+            "pysips.bingo_construction.ComponentGenerator", autospec=True
+        )
+        mock_agraph_generator = mocker.patch(
+            "pysips.bingo_construction.AGraphGenerator", autospec=True
+        )
 
+        config = BingoConstructionConfig()
+        build_agraph_generator(2, ["+", "*"], config)
 
-class TestGetProposal:
-    """Tests for BingoProposalMixin._get_proposal()."""
+        mock_component_generator.assert_called_once_with(
+            input_x_dimension=2,
+            terminal_probability=0.1,
+            constant_probability=1 / 3,
+        )
+        component_instance = mock_component_generator.return_value
+        assert component_instance.add_operator.call_args_list[0].args == ("+",)
+        assert component_instance.add_operator.call_args_list[1].args == ("*",)
+        mock_agraph_generator.assert_called_once_with(24, 24, component_instance)
 
-    def _make_mixin(self, **kwargs):
-        return _ConcreteMixin(**kwargs)
-
-    def test_returns_random_choice_proposal(self, mocker):
-        """_get_proposal() returns a RandomChoiceProposal."""
-        mixin = self._make_mixin()
-        generator = mixin._get_generator(x_dim=1, operators=["+", "*"])
-        proposal = mixin._get_proposal(
-            x_dim=1, generator=generator, operators=["+", "*"]
+    def test_returns_random_choice_proposal(self):
+        config = BingoConstructionConfig()
+        generator = build_agraph_generator(x_dim=1, operators=["+", "*"], bingo_config=config)
+        proposal = build_agraph_proposal(
+            x_dim=1,
+            generator=generator,
+            operators=["+", "*"],
+            bingo_config=config,
         )
         assert isinstance(proposal, RandomChoiceProposal)
 
     def test_normal_pool_fills_to_requested_size(self, mocker):
-        """When the generator has enough unique models, the crossover pool
-        reaches the requested crossover_pool_size."""
-        mixin = self._make_mixin(crossover_pool_size=5)
+        config = BingoConstructionConfig(crossover_pool_size=5)
 
-        # Generator that always produces distinct objects.
         counter = [0]
 
         def gen():
@@ -39,17 +54,12 @@ class TestGetProposal:
             return obj
 
         mock_gen = mocker.MagicMock(side_effect=gen)
-        proposal = mixin._get_proposal(x_dim=1, generator=mock_gen, operators=["+"])
+        build_agraph_proposal(x_dim=1, generator=mock_gen, operators=["+"], bingo_config=config)
 
-        # Should have called the generator at least 5 times to fill the pool.
         assert mock_gen.call_count >= 5
 
     def test_exhausted_generator_does_not_hang(self, mocker):
-        """Regression: _get_proposal() must not loop forever when the generator
-        cannot produce crossover_pool_size unique models (was an infinite loop)."""
-        mixin = self._make_mixin(crossover_pool_size=50)
-
-        # Generator only ever returns the same object.
+        config = BingoConstructionConfig(crossover_pool_size=50)
         single_obj = mocker.MagicMock()
         single_obj.__hash__ = mocker.MagicMock(return_value=42)
         single_obj.__eq__ = mocker.MagicMock(return_value=True)
@@ -61,22 +71,23 @@ class TestGetProposal:
 
         def run():
             result_holder.append(
-                mixin._get_proposal(x_dim=1, generator=mock_gen, operators=["+"])
+                build_agraph_proposal(
+                    x_dim=1,
+                    generator=mock_gen,
+                    operators=["+"],
+                    bingo_config=config,
+                )
             )
 
-        t = threading.Thread(target=run)
-        t.start()
-        t.join(timeout=5)
-        assert (
-            not t.is_alive()
-        ), "_get_proposal() did not terminate — infinite loop detected"
+        thread = threading.Thread(target=run)
+        thread.start()
+        thread.join(timeout=5)
+        assert not thread.is_alive(), "build_agraph_proposal() did not terminate"
         assert isinstance(result_holder[0], RandomChoiceProposal)
 
     def test_exhausted_generator_call_count_bounded(self, mocker):
-        """When the generator is exhausted, the total number of calls is bounded
-        (at most crossover_pool_size + 100 consecutive failures)."""
         pool_size = 10
-        mixin = self._make_mixin(crossover_pool_size=pool_size)
+        config = BingoConstructionConfig(crossover_pool_size=pool_size)
 
         call_count = [0]
 
@@ -85,7 +96,6 @@ class TestGetProposal:
             return "only_model"
 
         mock_gen = mocker.MagicMock(side_effect=gen)
-        mixin._get_proposal(x_dim=1, generator=mock_gen, operators=["+"])
+        build_agraph_proposal(x_dim=1, generator=mock_gen, operators=["+"], bingo_config=config)
 
-        # 1 unique model + up to 100 consecutive failures before breaking.
         assert call_count[0] <= pool_size + 100 + 1

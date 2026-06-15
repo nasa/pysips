@@ -8,36 +8,23 @@ import json
 from pathlib import Path
 from typing import Dict, List, Tuple
 
-from bingo.expressions.agraph.component_generator import ComponentGenerator
-
 _DATA_DIR = Path(__file__).parent / "data"
 
-# Standard pre-built config
-STANDARD_OPERATORS = [3, 4, 5, 6, 15, 16, 13, 14]
-STANDARD_X_DIM = 1
+# Default corpus for shipped prebuilt artifacts.
 STANDARD_CORPUS = "benchmark"
+_KATZ_MODEL_DIR = _DATA_DIR
 
 
-def _resolve_operator_ids(operators: list) -> List[int]:
-    """Convert a list of operator strings/ints to integer IDs.
+def katz_model_path(n: int, corpus: str = STANDARD_CORPUS) -> Path:
+    """Return the expected on-disk path for a prebuilt Katz model."""
+    return _KATZ_MODEL_DIR / f"default_katz_n{n}_{corpus}.json"
 
-    Parameters
-    ----------
-    operators : list
-        Operator names (``"+"``) or integer IDs.
 
-    Returns
-    -------
-    list of int
-        Sorted operator IDs.
-    """
-    ids = []
-    for op in operators:
-        if isinstance(op, int):
-            ids.append(op)
-        else:
-            ids.append(ComponentGenerator._operator_from_string(op))
-    return sorted(ids)
+def _validate_canonical_operator_ids(canonical_operator_ids: list) -> List[int]:
+    """Validate canonical operator IDs passed in by Prior Resolution."""
+    if not all(isinstance(operator_id, int) for operator_id in canonical_operator_ids):
+        raise TypeError("canonical_operator_ids must be a list of bingo operator IDs.")
+    return sorted(canonical_operator_ids)
 
 
 def _operator_filename_tag(operator_ids: List[int]) -> str:
@@ -152,20 +139,20 @@ def load_corpus_histogram(
 
 
 def load_z_k(
-    base_prior_key: str,
-    user_operators: list,
-    user_x_dim: int,
+    artifact_family: str,
+    canonical_operator_ids: list,
+    resolved_x_dim: int,
     corpus: str = STANDARD_CORPUS,
 ) -> Dict[int, float]:
     """Load a pre-built Z_k table.
 
     Parameters
     ----------
-    base_prior_key : str
-        ``"uniform"`` or ``"katz"``.
-    user_operators : list
-        Operator names or IDs from the regressor.
-    user_x_dim : int
+    artifact_family : str
+        ``"uniform"``, ``"katz"``, or ``"bms"``.
+    canonical_operator_ids : list of int
+        Sorted bingo operator IDs supplied by Prior Resolution.
+    resolved_x_dim : int
         Number of input features.
 
     Returns
@@ -180,43 +167,49 @@ def load_z_k(
     KeyError
         If *base_prior_key* is not recognised.
     """
-    if base_prior_key not in {"uniform", "katz"}:
+    if artifact_family not in {"uniform", "katz", "bms"}:
         raise KeyError(
-            f"No pre-built Z_k for base prior {base_prior_key!r}. "
-            f"Available: {['katz', 'uniform']}."
+            f"No pre-built Z_k for artifact family {artifact_family!r}. "
+            f"Available: {['bms', 'katz', 'uniform']}."
         )
 
-    user_ids = _resolve_operator_ids(user_operators)
+    operator_ids = _validate_canonical_operator_ids(canonical_operator_ids)
     data = _load_prebuilt_json(
         "z_k",
         corpus,
-        user_x_dim,
-        user_ids,
-        base_prior_key=base_prior_key,
+        resolved_x_dim,
+        operator_ids,
+        base_prior_key=artifact_family,
     )
 
     meta = data["metadata"]
     loaded_operators = sorted(meta["operators"])
     loaded_x_dim = int(meta["x_dim"])
     loaded_corpus = meta["corpus"]
+    loaded_family = meta.get("base_prior", artifact_family)
 
     if loaded_corpus != corpus:
         raise ValueError(
             f"Corpus mismatch: pre-built data uses corpus={loaded_corpus!r} "
-            f"but the regressor requested corpus={corpus!r}."
+            f"but Prior Resolution requested corpus={corpus!r}."
         )
-    if user_ids != loaded_operators:
+    if loaded_family != artifact_family:
+        raise ValueError(
+            f"Artifact-family mismatch: pre-built data uses {loaded_family!r} "
+            f"but Prior Resolution requested {artifact_family!r}."
+        )
+    if operator_ids != loaded_operators:
         raise ValueError(
             f"Operator mismatch: pre-built data uses operators "
             f"{loaded_operators} but the regressor has "
-            f"{user_ids}. Use "
+            f"{operator_ids}. Use "
             f"fit_size_calibrated_prior() for custom operator sets."
         )
-    if user_x_dim != loaded_x_dim:
+    if resolved_x_dim != loaded_x_dim:
         raise ValueError(
             f"x_dim mismatch: pre-built data uses x_dim="
-            f"{loaded_x_dim} but the regressor has x_dim="
-            f"{user_x_dim}. Use fit_size_calibrated_prior() "
+            f"{loaded_x_dim} but Prior Resolution has x_dim="
+            f"{resolved_x_dim}. Use fit_size_calibrated_prior() "
             f"for custom x_dim values."
         )
 
@@ -224,9 +217,9 @@ def load_z_k(
 
 
 def load_prebuilt_size_calibrated(
-    base_prior_key: str,
-    user_operators: list,
-    user_x_dim: int,
+    artifact_family: str,
+    canonical_operator_ids: list,
+    resolved_x_dim: int,
     histogram_type: str = "empirical",
     corpus: str = STANDARD_CORPUS,
 ) -> Tuple[Dict[int, float], Dict[int, float]]:
@@ -234,11 +227,11 @@ def load_prebuilt_size_calibrated(
 
     Parameters
     ----------
-    base_prior_key : str
-        ``"uniform"`` or ``"katz"``.
-    user_operators : list
-        Operator names or IDs from the regressor (used for Z_k).
-    user_x_dim : int
+    artifact_family : str
+        ``"uniform"``, ``"katz"``, or ``"bms"``.
+    canonical_operator_ids : list of int
+        Canonical Operator IDs (used for Z_k).
+    resolved_x_dim : int
         Number of input features (used for Z_k).
     histogram_type : str
         ``"empirical"`` or ``"parametric"``.
@@ -249,5 +242,5 @@ def load_prebuilt_size_calibrated(
     log_z_k : dict of {int: float}
     """
     corpus_log_hist = load_corpus_histogram(histogram_type, corpus)
-    log_z_k = load_z_k(base_prior_key, user_operators, user_x_dim, corpus)
+    log_z_k = load_z_k(artifact_family, canonical_operator_ids, resolved_x_dim, corpus)
     return corpus_log_hist, log_z_k

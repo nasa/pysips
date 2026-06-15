@@ -4,11 +4,12 @@ from unittest.mock import MagicMock
 from pytest_mock import MockerFixture
 from sklearn.base import RegressorMixin
 
+from pysips.bingo_construction import BingoConstructionConfig
 from pysips.regressor import PysipsRegressor
 
 # Dynamically get the module containing the PysipsRegressor class
 IMPORTMODULE = PysipsRegressor.__module__
-BINGO_MIXIN_MODULE = "pysips.bingo_proposal_mixin"
+BINGO_CONSTRUCTION_MODULE = "pysips.bingo_construction"
 
 
 @pytest.fixture
@@ -23,24 +24,24 @@ def sample_data():
 def mock_external_components(mocker: MockerFixture):
     """Mock all external components needed by the regressor."""
     mock_component_gen = mocker.patch(
-        f"{BINGO_MIXIN_MODULE}.ComponentGenerator", autospec=True
+        f"{BINGO_CONSTRUCTION_MODULE}.ComponentGenerator", autospec=True
     )
     # needs to provide unique outputs for pool generation
     mock_agraph_gen = mocker.MagicMock(side_effect=lambda: np.random.random())
     mock_agraph_gen_constructor = mocker.patch(
-        f"{BINGO_MIXIN_MODULE}.AGraphGenerator",
+        f"{BINGO_CONSTRUCTION_MODULE}.AGraphGenerator",
         autospec=True,
         return_value=mock_agraph_gen,
     )
     mock_laplace_nmll = mocker.patch(f"{IMPORTMODULE}.LaplaceNmll", autospec=True)
     mock_mutation_proposal = mocker.patch(
-        f"{BINGO_MIXIN_MODULE}.MutationProposal", autospec=True
+        f"{BINGO_CONSTRUCTION_MODULE}.MutationProposal", autospec=True
     )
     mock_crossover_proposal = mocker.patch(
-        f"{BINGO_MIXIN_MODULE}.CrossoverProposal", autospec=True
+        f"{BINGO_CONSTRUCTION_MODULE}.CrossoverProposal", autospec=True
     )
     mock_random_choice_proposal = mocker.patch(
-        f"{BINGO_MIXIN_MODULE}.RandomChoiceProposal", autospec=True
+        f"{BINGO_CONSTRUCTION_MODULE}.RandomChoiceProposal", autospec=True
     )
     mock_sample = mocker.patch(f"{IMPORTMODULE}.sample", autospec=True)
 
@@ -321,155 +322,20 @@ def test_init_prior_custom_object():
     assert regressor.prior is custom_prior
 
 
-def test_init_invalid_prior_string():
-    """Test that an invalid prior string raises ValueError."""
-    with pytest.raises(ValueError, match="Unknown prior 'invalid'"):
-        PysipsRegressor(prior="invalid")
-
-
-def test_init_invalid_prior_object_missing_rvs():
-    """Test that a prior object without rvs raises TypeError."""
-    bad_prior = MagicMock(spec=[])
-    bad_prior.logpdf = MagicMock()
-    with pytest.raises(TypeError, match="'rvs' and 'logpdf'"):
-        PysipsRegressor(prior=bad_prior)
-
-
-def test_init_invalid_prior_object_missing_logpdf():
-    """Test that a prior object without logpdf raises TypeError."""
-    bad_prior = MagicMock(spec=[])
-    bad_prior.rvs = MagicMock()
-    with pytest.raises(TypeError, match="'rvs' and 'logpdf'"):
-        PysipsRegressor(prior=bad_prior)
-
-
-def test_fit_with_uniform_prior(sample_data, mock_external_components):
-    """Test that fit with prior='uniform' uses ImproperUniformPrior."""
+def test_fit_uses_factory_returned_prior(sample_data, mock_external_components, mocker):
+    """Test that fit passes the factory result through to sample()."""
     X, y = sample_data
     mock_sample = mock_external_components["sample"]
 
-    mock_improper = MagicMock()
-    mock_external_components["_improper_uniform"] = mock_improper
+    resolved_prior = MagicMock()
+    mocker.patch(f"{IMPORTMODULE}.build_prior", return_value=resolved_prior)
 
     regressor = PysipsRegressor(prior="uniform", random_state=42)
     regressor.fit(X, y)
 
-    # Verify sample was called and the prior argument is an
-    # ImproperUniformPrior (the default behavior)
-    mock_sample.assert_called_once()
-    call_args = mock_sample.call_args
-    prior_arg = call_args.kwargs.get("prior") or call_args[0][2]
-    # The prior is constructed from ImproperUniformPrior, which is mocked
-    # at module level in mock_external_components; just verify sample ran
-    assert regressor.models_ is not None
-
-
-def test_fit_with_bms_prior(
-    sample_data, mock_external_components, mocker: MockerFixture
-):
-    """Test that fit with prior='bms' constructs BMSPrior."""
-    X, y = sample_data
-    mock_sample = mock_external_components["sample"]
-
-    mock_weights = ({3: 0.5}, {3: 0.1})
-    mock_load = mocker.patch(
-        f"{IMPORTMODULE}.load_bms_weights", return_value=mock_weights
-    )
-    mock_bms_prior_cls = mocker.patch(f"{IMPORTMODULE}.BMSPrior", autospec=True)
-    mock_bms_instance = MagicMock()
-    mock_bms_prior_cls.return_value = mock_bms_instance
-
-    regressor = PysipsRegressor(prior="bms", random_state=42)
-    regressor.fit(X, y)
-
-    # Verify weights were loaded with default corpus
-    mock_load.assert_called_once_with("benchmark")
-
-    # Verify BMSPrior was constructed with loaded weights
-    mock_bms_prior_cls.assert_called_once()
-    call_args = mock_bms_prior_cls.call_args
-    assert call_args.args[0] == {3: 0.5}
-    assert call_args.args[1] == {3: 0.1}
-    call_kwargs = mock_bms_prior_cls.call_args.kwargs
-    assert call_kwargs["x_dim"] == X.shape[1]
-
-    # Verify the BMSPrior instance was passed to sample
     mock_sample.assert_called_once()
     sample_call_kwargs = mock_sample.call_args.kwargs
-    assert (
-        sample_call_kwargs.get("prior") is mock_bms_instance
-        or mock_sample.call_args[0][2] is mock_bms_instance
-    )
-
-
-def test_fit_with_bms_prior_corpus_param(
-    sample_data, mock_external_components, mocker: MockerFixture
-):
-    """Test that fit with prior='bms' passes corpus param to load_bms_weights."""
-    X, y = sample_data
-
-    mock_load = mocker.patch(
-        f"{IMPORTMODULE}.load_bms_weights", return_value=({3: 0.5}, {3: 0.1})
-    )
-    mocker.patch(f"{IMPORTMODULE}.BMSPrior", autospec=True)
-
-    regressor = PysipsRegressor(
-        prior="bms",
-        prior_params={"corpus": "wikipedia"},
-        random_state=42,
-    )
-    regressor.fit(X, y)
-
-    mock_load.assert_called_once_with("wikipedia")
-
-
-def test_fit_with_bms_prior_passes_operators(
-    sample_data, mock_external_components, mocker: MockerFixture
-):
-    """Test that fit with prior='bms' passes user operators to BMSPrior."""
-    X, y = sample_data
-    mock_sample = mock_external_components["sample"]
-
-    mocker.patch(f"{IMPORTMODULE}.load_bms_weights", return_value=({3: 0.5}, {3: 0.1}))
-    mock_bms_prior_cls = mocker.patch(f"{IMPORTMODULE}.BMSPrior", autospec=True)
-    mock_bms_instance = MagicMock()
-    mock_bms_prior_cls.return_value = mock_bms_instance
-
-    # Create regressor with specific operators
-    regressor = PysipsRegressor(
-        prior="bms",
-        operators=["+", "-", "*", "/"],
-        random_state=42,
-    )
-    regressor.fit(X, y)
-
-    # Verify BMSPrior was constructed with operators
-    mock_bms_prior_cls.assert_called_once()
-    call_kwargs = mock_bms_prior_cls.call_args.kwargs
-
-    # Operators should be passed as-is (strings); BMSPrior/SamplablePrior
-    # accepts both strings and ints
-    assert "operators" in call_kwargs
-    assert call_kwargs["operators"] == ["+", "-", "*", "/"]
-
-
-def test_fit_with_custom_prior_object(sample_data, mock_external_components):
-    """Test that fit with a custom prior object passes it directly to sample."""
-    X, y = sample_data
-    mock_sample = mock_external_components["sample"]
-
-    custom_prior = MagicMock()
-    custom_prior.rvs = MagicMock()
-    custom_prior.logpdf = MagicMock()
-
-    regressor = PysipsRegressor(prior=custom_prior, random_state=42)
-    regressor.fit(X, y)
-
-    # Verify the custom prior was passed directly to sample
-    mock_sample.assert_called_once()
-    sample_call_kwargs = mock_sample.call_args.kwargs
-    prior_used = sample_call_kwargs.get("prior") or mock_sample.call_args[0][2]
-    assert prior_used is custom_prior
+    assert sample_call_kwargs.get("prior") is resolved_prior or mock_sample.call_args[0][2] is resolved_prior
 
 
 def test_init_prior_katz():
@@ -478,63 +344,27 @@ def test_init_prior_katz():
     assert regressor.prior == "katz"
 
 
-def test_fit_with_katz_prior(
+def test_fit_delegates_prior_resolution_to_factory(
     sample_data, mock_external_components, mocker: MockerFixture
 ):
-    """Test that fit with prior='katz' constructs KatzPrior with default model."""
+    """Test that fit delegates prior resolution to build_prior()."""
     X, y = sample_data
-    mock_sample = mock_external_components["sample"]
-
-    mock_katz_model = MagicMock()
-    mock_load = mocker.patch(
-        f"{IMPORTMODULE}.load_katz_model", return_value=mock_katz_model
-    )
-    mock_katz_prior_cls = mocker.patch(f"{IMPORTMODULE}.KatzPrior", autospec=True)
-    mock_katz_instance = MagicMock()
-    mock_katz_prior_cls.return_value = mock_katz_instance
-
-    regressor = PysipsRegressor(prior="katz", random_state=42)
-    regressor.fit(X, y)
-
-    # Verify the default model was loaded with n=2, corpus=benchmark
-    mock_load.assert_called_once_with(n=2, corpus="benchmark")
-
-    # Verify KatzPrior was constructed with the loaded model
-    mock_katz_prior_cls.assert_called_once()
-    call_args = mock_katz_prior_cls.call_args
-    assert call_args.args[0] is mock_katz_model
-    assert call_args.kwargs["x_dim"] == X.shape[1]
-
-    # Verify the KatzPrior instance was passed to sample
-    mock_sample.assert_called_once()
-    sample_call_kwargs = mock_sample.call_args.kwargs
-    assert (
-        sample_call_kwargs.get("prior") is mock_katz_instance
-        or mock_sample.call_args[0][2] is mock_katz_instance
-    )
-
-
-def test_fit_with_katz_prior_passes_operators(
-    sample_data, mock_external_components, mocker: MockerFixture
-):
-    """Test that fit with prior='katz' passes user operators to KatzPrior."""
-    X, y = sample_data
-
-    mocker.patch(f"{IMPORTMODULE}.load_katz_model", return_value=MagicMock())
-    mock_katz_prior_cls = mocker.patch(f"{IMPORTMODULE}.KatzPrior", autospec=True)
-    mock_katz_prior_cls.return_value = MagicMock()
+    mock_build_prior = mocker.patch(f"{IMPORTMODULE}.build_prior", return_value=MagicMock())
 
     regressor = PysipsRegressor(
         prior="katz",
+        prior_params={"corpus": "benchmark", "n": 3},
         operators=["+", "-", "*"],
         random_state=42,
     )
     regressor.fit(X, y)
 
-    mock_katz_prior_cls.assert_called_once()
-    call_kwargs = mock_katz_prior_cls.call_args.kwargs
-    assert "operators" in call_kwargs
-    assert call_kwargs["operators"] == ["+", "-", "*"]
+    mock_build_prior.assert_called_once()
+    call_args = mock_build_prior.call_args
+    assert call_args.args == ("katz", {"corpus": "benchmark", "n": 3})
+    assert call_args.kwargs["operators"] == ["+", "-", "*"]
+    assert call_args.kwargs["x_dim"] == X.shape[1]
+    assert isinstance(call_args.kwargs["bingo_config"], BingoConstructionConfig)
 
 
 # --- Tests for prior_params ---
@@ -553,71 +383,32 @@ def test_init_prior_params_stored():
     assert regressor.prior_params == params
 
 
-def test_fit_katz_with_prior_params(
-    sample_data, mock_external_components, mocker: MockerFixture
-):
-    """Test that katz prior_params are forwarded to load_katz_model."""
+def test_fit_invalid_prior_string_raises(sample_data, mock_external_components):
+    """Test that invalid prior strings fail during fit-time resolution."""
     X, y = sample_data
+    regressor = PysipsRegressor(prior="invalid", random_state=42)
 
-    mock_katz_model = MagicMock()
-    mock_load = mocker.patch(
-        f"{IMPORTMODULE}.load_katz_model", return_value=mock_katz_model
-    )
-    mock_katz_prior_cls = mocker.patch(f"{IMPORTMODULE}.KatzPrior", autospec=True)
-    mock_katz_prior_cls.return_value = MagicMock()
-
-    regressor = PysipsRegressor(
-        prior="katz",
-        prior_params={"corpus": "benchmark", "n": 3},
-        random_state=42,
-    )
-    regressor.fit(X, y)
-
-    mock_load.assert_called_once_with(n=3, corpus="benchmark")
-
-
-def test_fit_bms_with_unsupported_corpus_raises(sample_data, mock_external_components):
-    """Test that BMS prior with unavailable corpus raises FileNotFoundError."""
-    X, y = sample_data
-
-    regressor = PysipsRegressor(
-        prior="bms",
-        prior_params={"corpus": "feynman"},
-        random_state=42,
-    )
-    with pytest.raises(FileNotFoundError, match="No pre-fit BMS weights"):
+    with pytest.raises(ValueError, match="Unknown prior 'invalid'"):
         regressor.fit(X, y)
 
 
-def test_fit_bms_default_corpus(
-    sample_data, mock_external_components, mocker: MockerFixture
-):
-    """Test that BMS prior with default corpus works."""
+def test_fit_invalid_prior_object_missing_rvs(sample_data, mock_external_components):
+    """Test that a custom prior without rvs fails during fit-time resolution."""
     X, y = sample_data
+    bad_prior = MagicMock(spec=[])
+    bad_prior.logpdf = MagicMock()
+    regressor = PysipsRegressor(prior=bad_prior, random_state=42)
 
-    mock_bms_prior_cls = mocker.patch(f"{IMPORTMODULE}.BMSPrior", autospec=True)
-    mock_bms_prior_cls.return_value = MagicMock()
-
-    regressor = PysipsRegressor(prior="bms", random_state=42)
-    regressor.fit(X, y)
-
-    mock_bms_prior_cls.assert_called_once()
+    with pytest.raises(TypeError, match="'rvs' and 'logpdf'"):
+        regressor.fit(X, y)
 
 
-def test_fit_bms_explicit_wikipedia_corpus(
-    sample_data, mock_external_components, mocker: MockerFixture
-):
-    """Test that BMS prior with explicit wikipedia corpus works."""
+def test_fit_invalid_prior_object_missing_logpdf(sample_data, mock_external_components):
+    """Test that a custom prior without logpdf fails during fit-time resolution."""
     X, y = sample_data
+    bad_prior = MagicMock(spec=[])
+    bad_prior.rvs = MagicMock()
+    regressor = PysipsRegressor(prior=bad_prior, random_state=42)
 
-    mock_bms_prior_cls = mocker.patch(f"{IMPORTMODULE}.BMSPrior", autospec=True)
-    mock_bms_prior_cls.return_value = MagicMock()
-
-    regressor = PysipsRegressor(
-        prior="bms",
-        prior_params={"corpus": "wikipedia"},
-        random_state=42,
-    )
-    regressor.fit(X, y)
-
-    mock_bms_prior_cls.assert_called_once()
+    with pytest.raises(TypeError, match="'rvs' and 'logpdf'"):
+        regressor.fit(X, y)
