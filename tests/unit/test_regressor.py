@@ -4,8 +4,285 @@ from unittest.mock import MagicMock
 from pytest_mock import MockerFixture
 from sklearn.base import RegressorMixin
 
-from pysips.bingo_construction import BingoConstructionConfig
 from pysips.regressor import PysipsRegressor
+
+IMPORTMODULE = PysipsRegressor.__module__
+
+
+@pytest.fixture
+def sample_data():
+    X = np.array([[1.0], [2.0], [3.0], [4.0], [5.0]])
+    y = np.array([2.0, 4.0, 6.0, 8.0, 10.0])
+    return X, y
+
+
+def _make_prior(n=3):
+    return [MagicMock() for _ in range(n)]
+
+
+@pytest.fixture
+def mock_fit_components(mocker: MockerFixture):
+    """Mock the components called during fit."""
+    mock_decoder_cls = mocker.patch(f"{IMPORTMODULE}.DummyDecoder", autospec=True)
+    mock_decoder_inst = mock_decoder_cls.return_value
+    mock_decoder_inst.validate.return_value = None
+
+    mocker.patch(f"{IMPORTMODULE}.LatentLikelihood", autospec=True)
+
+    mock_sample = mocker.patch(f"{IMPORTMODULE}.sample", autospec=True)
+    mock_model = MagicMock()
+    mock_model.__str__.return_value = "X0"
+    mock_sample.return_value = ([mock_model], [-10.0], [0.5])
+
+    mocker.patch(f"{IMPORTMODULE}._infer_latent_dim", return_value=3)
+
+    return {
+        "dummy_decoder_cls": mock_decoder_cls,
+        "decoder_inst": mock_decoder_inst,
+        "sample": mock_sample,
+        "model": mock_model,
+    }
+
+
+# --- init ---
+
+
+def test_init_defaults():
+    reg = PysipsRegressor()
+    assert reg.prior is None
+    assert reg.decoder is None
+    assert reg.num_particles == 50
+    assert reg.num_mcmc_samples == 5
+    assert reg.target_ess == 0.8
+    assert reg.opt_restarts == 1
+    assert reg.model_selection == "mode"
+    assert reg.checkpoint_file is None
+    assert reg.random_state is None
+    assert reg.max_time is None
+    assert reg.max_equation_evals is None
+    assert reg.show_progress_bar is True
+
+
+def test_init_custom_params():
+    prior = _make_prior()
+    reg = PysipsRegressor(
+        prior=prior,
+        num_particles=100,
+        num_mcmc_samples=20,
+        random_state=7,
+        model_selection="max_nml",
+    )
+    assert reg.prior is prior
+    assert reg.num_particles == 100
+    assert reg.num_mcmc_samples == 20
+    assert reg.random_state == 7
+    assert reg.model_selection == "max_nml"
+
+
+def test_init_rejects_both_time_limits():
+    with pytest.raises(ValueError, match="cannot both be specified"):
+        PysipsRegressor(max_time=10.0, max_equation_evals=1000)
+
+
+# --- fit ---
+
+
+def test_fit_raises_without_prior(sample_data):
+    X, y = sample_data
+    with pytest.raises(ValueError, match="prior"):
+        PysipsRegressor().fit(X, y)
+
+
+def test_fit_sets_fitted_attributes(sample_data, mock_fit_components):
+    X, y = sample_data
+    reg = PysipsRegressor(prior=_make_prior(), random_state=0)
+    reg.fit(X, y)
+
+    assert reg.n_features_in_ == X.shape[1]
+    assert reg.models_ == [mock_fit_components["model"]]
+    assert reg.likelihoods_ == [-10.0]
+    assert reg.phis_ == [0.5]
+    assert reg.best_model_ is mock_fit_components["model"]
+    assert reg.best_likelihood_ == -10.0
+
+
+def test_fit_uses_dummy_decoder_when_none(sample_data, mock_fit_components):
+    X, y = sample_data
+    PysipsRegressor(prior=_make_prior()).fit(X, y)
+    mock_fit_components["dummy_decoder_cls"].assert_called_once()
+
+
+def test_fit_uses_provided_decoder(sample_data, mock_fit_components):
+    X, y = sample_data
+    custom_decoder = MagicMock()
+    custom_decoder.validate.return_value = None
+    PysipsRegressor(prior=_make_prior(), decoder=custom_decoder).fit(X, y)
+    mock_fit_components["dummy_decoder_cls"].assert_not_called()
+    custom_decoder.validate.assert_called_once()
+
+
+def test_fit_calls_sample_with_correct_kwargs(sample_data, mock_fit_components):
+    X, y = sample_data
+    prior = _make_prior()
+    PysipsRegressor(
+        prior=prior,
+        num_particles=42,
+        num_mcmc_samples=3,
+        target_ess=0.7,
+        random_state=1,
+    ).fit(X, y)
+
+    mock_sample = mock_fit_components["sample"]
+    mock_sample.assert_called_once()
+    call_kwargs = mock_sample.call_args[1]
+    assert call_kwargs["kwargs"] == {
+        "num_particles": 42,
+        "num_mcmc_samples": 3,
+        "target_ess": 0.7,
+    }
+    assert call_kwargs["seed"] == 1
+
+
+# --- predict ---
+
+
+def test_predict_requires_fit(sample_data):
+    X, _ = sample_data
+    with pytest.raises(Exception):
+        PysipsRegressor().predict(X)
+
+
+def test_predict_calls_expression_predict(sample_data, mocker: MockerFixture):
+    X, _ = sample_data
+    mock_expr = MagicMock()
+    mock_expr.predict.return_value = np.array([2.0, 4.0, 6.0, 8.0, 10.0])
+    mock_model = MagicMock()
+    mock_model.expression = mock_expr
+
+    mocker.patch(f"{IMPORTMODULE}.check_is_fitted")
+    mocker.patch(f"{IMPORTMODULE}.check_array", return_value=X)
+
+    reg = PysipsRegressor()
+    reg.best_model_ = mock_model
+    reg.models_ = [mock_model]
+    reg.n_features_in_ = X.shape[1]
+
+    preds = reg.predict(X)
+    mock_expr.predict.assert_called_once_with(X)
+    np.testing.assert_array_equal(preds, mock_expr.predict.return_value)
+
+
+def test_predict_wrong_feature_count(sample_data, mocker: MockerFixture):
+    X, _ = sample_data
+    wrong_X = np.array([[1.0, 2.0], [3.0, 4.0]])
+
+    mocker.patch(f"{IMPORTMODULE}.check_is_fitted")
+    mocker.patch(f"{IMPORTMODULE}.check_array", return_value=wrong_X)
+
+    reg = PysipsRegressor()
+    reg.best_model_ = MagicMock()
+    reg.models_ = [MagicMock()]
+    reg.n_features_in_ = X.shape[1]
+
+    with pytest.raises(ValueError):
+        reg.predict(wrong_X)
+
+
+# --- score ---
+
+
+@pytest.mark.parametrize("invalid_value", [np.nan, np.inf, -np.inf])
+def test_score_handles_invalid_predictions(
+    sample_data, mocker: MockerFixture, invalid_value
+):
+    X, y = sample_data
+    mocker.patch(f"{IMPORTMODULE}.check_is_fitted")
+    mocker.patch(f"{IMPORTMODULE}.check_array", return_value=X)
+
+    preds = np.array([2.0, 4.0, 6.0, 8.0, 10.0])
+    preds[0] = invalid_value
+    mock_expr = MagicMock()
+    mock_expr.predict.return_value = preds
+    mock_model = MagicMock()
+    mock_model.expression = mock_expr
+
+    reg = PysipsRegressor()
+    reg.best_model_ = mock_model
+    reg.models_ = [mock_model]
+    reg.n_features_in_ = X.shape[1]
+
+    assert reg.score(X, y) == -np.inf
+
+
+def test_score_reraises_other_value_errors(sample_data, mocker: MockerFixture):
+    X, y = sample_data
+    reg = PysipsRegressor()
+    reg.best_model_ = MagicMock()
+    mocker.patch.object(RegressorMixin, "score", side_effect=ValueError("other error"))
+    with pytest.raises(ValueError, match="other error"):
+        reg.score(X, y)
+
+
+def test_score_normal_case(sample_data, mocker: MockerFixture):
+    X, y = sample_data
+    mocker.patch("sklearn.base.RegressorMixin.score", return_value=0.85)
+    reg = PysipsRegressor()
+    reg.best_model_ = MagicMock()
+    assert reg.score(X, y) == 0.85
+
+
+# --- get_expression / get_models ---
+
+
+def test_get_expression(mocker: MockerFixture):
+    mocker.patch(f"{IMPORTMODULE}.check_is_fitted")
+    mock_model = MagicMock()
+    mock_model.__str__.return_value = "X0"
+    reg = PysipsRegressor()
+    reg.best_model_ = mock_model
+    assert reg.get_expression() == "X0"
+
+
+def test_get_expression_not_fitted(mocker: MockerFixture):
+    mocker.patch(f"{IMPORTMODULE}.check_is_fitted", side_effect=Exception("Not fitted"))
+    with pytest.raises(Exception):
+        PysipsRegressor().get_expression()
+
+
+def test_get_models(mocker: MockerFixture):
+    mocker.patch(f"{IMPORTMODULE}.check_is_fitted")
+    models = [MagicMock(), MagicMock()]
+    likelihoods = [-5.0, -8.0]
+    reg = PysipsRegressor()
+    reg.models_ = models
+    reg.likelihoods_ = likelihoods
+    assert reg.get_models() == (models, likelihoods)
+
+
+def test_get_models_not_fitted(mocker: MockerFixture):
+    mocker.patch(f"{IMPORTMODULE}.check_is_fitted", side_effect=Exception("Not fitted"))
+    with pytest.raises(Exception):
+        PysipsRegressor().get_models()
+
+
+# --- model selection ---
+
+
+def test_model_selection_max_nml(sample_data, mock_fit_components):
+    X, y = sample_data
+    m1, m2 = MagicMock(), MagicMock()
+    mock_fit_components["sample"].return_value = ([m1, m2], [-10.0, -5.0], [1.0])
+    reg = PysipsRegressor(prior=_make_prior(), model_selection="max_nml")
+    reg.fit(X, y)
+    assert reg.best_model_ is m2  # -5.0 is the max
+
+
+def test_model_selection_invalid_raises(sample_data, mock_fit_components):
+    X, y = sample_data
+    reg = PysipsRegressor(prior=_make_prior(), model_selection="nonsense")
+    with pytest.raises(KeyError):
+        reg.fit(X, y)
+
 
 # Dynamically get the module containing the PysipsRegressor class
 IMPORTMODULE = PysipsRegressor.__module__
@@ -335,7 +612,10 @@ def test_fit_uses_factory_returned_prior(sample_data, mock_external_components, 
 
     mock_sample.assert_called_once()
     sample_call_kwargs = mock_sample.call_args.kwargs
-    assert sample_call_kwargs.get("prior") is resolved_prior or mock_sample.call_args[0][2] is resolved_prior
+    assert (
+        sample_call_kwargs.get("prior") is resolved_prior
+        or mock_sample.call_args[0][2] is resolved_prior
+    )
 
 
 def test_init_prior_katz():
@@ -349,7 +629,9 @@ def test_fit_delegates_prior_resolution_to_factory(
 ):
     """Test that fit delegates prior resolution to build_prior()."""
     X, y = sample_data
-    mock_build_prior = mocker.patch(f"{IMPORTMODULE}.build_prior", return_value=MagicMock())
+    mock_build_prior = mocker.patch(
+        f"{IMPORTMODULE}.build_prior", return_value=MagicMock()
+    )
 
     regressor = PysipsRegressor(
         prior="katz",
