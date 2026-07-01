@@ -51,3 +51,7 @@ UNILATERAL TERMINATION OF THIS AGREEMENT.
 """
 
 from .regressor import PysipsRegressor
+from .decoder import Decoder, DummyDecoder
+from .likelihood import LatentLikelihood
+
+__all__ = ["PysipsRegressor", "Decoder", "DummyDecoder", "LatentLikelihood"]

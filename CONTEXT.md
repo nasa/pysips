@@ -44,6 +44,16 @@ _Avoid_: environment, config blob
 The internal, immutable set of bingo expression-generation and proposal-construction settings used during Prior Resolution and sampling setup.
 _Avoid_: runtime kwargs, bingo params dict
 
+### Latent-Space Inference
+
+**Latent Space**:
+The N-dimensional continuous space (`z`) over which sampling is performed. Each particle is a point in this space rather than a discrete symbolic expression.
+_Avoid_: embedding space, code space
+
+**Decoder**:
+The map `g(z)` from a latent point to a symbolic expression. It is the only direction the sampler needs; inference goes latent → equation, never equation → latent.
+_Avoid_: encoder, generator, translator
+
 ## Example Dialogue
 
 Dev: For this run, are we using a Prior directly or constructing one from Prebuilt Prior Artifacts?

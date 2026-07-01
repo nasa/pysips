@@ -1,131 +1,59 @@
 """
 PySIPS: Python package for Symbolic Inference via Posterior Sampling
 
-This module provides a scikit-learn compatible interface for symbolic regression
-using Sequential Monte Carlo (SMC) sampling with Bayesian model selection. It
-combines symbolic expression generation, probabilistic proposal mechanisms, and
-Laplace approximation for normalized marginal likelihood estimation to discover
-mathematical expressions that best explain observed data.
-
-The approach uses SMC to sample from a posterior distribution over symbolic
-expressions, allowing for principled uncertainty quantification and model
-selection in symbolic regression tasks. Unlike traditional genetic programming
-approaches, this method provides probabilistic estimates of model quality and
-can naturally handle model uncertainty.
+This module provides a scikit-learn compatible interface for symbolic
+regression using Sequential Monte Carlo (SMC) sampling in an N-dimensional
+continuous latent space.
 
 Methodology
 -----------
-The algorithm works through the following steps:
+Inference is vanilla SMC in a continuous latent space, with all
+symbolic-regression specifics hidden inside a custom likelihood:
 
-1. **Expression Generation**: Creates initial symbolic expressions using
-   configurable operators and complexity constraints
+1. **Latent prior**: A scipy-style prior defines the continuous latent space
+   and is passed straight through to smcpy.
 
-2. **Proposal Mechanisms**: Uses probabilistic combination of:
-   - Mutation operations (structural changes to expressions)
-   - Crossover operations (combining expressions from gene pool)
+2. **Decoding**: Each latent particle is decoded into a symbolic expression by
+   a (pre-trained) decoder. A placeholder :class:`~pysips.decoder.DummyDecoder`
+   is used until a trained decoder is available.
 
-3. **Likelihood Evaluation**: Employs Laplace approximation to estimate
-   normalized marginal likelihood for Bayesian model comparison
+3. **Likelihood Evaluation**: Each decoded expression is scored with a Laplace
+   approximation to the normalized marginal likelihood (NMLL) for Bayesian
+   model comparison. The decoded expression objects ride through SMC in the
+   ``log_like`` slot so that each final particle's equation is exactly the one
+   that gated its acceptance.
 
-4. **SMC Sampling**: Uses Sequential Monte Carlo to sample from the
-   posterior distribution over symbolic expressions
+4. **SMC Sampling**: smcpy's native adaptive sampler draws from the posterior,
+   auto-tuning the proposal covariance from the acceptance rate.
 
-5. **Model Selection**: Chooses final model using either:
-   - Mode selection (most frequently sampled expression)
-   - Maximum likelihood selection (highest scoring expression)
-
-Parameters Overview
--------------------
-Expression Generation:
-    - operators: Mathematical operators to include
-    - max_complexity: Maximum expression graph size
-    - terminal_probability: Probability of terminal node selection
-    - constant_probability: Probability of constant vs variable terminals
-
-Mutation Parameters:
-    - command_probability: Probability of operation changes
-    - node_probability: Probability of node replacement
-    - parameter_probability: Probability of constant modification
-    - prune_probability: Probability of expression pruning
-    - fork_probability: Probability of expression expansion
-
-Sampling Parameters:
-    - num_particles: Population size for SMC
-    - num_mcmc_samples: MCMC steps per SMC iteration
-    - target_ess: Target effective sample size
-    - crossover_pool_size: Size of crossover gene pool
-    - max_time: Maximum runtime for sampling process
-
-Checkpointing:
-    - checkpoint_file: File path for saving/loading sampling progress
-      If the checkpoint file exists, fitting will attempt to resume from
-      the saved state and continue updating the checkpoint as it proceeds
+5. **Model Selection**: The final model is chosen by either mode selection
+   (most frequently sampled expression) or maximum NMLL.
 
 Usage Example
 -------------
+>>> from scipy.stats import norm
 >>> from pysips import PysipsRegressor
 >>> import numpy as np
 >>>
->>> # Generate sample data
 >>> X = np.random.randn(100, 2)
->>> y = X[:, 0]**2 + 2*X[:, 1] + np.random.normal(0, 0.1, 100)
+>>> y = X[:, 0] ** 2 + 2 * X[:, 1] + np.random.normal(0, 0.1, 100)
 >>>
->>> # Create and fit regressor
+>>> prior = [norm(0, 1) for _ in range(8)]  # 8-D latent space
 >>> regressor = PysipsRegressor(
-...     operators=['+', '*', 'pow'],
-...     max_complexity=20,
+...     prior=prior,
 ...     num_particles=100,
-...     model_selection='mode',
-...     checkpoint_file='my_run.checkpoint',
-...     random_state=42
+...     model_selection="mode",
+...     random_state=42,
 ... )
 >>> regressor.fit(X, y)
->>>
->>> # Make predictions
 >>> y_pred = regressor.predict(X)
->>>
->>> # Get discovered expression
 >>> expression = regressor.get_expression()
->>> print(f"Discovered expression: {expression}")
->>>
->>> # Get all sampled models
 >>> models, likelihoods = regressor.get_models()
->>>
->>> # For hyperparameter tuning, disable progress bar
->>> regressor_quiet = PysipsRegressor(
-...     operators=['+', '*'],
-...     num_particles=50,
-...     show_progress_bar=False,  # No progress output
-...     random_state=42
-... )
->>> regressor_quiet.fit(X, y)  # Silent fitting
-
-Applications
-------------
-This approach is particularly well-suited for:
-- Scientific discovery where interpretability is crucial
-- Problems requiring uncertainty quantification in model selection
-- Cases where multiple plausible models exist and need to be ranked
-- Regression tasks where symbolic relationships are preferred over black-box models
-- Applications requiring principled model complexity control
 
 Notes
 -----
-The method balances exploration and exploitation through:
-- Probabilistic proposal selection between mutation and crossover
-- Adaptive sampling that focuses on promising regions of expression space
-- Multiple model selection criteria to handle different use cases
-
-For best results, consider:
-- Adjusting complexity limits based on problem difficulty
-- Tuning mutation/crossover probabilities for your domain
-- Using sufficient particles for good posterior approximation
-- Setting appropriate number of MCMC samples for mixing
-
-Checkpointing allows for:
-- Resuming interrupted long-running fits
-- Incremental progress saving during extended sampling runs
-- Recovery from system failures or resource limitations
+Checkpointing allows resuming interrupted long-running fits by saving
+incremental progress to a pickle file.
 """
 
 from collections import Counter
@@ -133,16 +61,10 @@ import numpy as np
 from sklearn.base import BaseEstimator, RegressorMixin
 from sklearn.utils.validation import check_X_y, check_array, check_is_fitted
 
-from .bingo_construction import (
-    BingoConstructionConfig,
-    build_agraph_generator,
-    build_agraph_proposal,
-)
-from .priors.factory import build_prior
-from .laplace_nmll import LaplaceNmll
-from .sampler import sample
+from .decoder import DummyDecoder
+from .likelihood import LatentLikelihood
+from .sampler import sample, _infer_latent_dim
 
-DEFAULT_OPERATORS = ["+", "*"]
 DEFALT_PARAMETER_INITIALIZATION_BOUNDS = [-5, 5]
 
 
@@ -151,70 +73,40 @@ class PysipsRegressor(BaseEstimator, RegressorMixin):
     """
     A scikit-learn compatible wrapper for PySIPS symbolic regression.
 
-    This regressor uses Sequential Monte Carlo (SMC) sampling to explore
-    the space of symbolic expressions and find mathematical models that
-    best explain the observed data. The approach provides principled
-    uncertainty quantification and supports checkpointing for long-running
-    fits.
+    This regressor performs Bayesian symbolic regression by running Sequential
+    Monte Carlo (SMC) sampling in an N-dimensional continuous latent space.
+    Each latent particle is decoded into a symbolic expression and scored with
+    a Laplace approximation to the normalized marginal likelihood, yielding a
+    posterior distribution over expressions with principled uncertainty
+    quantification and support for checkpointing.
 
     Parameters
     ----------
-    operators : list, default=['+', '*']
-        List of operators to use in symbolic expressions.
+    prior : sequence of scipy-style distributions
+        Prior over the continuous latent space, passed straight through to
+        smcpy. Its length (summed over each distribution's ``dim``) defines the
+        latent dimension N. Required.
 
-    max_complexity : int, default=24
-        Maximum complexity of symbolic expressions.
-
-    terminal_probability : float, default=0.1
-        Probability of selecting a terminal during expression generation.
-
-    constant_probability : float or None, default=None
-        Probability of selecting a constant terminal. If None, will be set to 1/(x_dim + 1).
-
-    command_probability : float, default=0.2
-        Probability of command mutation.
-
-    node_probability : float, default=0.2
-        Probability of node mutation.
-
-    parameter_probability : float, default=0.2
-        Probability of parameter mutation.
-
-    prune_probability : float, default=0.2
-        Probability of pruning mutation.
-
-    fork_probability : float, default=0.2
-        Probability of fork mutation.
-
-    repeat_mutation_probability : float, default=0.05
-        Probability of repeating a mutation.
-
-    crossover_pool_size : int, default=num_particles
-        Size of the crossover pool.
-
-    mutation_prob : float, default=0.75
-        Probability of mutation (vs crossover).
-
-    crossover_prob : float, default=0.25
-        Probability of crossover (vs mutation).
-
-    exclusive : bool, default=True
-        Whether mutation and crossover are exclusive.
+    decoder : object or None, default=None
+        Decoder mapping latent points to symbolic expressions. Must implement
+        ``decode(latent_points)`` returning an object array of expressions and
+        ``validate(n_dims)``. If None, a :class:`~pysips.decoder.DummyDecoder`
+        placeholder is used.
 
     num_particles : int, default=50
         Number of particles for sampling.
 
     num_mcmc_samples : int, default=5
-        Number of MCMC samples.
+        Number of MCMC samples per SMC step.
 
     target_ess : float, default=0.8
         Target effective sample size.
 
     param_init_bounds : list, default=[-5, 5]
-        Bounds for parameter initialization.
+        Bounds for constant initialization during NMLL fitting.
 
     opt_restarts : int, default=1
-        Number of optimization restarts.
+        Number of optimization restarts during NMLL fitting.
 
     model_selection : str, default="mode"
         The way to choose a best model from the produced distribution of
@@ -241,67 +133,6 @@ class PysipsRegressor(BaseEstimator, RegressorMixin):
         the sampling will run until completion without time constraints.
         Cannot be used together with max_time.
 
-    prior : str or object, default="uniform"
-        The prior distribution to use for sampling. Can be:
-
-        - ``"uniform"`` : Improper uniform prior (default). Generates
-          random symbolic expressions with equal probability.
-        - ``"bms"`` : Bayesian Machine Scientist prior. Scores
-          expressions based on weighted operator frequency counts.
-          Only pre-fit weights are supported; raises an error if a
-          pre-fit is not available for the requested corpus.
-        - ``"katz"`` : Katz back-off n-gram prior. Scores expressions
-          via operator n-gram probabilities. Pre-fit models are loaded
-          by default; set ``prior_params["fit_if_missing"] = True`` to
-          fit from corpus on demand when no pre-fit is available.
-                - ``"size_calibrated_uniform"`` : Uniform base prior with
-                    corpus-calibrated size distribution. Requires a matching
-                    pre-built artifact for the requested ``operators``, ``x_dim``,
-                    and ``prior_params["corpus"]`` (default ``"benchmark"``).
-                - ``"size_calibrated_katz"`` : Katz base prior with
-                    corpus-calibrated size distribution. Requires a matching
-                    pre-built artifact for the requested ``operators``, ``x_dim``,
-                    and ``prior_params["corpus"]`` (default ``"benchmark"``).
-        - ``"size_calibrated_bms"`` : BMS base prior with
-          corpus-calibrated size distribution backed by shipped
-          pre-built artifacts.
-        - A custom prior object with ``rvs(N, random_state=None)``
-          and ``logpdf(x)`` methods. The ``rvs`` method should return
-          an array of shape ``(N, 1)`` and ``logpdf`` should return
-          an array of shape ``(N, 1)``.
-
-    prior_params : dict or None, default=None
-        Optional parameters for configuring string-based priors.
-        Ignored when *prior* is a custom object.
-
-        For ``"katz"``:
-
-        - ``"corpus"`` (str): Corpus name for fitting/loading, e.g.
-          ``"wikipedia"``, ``"feynman"``, ``"benchmark"``.
-          Default ``"benchmark"``.
-        - ``"n"`` (int): N-gram order. Default ``2``.
-        - ``"normalize"`` (bool): If ``True``, divide the total
-          log-probability by the number of phrases, yielding a
-          per-phrase mean log-probability (cross-entropy).
-          Default ``False``.
-        - ``"fit_if_missing"`` (bool): If ``True``, fit a Katz model
-          from the requested corpus when no pre-fit is available.
-          Default ``False``.
-
-        For ``"bms"``:
-
-        - ``"corpus"`` (str): Corpus name identifying which pre-fit
-          weights to use. Default ``"benchmark"``.
-
-                For ``"size_calibrated_uniform"`` / ``"size_calibrated_katz"`` /
-                ``"size_calibrated_bms"``:
-
-                - ``"corpus"`` (str): Corpus name identifying which pre-built
-                    histogram and ``Z_k`` artifact to load. Default ``"benchmark"``.
-        - ``"floor_log_prob"`` (float): Log-probability assigned to
-          expression sizes not covered by the corpus histogram.
-          Default ``-inf``.
-
     show_progress_bar : bool, default=True
         Whether to display a progress bar during fitting. When False, the
         progress bar will be hidden, which is useful for hyperparameter
@@ -310,20 +141,8 @@ class PysipsRegressor(BaseEstimator, RegressorMixin):
 
     def __init__(
         self,
-        operators=None,
-        max_complexity=24,
-        terminal_probability=0.1,
-        constant_probability=None,
-        command_probability=0.2,
-        node_probability=0.2,
-        parameter_probability=0.2,
-        prune_probability=0.2,
-        fork_probability=0.2,
-        repeat_mutation_probability=0.05,
-        crossover_pool_size=None,
-        mutation_prob=0.75,
-        crossover_prob=0.25,
-        exclusive=True,
+        prior=None,
+        decoder=None,
         num_particles=50,
         num_mcmc_samples=5,
         target_ess=0.8,
@@ -332,8 +151,6 @@ class PysipsRegressor(BaseEstimator, RegressorMixin):
         model_selection="mode",
         checkpoint_file=None,
         random_state=None,
-        prior="uniform",
-        prior_params=None,
         max_time=None,
         max_equation_evals=None,
         show_progress_bar=True,
@@ -345,23 +162,8 @@ class PysipsRegressor(BaseEstimator, RegressorMixin):
                 "Please choose one constraint method."
             )
 
-        self.max_complexity = max_complexity
-        self.terminal_probability = terminal_probability
-        self.constant_probability = constant_probability
-        self.command_probability = command_probability
-        self.node_probability = node_probability
-        self.parameter_probability = parameter_probability
-        self.prune_probability = prune_probability
-        self.fork_probability = fork_probability
-        self.repeat_mutation_probability = repeat_mutation_probability
-        self.crossover_pool_size = (
-            crossover_pool_size if crossover_pool_size is not None else num_particles
-        )
-        self.mutation_prob = mutation_prob
-        self.crossover_prob = crossover_prob
-        self.exclusive = exclusive
-
-        self.operators = operators if operators is not None else DEFAULT_OPERATORS
+        self.prior = prior
+        self.decoder = decoder
         self.num_particles = num_particles
         self.num_mcmc_samples = num_mcmc_samples
         self.target_ess = target_ess
@@ -374,8 +176,6 @@ class PysipsRegressor(BaseEstimator, RegressorMixin):
         self.model_selection = model_selection
         self.checkpoint_file = checkpoint_file
         self.random_state = random_state
-        self.prior = prior
-        self.prior_params = prior_params
         self.max_time = max_time
         self.max_equation_evals = max_equation_evals
         self.show_progress_bar = show_progress_bar
@@ -408,46 +208,22 @@ class PysipsRegressor(BaseEstimator, RegressorMixin):
         X, y = check_X_y(X, y, y_numeric=True)
         self.n_features_in_ = X.shape[1]
 
-        # Set up the sampling config
-        x_dim = X.shape[1]
-        bingo_config = BingoConstructionConfig(
-            max_complexity=self.max_complexity,
-            terminal_probability=self.terminal_probability,
-            constant_probability=self.constant_probability,
-            command_probability=self.command_probability,
-            node_probability=self.node_probability,
-            parameter_probability=self.parameter_probability,
-            prune_probability=self.prune_probability,
-            fork_probability=self.fork_probability,
-            repeat_mutation_probability=self.repeat_mutation_probability,
-            crossover_pool_size=self.crossover_pool_size,
-            mutation_prob=self.mutation_prob,
-            crossover_prob=self.crossover_prob,
-            exclusive=self.exclusive,
-        )
+        if self.prior is None:
+            raise ValueError(
+                "A latent-space prior must be provided. Pass a sequence of "
+                "scipy-style distributions whose length defines the latent "
+                "dimension N."
+            )
 
-        # Create generator, proposal, and likelihood
-        generator = build_agraph_generator(x_dim, self.operators, bingo_config)
-        prior = build_prior(
-            self.prior,
-            self.prior_params,
-            operators=self.operators,
-            x_dim=x_dim,
-            bingo_config=bingo_config,
-            num_mcmc_samples=self.num_mcmc_samples,
-            target_ess=self.target_ess,
-            max_time=self.max_time,
-            max_equation_evals=self.max_equation_evals,
-            random_state=self.random_state,
-        )
-        proposal = build_agraph_proposal(
-            x_dim,
-            self.operators,
-            generator,
-            bingo_config,
-            default_crossover_pool_size=self.num_particles,
-        )
-        likelihood = LaplaceNmll(
+        decoder = self.decoder if self.decoder is not None else DummyDecoder()
+
+        # The prior defines the latent dimension; make sure the decoder agrees.
+        n_latent = _infer_latent_dim(self.prior)
+        decoder.validate(n_latent)
+
+        # The likelihood decodes each latent point and scores it via Laplace NMLL.
+        likelihood = LatentLikelihood(
+            decoder,
             X,
             y,
             opt_restarts=self.opt_restarts,
@@ -457,8 +233,7 @@ class PysipsRegressor(BaseEstimator, RegressorMixin):
         # Run sampling
         models, likelihoods, phis = sample(
             likelihood,
-            proposal,
-            prior,
+            self.prior,
             max_time=self.max_time,
             max_equation_evals=self.max_equation_evals,
             seed=self.random_state,
