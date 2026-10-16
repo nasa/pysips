@@ -88,7 +88,7 @@ class Metropolis(VectorMCMC):
         )
         self._is_multiprocess = multiprocess
 
-    def smc_metropolis(self, inputs, num_samples, cov=None):
+    def smc_metropolis(self, inputs, num_samples, cov=None, log_likes=None):
         """
         Parameters
         ----------
@@ -96,6 +96,10 @@ class Metropolis(VectorMCMC):
             model at which Markov chain initiates
         num_samples : int
             number of samples in the chain; includes burnin
+        log_likes : array-like, optional
+            Accepted for compatibility with kernels supplying cached likelihoods.
+            Symbolic likelihoods refit model constants, so initialize them again
+            as before rather than changing the existing refitting behavior.
         """
         log_priors, log_like = self._initialize_probabilities(inputs)
 
